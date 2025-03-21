@@ -6,30 +6,26 @@ We offer a new dimension reduction tool called DiRe - JAX that is benchmarked ag
 
 ### Quick start
 
-For CPU version, run
+Do either
 
-    pip install dire-jax[cpu]
+```bash    
+pip install dire-jax
+```
 
-For GPU version, run
+if you need to install the main DiRe class only
 
-    pip install dire-jax[gpu]
+```bash
+pip install dire-jax[utils]
+```
 
-and then install the latest GPU version of FAISS
-
-    conda install pytorch::faiss-gpu
-
-In Google Colab you will likely need
-
-    !pip install -q condacolab
-    import condacolab
-    condacolab.install()
-
-before you install anything via Conda. 
+if you also need the benchmarking utilities. 
 
 Then, do the imports
 
-    from dire_jax import DiRe
-    from dire_jax.dire_utils import display_layout
+```python
+from dire_jax import DiRe
+from dire_jax.dire_utils import display_layout
+```
 
 and afterwards, for example, try this: 
 
@@ -53,8 +49,8 @@ reducer_blobs = DiRe(dimension=2,
                      neg_ratio=32,
                      verbose=False,)
 
-layout_blobs = reducer_blobs.fit_transform(features_blobs)
-display_layout(layout_blobs, labels_blobs)
+_ = reducer_blobs.fit_transform(features_blobs)
+reducer_blobs.visualize(labels=labels_blobs, point_size=4)
 
 ```
 
@@ -67,6 +63,22 @@ The output should look similar to
 
 Our working paper is available in the repository. Also, check out the Jupyter notebook with benchmarking results.
 
+
+### Benchmarking and utilities
+
+In order to run the Jupyter notebook in the ./tests folder, you need to install some extras:
+```bash
+pip install dire-jax[utils]
+```
+
+This installation will give you access to the utilities (metrics and benchmarking routines) that are 
+specifically implemented to be used together with DiRe. However, some of them rely on external packages (especially for
+persistent homology computations) that may have longer runtimes. 
+
 ### Contributing
 
 Create a fork, contribute, and make a merge request. Thanks!
+
+### Acknowledgement 
+
+This work is supported by the Google Cloud Research Award number GCP19980904.

@@ -8,21 +8,23 @@ Utilities for plotting, benchmarking, and miscellany
 # Imports
 #
 
-import numpy as np
-import pandas as pd
-import plotly.express as px
-from jax import random
 from collections import defaultdict
 from time import perf_counter
 from contextlib import contextmanager
 
+import numpy as np
+import pandas as pd
+import plotly.express as px
+from jax import random
+
 from .hpmetrics import (compute_local_metrics,
                         compute_global_metrics,
-                        compute_context_measures)
-
+                        compute_context_measures,
+                        compute_quality_measures)
 
 #
-# Auxiliary functions for plotting, benchmarking, and miscellany that are not included in other packages and classes
+# Auxiliary functions for plotting, benchmarking, and miscellany
+# that are not included in other packages and classes
 #
 
 
@@ -52,11 +54,13 @@ def display_layout(layout, labels, point_size=2):
 
         if labels is not None:
             data_df['label'] = labels
-            figure = px.scatter(data_df, x='x', y='y', color='label', title=f'Layout in dimension {dimension}')
+            figure = px.scatter(data_df, x='x', y='y', color='label',
+                                title=f'Layout in dimension {dimension}')
         else:
-            figure = px.scatter(data_df, x='x', y='y', title=f'Layout in dimension {dimension}')
+            figure = px.scatter(data_df, x='x', y='y',
+                                title=f'Layout in dimension {dimension}')
 
-        figure.update_traces(marker=dict(size=point_size))
+        figure.update_traces(marker={"size": point_size})
         return figure
     #
     if dimension == 3:
@@ -68,9 +72,10 @@ def display_layout(layout, labels, point_size=2):
             figure = px.scatter_3d(data_df, x='x', y='y', z='z', color='label',
                                    title=f'Layout in dimension {dimension}')
         else:
-            figure = px.scatter_3d(data_df, x='x', y='y', z='z', title=f'Layout in dimension {dimension}')
+            figure = px.scatter_3d(data_df, x='x', y='y', z='z',
+                                   title=f'Layout in dimension {dimension}')
 
-        figure.update_traces(marker=dict(size=point_size))
+        figure.update_traces(marker={"size": point_size})
         return figure
     #
     return None
@@ -101,12 +106,90 @@ def do_local_analysis(data, layout, n_neighbors):
     print(f"Embedding stress (scaling adjusted): {local_metrics['stress']}")
     print(f"Neighborhood preservation score (mean, std): {local_metrics['neighbor']}")
 
-    return None
+
+#
+# Create a plotly visualization of persistence diagrams
+#
+def visualize_persistence_diagram(diagram, dimension, title):
+    """
+    Create a visualization of a persistence diagram.
+
+    Parameters
+    ----------
+    diagram : list of tuples
+        Persistence diagram represented as a list of (birth, death) tuples
+    dimension : int
+        Homology dimension of the diagram
+    title : str
+        Title for the visualization
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Interactive visualization of the persistence diagram
+    """
+    # Filter out points with infinite death time for visualization
+    filtered_diagram = [(b, d) for b, d in diagram if not np.isinf(d)]
+
+    if not filtered_diagram:  # Handle empty diagrams
+        return None
+
+    # Create dataframe for plotting
+    df = pd.DataFrame(filtered_diagram, columns=['birth', 'death'])
+
+    # Calculate the persistence (death - birth) for each point
+    df['persistence'] = df['death'] - df['birth']
+
+    # Calculate the diagonal line range for reference
+    max_value = max(df['death'].max(), df['birth'].max()) * 1.05
+    diagonal = pd.DataFrame({
+        'x': [0, max_value],
+        'y': [0, max_value]
+    })
+
+    # Create the scatter plot
+    fig = px.scatter(
+        df, 
+        x='birth', 
+        y='death', 
+        size='persistence',
+        color='persistence',
+        color_continuous_scale='Viridis',
+        opacity=0.8,
+        labels={
+            'birth': 'Birth',
+            'death': 'Death',
+            'persistence': 'Persistence'
+        },
+        title=f"{title} (Dimension {dimension})"
+    )
+
+    # Add the diagonal line
+    fig.add_scatter(
+        x=diagonal['x'],
+        y=diagonal['y'],
+        mode='lines',
+        line={"dash": 'dash', "color": 'gray'},
+        name='Diagonal',
+        showlegend=True
+    )
+
+    # Configure layout
+    fig.update_layout(
+        xaxis_title='Birth',
+        yaxis_title='Death',
+        xaxis={"range": [0, max_value]},
+        yaxis={"range": [0, max_value]},
+        height=600,
+        width=600
+    )
+
+    return fig
 
 
 #
 # Do persistence analysis: compute persistence diagrams and Betti curves, and find various distances between them.
-# Visualise the Betti curves. TODO: also add persistence diagrams visualisation.
+# Visualise the Betti curves and persistence diagrams.
 #
 def do_persistence_analysis(data, layout, dimension, subsample_threshold, rng_key, n_steps=100):
     """
@@ -117,18 +200,24 @@ def do_persistence_analysis(data, layout, dimension, subsample_threshold, rng_ke
 
     Parameters
     ----------
-    data: (numpy.ndarray) High-dimensional data.
-    layout: (numpy.ndarray) Low-dimensional embedding.
-    dimension: (int) The dimension up to which persistence diagrams are computed.
-    subsample_threshold: (float) The threshold used for subsampling the data points.
-    rng_key: Random key used for generating random numbers for subsampling, ensuring reproducibility.
-    n_steps: (int): The number of steps or points in the filtration range for computing Betti curves, default 100.
+    data : numpy.ndarray
+        High-dimensional data.
+    layout : numpy.ndarray
+        Low-dimensional embedding.
+    dimension : int
+        The dimension up to which persistence diagrams are computed.
+    subsample_threshold : float
+        The threshold used for subsampling the data points.
+    rng_key : jax.random.PRNGKey
+        Random key used for generating random numbers for subsampling, ensuring reproducibility.
+    n_steps : int, optional
+        The number of steps or points in the filtration range for computing Betti curves, default 100.
 
     Returns
     -------
-    None: This function primarily prints results and may plot curves, but does not return data directly.
+    None
+        This function primarily visualizes results and prints metric values.
     """
-
     print(f"Computing persistence up to dimension {dimension} and global metrics")
     gdict = compute_global_metrics(data,
                                    layout,
@@ -140,26 +229,57 @@ def do_persistence_analysis(data, layout, dimension, subsample_threshold, rng_ke
     print("done")
 
     global_metrics = gdict['metrics']
-    #diags = gdict['diags'] TODO: for persistence diagram visualization
-    bettis = gdict['bettis']
+    diags = gdict['diags']  # Persistence diagrams
+    bettis = gdict['bettis'] # Betti curves
 
     for dim in range(dimension + 1):
-        # Extracting Betti curves
+        # Visualize persistence diagrams
+        hd_diagram_fig = visualize_persistence_diagram(
+            diags['data'][dim], 
+            dim, 
+            "High-dimensional Data Persistence Diagram"
+        )
+        ld_diagram_fig = visualize_persistence_diagram(
+            diags['layout'][dim], 
+            dim, 
+            "Low-dimensional Layout Persistence Diagram"
+        )
+
+        if hd_diagram_fig is not None:
+            hd_diagram_fig.show()
+        if ld_diagram_fig is not None:
+            ld_diagram_fig.show()
+
+        # Extracting and visualizing Betti curves
         axis_x_hd, axis_y_hd = bettis['data'][dim]
         axis_x_ld, axis_y_ld = bettis['layout'][dim]
+
         # Normalising Betti curves for plotting
+        # This ensures comparable scales regardless of filtration range
         axis_x_hd_, axis_y_hd_ = axis_x_hd / np.max(axis_x_hd), axis_y_hd
         axis_x_ld_, axis_y_ld_ = axis_x_ld / np.max(axis_x_ld), axis_y_ld
-        # Plotting *normalised* Betti curves
-        df_hd = pd.DataFrame({'x': axis_x_hd_,
-                              'y': axis_y_hd_,
-                              'Type': f'Betti {dim} High-dimensional'})
-        df_ld = pd.DataFrame({'x': axis_x_ld_,
-                              'y': axis_y_ld_,
-                              'Type': f'Betti {dim} Low-dimensional'})
+
+        # Plotting normalized Betti curves
+        df_hd = pd.DataFrame({
+            'x': axis_x_hd_,
+            'y': axis_y_hd_,
+            'Type': f'Betti {dim} High-dimensional'
+        })
+        df_ld = pd.DataFrame({
+            'x': axis_x_ld_,
+            'y': axis_y_ld_,
+            'Type': f'Betti {dim} Low-dimensional'
+        })
         df = pd.concat([df_hd, df_ld])
-        figure = px.line(df, x='x', y='y', color='Type', labels={'x': 'Filtration Level', 'y': 'Rank'},
-                         title=f'Betti {dim} High-dimensional vs Low-dimensional')
+
+        figure = px.line(
+            df, 
+            x='x', 
+            y='y', 
+            color='Type', 
+            labels={'x': 'Filtration Level', 'y': 'Rank'},
+            title=f'Betti {dim} High-dimensional vs Low-dimensional'
+        )
         figure.show()
 
         # Printing global metrics
@@ -168,8 +288,6 @@ def do_persistence_analysis(data, layout, dimension, subsample_threshold, rng_ke
         print(f"Distance `EMD` for dimension {dim}: {global_metrics['emd'][dim]}")
         print(f"Distance `Wasserstein` for dimension {dim}: {global_metrics['wass'][dim]}")
         print(f"Distance `bottleneck` for dimension {dim}: {global_metrics['bott'][dim]}")
-
-    return None
 
 
 #
@@ -207,8 +325,6 @@ def do_context_analysis(data, layout, labels, subsample_threshold, n_neighbors, 
 
     print(f"Context preservation score (SVM): {context_measures['svm']}")
     print(f"Context preservation score (kNN): {context_measures['knn']}")
-
-    return None
 
 
 #
@@ -286,8 +402,6 @@ def viz_benchmark(reducer, data, **kwargs):
     else:
         print("Data has no labels: no context analysis performed")
 
-    return None
-
 
 #
 # Computing local and global metrics, and context preservation measures.
@@ -331,9 +445,12 @@ def do_metrics(reducer, data, **kwargs):
                                    n_steps,
                                    metrics_only=True)
     mdict.update(gdict['metrics'])
-    # TODO: add Igor's quality measures
-    #qdict = compute_quality_measures(data, layout)
-    #mdict.update(qdict)
+
+    # Add quality measures for the embedding
+    qdict = compute_quality_measures(data, layout)
+    mdict.update(qdict)
+
+    # Add context measures if labels are provided
     labels = kwargs.pop('labels', None)
     if labels is not None:
         cdict = compute_context_measures(data,
@@ -344,7 +461,7 @@ def do_metrics(reducer, data, **kwargs):
                                          rng_key=rng_key,
                                          **kwargs)
         mdict.update(cdict)
-    #
+
     return mdict
 
 

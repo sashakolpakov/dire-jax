@@ -8,11 +8,10 @@ Auxiliary functions for high-performance benchmarking metrics
 # Imports
 #
 
+import gc
 import numpy as np
 import jax.numpy as jnp
-from jax import jit, lax, random
-import faiss
-import gc
+from jax import jit, lax, random, device_get
 import ot
 from ripser import ripser
 from fastdtw import fastdtw
@@ -24,6 +23,7 @@ from sklearn.svm import LinearSVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
+from .hpindex import HPIndex
 
 #
 # Auxiliary functions
@@ -113,34 +113,47 @@ def make_knn_graph(data, n_neighbors):
 
     Parameters
     ----------
-    data: (numpy.ndarray) Data points.
-    n_neighbors: (int) Number of nearest neighbors.
+    data : numpy.ndarray
+        High-dimensional data points.
+    n_neighbors : int
+        Number of nearest neighbors to find for each point.
 
     Returns
     -------
-    np.ndarray, np.ndarray: distances to nearest neighbors for each vertex and the nearest neighbors indices.
-    The vertex itself is included with distance 0.0 and its own index coming first. The next n_neighbors follow
-    ordered by proximity to the vertex.
+    numpy.ndarray, numpy.ndarray
+        Tuple containing:
+        - distances: Array of shape (n_samples, n_neighbors+1) with distances to nearest neighbors
+        - indices: Array of shape (n_samples, n_neighbors+1) with indices of nearest neighbors
+        
+        The first column contains each point's self-reference (distance 0.0 and own index).
+        The remaining columns contain the n_neighbors nearest neighbors in ascending order of distance.
+
     """
+    # Get data size
+    n_samples = data.shape[1]
 
-    # Initialising the index (GPU or CPU)
-    data_dim = data.shape[1]
-    try:
-        res = faiss.StandardGpuResources()
-        index = faiss.GpuIndexFlatL2(res, data_dim)
-    except Exception as e:
-        index = faiss.IndexFlatL2(data_dim)
-    # TODO: check if FAISS throws generic exceptions or we can handle a more narrow class
-
-    # Adding data to the index
+    # Determine appropriate batch size for memory efficiency
+    if n_samples > 131072:
+        batch_size = 8192
+    elif n_samples > 16348:
+        batch_size = 1024
+    else:
+        batch_size = n_samples  # Process all at once for small datasets
+    
+    # Convert data to the required format for kNN search
     data_np = np.ascontiguousarray(data.astype(np.float32))
-    index.add(data_np)
 
-    # Distances and indices of the vertex and its kNN neighbors
-    distances, indices = index.search(data_np, n_neighbors + 1)
+    jax_indices, jax_distances = HPIndex.knn_tiled(
+        data_np, data_np, n_neighbors+1, batch_size, batch_size)
 
-    # Clear resources
-    del index
+    jax_indices = jax_indices.block_until_ready()
+    jax_distances = jax_distances.block_until_ready()
+
+    indices = device_get(jax_indices)
+    distances = device_get(jax_distances)
+
+    # Clean up resources
+    del jax_indices, jax_distances
     gc.collect()
 
     return distances, indices
@@ -169,20 +182,20 @@ def compute_stress(data, layout, n_neighbors, eps=1e-6):
     # Computing kNN distances and indices for higher-dimensional data
     distances, indices = make_knn_graph(data, n_neighbors)
 
-    # FAISS uses L2 distances squared (sic!)
+    # HPIndex returns L2 distances squared (sic!)
     # Higher-dimensional distances
-    distances = jnp.sqrt(distances)
+    distances = np.sqrt(distances)
 
     # Lower-dimensional distances
-    distances_emb = jnp.linalg.norm(layout[:, None] - layout[indices], axis=-1)
+    distances_emb = np.linalg.norm(layout[:, None] - layout[indices], axis=-1)
 
     # Removing zero distance to self
     distances = distances[:, 1:]
     distances_emb = distances_emb[:, 1:]
 
     # Computing normalized (= scaling adjusted) stress
-    ratios = jnp.absolute(distances / distances_emb - 1.0)
-    stress_mean, stress_std = welford(ratios.ravel())
+    ratios = np.absolute(distances / distances_emb - 1.0)
+    stress_mean, stress_std = welford(jnp.asarray(ratios.ravel()))
 
     # Avoiding division by 0 if stress is small
     stress_normalized = 0.0 if stress_mean < eps else stress_std.item() / stress_mean.item()
@@ -228,14 +241,14 @@ def compute_neighbor_score(data, layout, n_neighbors):
     indices_embed = indices_embed[:, 1:]
 
     # Sorting indices for efficient search
-    indices_data = jnp.sort(indices_data, axis=1)
-    indices_embed = jnp.sort(indices_embed, axis=1)
+    indices_data = np.sort(indices_data, axis=1)
+    indices_embed = np.sort(indices_embed, axis=1)
 
     # Compute preservation scores for each point neighborhood
-    preservation_scores = jnp.mean(indices_data == indices_embed, axis=1)
+    preservation_scores = np.mean(indices_data == indices_embed, axis=1)
 
     # Mean and std over all points
-    neighbor_mean, neighbor_std = welford(preservation_scores.ravel())
+    neighbor_mean, neighbor_std = welford(jnp.asarray(preservation_scores.ravel()))
 
     return [neighbor_mean.item(), neighbor_std.item()]
 
@@ -246,7 +259,7 @@ def compute_neighbor_score(data, layout, n_neighbors):
 # 1. Embedding stress (scaling adjusted);
 # 2. Neighborhood preservation score (mean, std).
 #
-def compute_local_metrics(data, layout, n_neighbors):
+def compute_local_metrics(data, layout, n_neighbors, memory_efficient=None):
     """
     Compute local metrics of the (data, layout) pair.
 
@@ -255,14 +268,38 @@ def compute_local_metrics(data, layout, n_neighbors):
     data: (numpy.ndarray) High-dimensional data points.
     layout: (numpy.ndarray) Low-dimensional data points corresponding to the high-dimensional data.
     n_neighbors: (int) Number of closest neighbors for the kNN graph.
+    memory_efficient: (bool or None) If True, use memory-efficient algorithms for large datasets.
+                     If None, automatically determine based on dataset size.
 
     Returns
     -------
     dict: A dictionary containing computed scores of each type (stress, neighborhood preservation).
     """
+    # Determine if we should use memory-efficient mode for large datasets
+    if memory_efficient is None:
+        memory_efficient = data.shape[0] > 50000
+    
+    # For very large datasets, subsample before computing metrics
+    if memory_efficient and data.shape[0] > 100000:
+        # Use a reasonable sample size that maintains statistical validity
+        sample_size = 50000
+        indices = np.random.choice(data.shape[0], sample_size, replace=False)
+        data_sample = data[indices]
+        layout_sample = layout[indices]
+        
+        print(f"Using subsampled data ({sample_size} points) for metrics computation")
+        
+        metrics = {'stress': compute_stress(data_sample, layout_sample, n_neighbors),
+                   'neighbor': compute_neighbor_score(data_sample, layout_sample, n_neighbors),
+                   'note': f"Metrics computed on {sample_size} randomly sampled points due to large dataset size"}
+        
+        # Add note about subsampling
 
-    metrics = {'stress': compute_stress(data, layout, n_neighbors),
-               'neighbor': compute_neighbor_score(data, layout, n_neighbors)}
+    else:
+        metrics = {
+            'stress': compute_stress(data, layout, n_neighbors),
+            'neighbor': compute_neighbor_score(data, layout, n_neighbors)
+        }
 
     return metrics
 
@@ -403,7 +440,7 @@ def compute_dtw(axis_x_hd, axis_y_hd, axis_x_ld, axis_y_ld, norm_factor=1.0):
 
     seq0 = np.array(list(zip(axis_x_hd, axis_y_hd)))
     seq1 = np.array(list(zip(axis_x_ld, axis_y_ld)))
-    dist_dtw, path = fastdtw(seq0, seq1, dist=2)
+    dist_dtw, _ = fastdtw(seq0, seq1, dist=2)  # dist_dtw recorded, path unused
     dist_dtw *= norm_factor
 
     return dist_dtw
@@ -792,26 +829,201 @@ def compute_knn_score(data, layout, labels, n_neighbors=16, **kwargs):
 
 
 #
+# Compute quality measures for dimensionality reduction
+#
+def compute_quality_measures(data, layout):
+    """
+    Compute quality measures for assessing the quality of dimensionality reduction.
+    
+    This function calculates various metrics that evaluate how well the low-dimensional
+    representation preserves important properties of the high-dimensional data.
+    
+    Parameters
+    ----------
+    data : numpy.ndarray
+        High-dimensional data points.
+    layout : numpy.ndarray
+        Low-dimensional embedding of the data.
+        
+    Returns
+    -------
+    dict
+        Dictionary of quality measures including:
+        - trustworthiness: Measures if points that are close in the embedding are also close in original space
+        - continuity: Measures if points that are close in original space are also close in the embedding
+        - shepard_correlation: Correlation between pairwise distances in original and embedded spaces
+    """
+    # Calculate pairwise distances in original space
+    n_samples = min(16348, data.shape[0])  # Limit computation for very large datasets
+
+    if data.shape[0] > n_samples:
+        # Random sampling for large datasets
+        indices = np.random.choice(data.shape[0], n_samples, replace=False)
+        data_subset = data[indices]
+        layout_subset = layout[indices]
+    else:
+        data_subset = data
+        layout_subset = layout
+    
+    # Use contiguous arrays for efficient distance computation
+    data_np = np.ascontiguousarray(data_subset.astype(np.float32))
+    layout_np = np.ascontiguousarray(layout_subset.astype(np.float32))
+
+    # Compute all pairwise distances (excluding self-distances)
+    k = min(100, n_samples)  # Number of neighbors to consider
+    
+    # High-dimensional distances and indices
+    hd_indices, hd_distances = make_knn_graph(data_np, k)
+    hd_indices = hd_indices[:, 1:]  # Skip the first column (self)
+    hd_distances = hd_distances[:, 1:]  # Skip the first column (self)
+    hd_distances = np.sqrt(hd_distances)
+
+    # Low-dimensional distances
+    ld_indices, ld_distances = make_knn_graph(layout_np, k)
+    ld_indices = ld_indices[:, 1:]  # Skip the first column (self)
+    ld_distances = ld_distances[:, 1:]  # Skip the first column (self)
+    ld_distances = np.sqrt(ld_distances)
+    
+    # Calculate trustworthiness (are neighbors in embedding also neighbors in original space?)
+    def calculate_trustworthiness():
+        # Vectorized implementation for better performance
+        trust_sum = 0
+        
+        for i in range(n_samples):
+            # Get neighbors in the embedding
+            ld_neighbor_indices = ld_indices[i]
+            
+            # Get neighbors in the original space
+            hd_neighbor_indices = hd_indices[i]
+            
+            # Find points that are neighbors in the embedding but not in the original space
+            ld_neighbors = set(ld_neighbor_indices)
+            hd_neighbors = set(hd_neighbor_indices)
+            violators = list(ld_neighbors - hd_neighbors)
+            
+            if violators:
+                # Get the distances to violators in the original space
+                for j in violators:
+                    # Calculate rank based on distance
+                    orig_dists = hd_distances[i]
+                    dist_to_j = orig_dists[j]
+                    # Count how many points are closer than j to i
+                    orig_rank = np.sum(orig_dists < dist_to_j)
+                    
+                    # Penalty based on how far j is in original space
+                    trust_sum += (orig_rank - k)
+        
+        # Normalize the trustworthiness score
+        n = n_samples
+        normalization = 2.0 / (n * k * (2 * n - 3 * k - 1))
+        trustworthiness = 1 - normalization * trust_sum
+        
+        return trustworthiness
+    
+    # Calculate continuity (are neighbors in original space also neighbors in embedding?)
+    def calculate_continuity():
+        # Vectorized implementation for better performance
+        cont_sum = 0
+        
+        for i in range(n_samples):
+            # Get neighbors in the original space
+            hd_neighbor_indices = hd_indices[i]
+            
+            # Get neighbors in the embedding
+            ld_neighbor_indices = ld_indices[i]
+            
+            # Find points that are neighbors in the original space but not in the embedding
+            hd_neighbors = set(hd_neighbor_indices)
+            ld_neighbors = set(ld_neighbor_indices)
+            violators = list(hd_neighbors - ld_neighbors)
+            
+            if violators:
+                # Get the distances to violators in the embedding
+                for j in violators:
+                    # Calculate rank based on distance
+                    embed_dists = ld_distances[i]
+                    dist_to_j = embed_dists[j]
+                    # Count how many points are closer than j to i
+                    embed_rank = np.sum(embed_dists < dist_to_j)
+                    
+                    # Penalty based on how far j is in the embedding
+                    cont_sum += (embed_rank - k)
+        
+        # Normalize the continuity score
+        n = n_samples
+        normalization = 2.0 / (n * k * (2 * n - 3 * k - 1))
+        continuity = 1 - normalization * cont_sum
+        
+        return continuity
+    
+    # Calculate Shepard diagram correlation
+    def calculate_shepard_correlation():
+        # Sample pairs for correlation
+        n_pairs = min(131072, n_samples * (n_samples - 1) // 2)
+        
+        # Generate random pairs
+        i_indices = np.random.randint(0, n_samples, n_pairs)
+        j_indices = np.random.randint(0, n_samples, n_pairs)
+        
+        # Ensure i != j
+        mask = i_indices != j_indices
+        i_indices = i_indices[mask]
+        j_indices = j_indices[mask]
+        
+        # Calculate distances
+        hd_dists = np.linalg.norm(data_subset[i_indices] - data_subset[j_indices], axis=1)
+        ld_dists = np.linalg.norm(layout_subset[i_indices] - layout_subset[j_indices], axis=1)
+        
+        # Calculate correlation
+        correlation = np.corrcoef(hd_dists, ld_dists)[0, 1]
+        
+        return correlation
+    
+    # Compute and return metrics
+    trustworthiness = calculate_trustworthiness()
+    continuity = calculate_continuity()
+    shepard_correlation = calculate_shepard_correlation()
+    
+    return {
+        'trustworthiness': trustworthiness,
+        'continuity': continuity,
+        'shepard_correlation': shepard_correlation
+    }
+
+
+#
 # Compute context measures (context preservation)
 #
 def compute_context_measures(data, layout, labels, subsample_threshold, n_neighbors, rng_key, **kwargs):
     """
+    Compute measures of how well the embedding preserves the context of the data.
+    
     Parameters
     ----------
-    data: (numpy.ndarray) High-dimensional data.
-    layout: (numpy.ndarray) Low-dimensional embedding.
-    labels: (numpy.ndarray) Data labels.
-    subsample_threshold: (float) Threshold used for subsampling the data.
-    n_neighbors: (int) Number of neighbors for the kNN graph of data.
-    rng_key: Random key used for generating random numbers for subsampling, ensuring reproducibility.
-    kwargs: Other keyword arguments used by the various scores above.
+    data : numpy.ndarray
+        High-dimensional data points.
+    layout : numpy.ndarray
+        Low-dimensional embedding of the data.
+    labels : numpy.ndarray
+        Data labels needed for context preservation analysis.
+    subsample_threshold : float
+        Threshold used for subsampling the data.
+    n_neighbors : int
+        Number of neighbors for the kNN graph.
+    rng_key : jax.random.PRNGKey
+        Random key for reproducible subsampling.
+    **kwargs
+        Additional keyword arguments for the scoring functions.
 
     Returns
     -------
-    dict: Dictionary of context preservation measures.
+    dict
+        Dictionary of context preservation measures, including
+        SVM and kNN classification performance comparisons.
     """
-
-    measures = {'svm': compute_svm_score(data, layout, labels, subsample_threshold, rng_key, **kwargs),
-                'knn': compute_knn_score(data, layout, labels, n_neighbors, **kwargs)}
+    measures = {
+        'svm': compute_svm_score(data, layout, labels, subsample_threshold, rng_key, **kwargs),
+        'knn': compute_knn_score(data, layout, labels, n_neighbors, **kwargs)
+    }
 
     return measures

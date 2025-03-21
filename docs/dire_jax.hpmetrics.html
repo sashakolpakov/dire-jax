@@ -32,7 +32,7 @@
       
       <div class="navlinks">
         <span class="navbar-brand">
-          dire_jax <a href="index.html">API Documentation</a>
+          DiRe - JAX <a href="index.html">API Documentation</a>
         </span>
 
         <a href="moduleIndex.html">
@@ -231,6 +231,16 @@
         
 
         
+            <div class="itemName"><code><a href="#compute_quality_measures" class="internal-link" title="dire_jax.hpmetrics.compute_quality_measures">compute<wbr></wbr>_quality<wbr></wbr>_measures</a></code>
+            </div>
+        
+
+    </li><li class="">
+        
+        
+        
+
+        
             <div class="itemName"><code><a href="#compute_stress" class="internal-link" title="dire_jax.hpmetrics.compute_stress">compute<wbr></wbr>_stress</a></code>
             </div>
         
@@ -381,6 +391,16 @@
             </div>
         
 
+    </li><li class="">
+        
+        
+        
+
+        
+            <div class="itemName"><code><a href="dire_jax.hpindex.html" class="internal-link" title="dire_jax.hpindex">hpindex</a></code>
+            </div>
+        
+
     </li><li class=" thisobject">
         
         
@@ -403,8 +423,21 @@
         
          
 
+        <div class="childrenKindTitle">Variables</div>
+        <ul>
+    
+    <li class="">
         
-         
+        
+        
+
+        
+            <div class="itemName"><code><a href="index.html#HAS_UTILS" class="internal-link" title="dire_jax.HAS_UTILS">HAS<wbr></wbr>_UTILS</a></code>
+            </div>
+        
+
+    </li>
+</ul> 
 
         
          
@@ -448,7 +481,7 @@
         </div>
 
         <div id="splitTables">
-          <table class="children sortable" id="id5">
+          <table class="children sortable" id="id8">
   
   
   <tr class="function">
@@ -465,7 +498,7 @@
     
     <td>Function</td>
     <td><code><a href="#compute_context_measures" class="internal-link" title="dire_jax.hpmetrics.compute_context_measures">compute<wbr></wbr>_context<wbr></wbr>_measures</a></code></td>
-    <td>Parameters ---------- data: (numpy.ndarray) High-dimensional data. layout: (numpy.ndarray) Low-dimensional embedding. labels: (numpy.ndarray) Data labels. subsample_threshold: (float) Threshold used for subsampling the data...</td>
+    <td>Compute measures of how well the embedding preserves the context of the data.</td>
   </tr><tr class="function">
     
     <td>Function</td>
@@ -501,6 +534,11 @@
     <td>Function</td>
     <td><code><a href="#compute_neighbor_score" class="internal-link" title="dire_jax.hpmetrics.compute_neighbor_score">compute<wbr></wbr>_neighbor<wbr></wbr>_score</a></code></td>
     <td>Computes the neighborhood preservation score between high-dimensional data and its corresponding low-dimensional layout.</td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><code><a href="#compute_quality_measures" class="internal-link" title="dire_jax.hpmetrics.compute_quality_measures">compute<wbr></wbr>_quality<wbr></wbr>_measures</a></code></td>
+    <td>Compute quality measures for assessing the quality of dimensionality reduction.</td>
   </tr><tr class="function">
     
     <td>Function</td>
@@ -659,19 +697,30 @@ float: Normalized bottleneck distance between persistence diagrams.</p></div>
   </div>
   <div class="docstring functionBody">
     
-    <div><p class="pre">Parameters
+    <div><p class="pre">Compute measures of how well the embedding preserves the context of the data.
+
+Parameters
 ----------
-data: (numpy.ndarray) High-dimensional data.
-layout: (numpy.ndarray) Low-dimensional embedding.
-labels: (numpy.ndarray) Data labels.
-subsample_threshold: (float) Threshold used for subsampling the data.
-n_neighbors: (int) Number of neighbors for the kNN graph of data.
-rng_key: Random key used for generating random numbers for subsampling, ensuring reproducibility.
-kwargs: Other keyword arguments used by the various scores above.
+data : numpy.ndarray
+    High-dimensional data points.
+layout : numpy.ndarray
+    Low-dimensional embedding of the data.
+labels : numpy.ndarray
+    Data labels needed for context preservation analysis.
+subsample_threshold : float
+    Threshold used for subsampling the data.
+n_neighbors : int
+    Number of neighbors for the kNN graph.
+rng_key : jax.random.PRNGKey
+    Random key for reproducible subsampling.
+**kwargs
+    Additional keyword arguments for the scoring functions.
 
 Returns
 -------
-dict: Dictionary of context preservation measures.</p></div>
+dict
+    Dictionary of context preservation measures, including
+    SVM and kNN classification performance comparisons.</p></div>
   </div>
 </div><div class="basefunction">
   
@@ -887,7 +936,7 @@ float: kNN context preservation score.</p></div>
   <div class="functionHeader">
     
     
-    <span class="py-keyword">def</span> <span class="py-defname">compute_local_metrics</span><span class="function-signature">(data, layout, n_neighbors)</span>:
+    <span class="py-keyword">def</span> <span class="py-defname">compute_local_metrics</span><span class="function-signature">(data, layout, n_neighbors, memory_efficient=None)</span>:
     
     <a class="headerLink" href="#compute_local_metrics" title="dire_jax.hpmetrics.compute_local_metrics">
       
@@ -904,6 +953,8 @@ Parameters
 data: (numpy.ndarray) High-dimensional data points.
 layout: (numpy.ndarray) Low-dimensional data points corresponding to the high-dimensional data.
 n_neighbors: (int) Number of closest neighbors for the kNN graph.
+memory_efficient: (bool or None) If True, use memory-efficient algorithms for large datasets.
+                 If None, automatically determine based on dataset size.
 
 Returns
 -------
@@ -951,6 +1002,48 @@ Returns
 list: A list containing two floats:
       - neighbor_mean: (float) The mean of the neighborhood preservation scores.
       - neighbor_std: (float) The standard deviation of the neighborhood preservation scores.</p></div>
+  </div>
+</div><div class="basefunction">
+  
+  
+  <a name="dire_jax.hpmetrics.compute_quality_measures">
+    
+  </a>
+  <a name="compute_quality_measures">
+    
+  </a>
+  <div class="functionHeader">
+    
+    
+    <span class="py-keyword">def</span> <span class="py-defname">compute_quality_measures</span><span class="function-signature">(data, layout)</span>:
+    
+    <a class="headerLink" href="#compute_quality_measures" title="dire_jax.hpmetrics.compute_quality_measures">
+      
+      
+      ¶
+    </a>
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p class="pre">Compute quality measures for assessing the quality of dimensionality reduction.
+
+This function calculates various metrics that evaluate how well the low-dimensional
+representation preserves important properties of the high-dimensional data.
+
+Parameters
+----------
+data : numpy.ndarray
+    High-dimensional data points.
+layout : numpy.ndarray
+    Low-dimensional embedding of the data.
+    
+Returns
+-------
+dict
+    Dictionary of quality measures including:
+    - trustworthiness: Measures if points that are close in the embedding are also close in original space
+    - continuity: Measures if points that are close in original space are also close in the embedding
+    - shepard_correlation: Correlation between pairwise distances in original and embedded spaces</p></div>
   </div>
 </div><div class="basefunction">
   
@@ -1200,14 +1293,20 @@ dict: A dictionary containing two keys, 'data' and 'layout', each associated wit
 
 Parameters
 ----------
-data: (numpy.ndarray) Data points.
-n_neighbors: (int) Number of nearest neighbors.
+data : numpy.ndarray
+    High-dimensional data points.
+n_neighbors : int
+    Number of nearest neighbors to find for each point.
 
 Returns
 -------
-np.ndarray, np.ndarray: distances to nearest neighbors for each vertex and the nearest neighbors indices.
-The vertex itself is included with distance 0.0 and its own index coming first. The next n_neighbors follow
-ordered by proximity to the vertex.</p></div>
+numpy.ndarray, numpy.ndarray
+    Tuple containing:
+    - distances: Array of shape (n_samples, n_neighbors+1) with distances to nearest neighbors
+    - indices: Array of shape (n_samples, n_neighbors+1) with indices of nearest neighbors
+    
+    The first column contains each point's self-reference (distance 0.0 and own index).
+    The remaining columns contain the n_neighbors nearest neighbors in ascending order of distance.</p></div>
   </div>
 </div><div class="basefunction">
   
@@ -1359,9 +1458,9 @@ tuple: Updated carry tuple (count, mean, M2) and None as a placeholder for loop 
 
   
   <div class="container-fluid">
-    <a href="index.html">API Documentation</a> for dire_jax,
+    <a href="index.html">API Documentation</a> for DiRe - JAX,
   generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a>
-    24.11.2 at 2025-02-22 19:46:06.
+    24.11.2 at 2025-03-19 01:38:13.
   </div>
 
   <!-- Search related scripts needs to be loaded at the end of HTML 

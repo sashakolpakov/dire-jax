@@ -28,7 +28,7 @@
       
       <div class="navlinks">
         <span class="navbar-brand">
-          dire_jax <a href="index.html">API Documentation</a>
+          DiRe - JAX <a href="index.html">API Documentation</a>
         </span>
 
         <a href="moduleIndex.html">
@@ -115,7 +115,7 @@
             <div class="type">Module</div>
             <div class="kind">Module</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Provides the main class for dimension reduction</div>
+            <div class="summary">Provides the main class for dimensionality reduction.</div>
           </li><li id="dire_jax.dire_utils">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>_utils</div>
@@ -124,6 +124,14 @@
             <div class="kind">Module</div>
             <div class="privacy">PUBLIC</div>
             <div class="summary">Utilities for plotting, benchmarking, and miscellany</div>
+          </li><li id="dire_jax.hpindex">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.hpindex</div>
+            <div class="url">dire_jax.hpindex.html</div>
+            <div class="type">Module</div>
+            <div class="kind">Module</div>
+            <div class="privacy">PUBLIC</div>
+            <div class="summary">A JAX-based implementation for efficient k-nearest neighbors.</div>
           </li><li id="dire_jax.hpmetrics">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.hpmetrics</div>
@@ -132,6 +140,46 @@
             <div class="kind">Module</div>
             <div class="privacy">PUBLIC</div>
             <div class="summary">Auxiliary functions for high-performance benchmarking metrics</div>
+          </li><li id="dire_jax.hpindex.HPIndex">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.hpindex<wbr></wbr>.<wbr></wbr>HPIndex</div>
+            <div class="url">dire_jax.hpindex.HPIndex.html</div>
+            <div class="type">Class</div>
+            <div class="kind">Class</div>
+            <div class="privacy">PUBLIC</div>
+            <div class="summary">A kernelized kNN index that uses batching / tiling to efficiently handle large datasets with limited memory usage.</div>
+          </li><li id="dire_jax.hpindex.HPIndex.__init__">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.hpindex<wbr></wbr>.<wbr></wbr>HPIndex<wbr></wbr>.__init__</div>
+            <div class="url">dire_jax.hpindex.HPIndex.html#__init__</div>
+            <div class="type">Function</div>
+            <div class="kind">Method</div>
+            <div class="privacy">PUBLIC</div>
+            <div class="summary"><span class="undocumented">Undocumented</span></div>
+          </li><li id="dire_jax.hpindex.HPIndex.knn_tiled">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.hpindex<wbr></wbr>.<wbr></wbr>HPIndex<wbr></wbr>.knn<wbr></wbr>_tiled</div>
+            <div class="url">dire_jax.hpindex.HPIndex.html#knn_tiled</div>
+            <div class="type">Function</div>
+            <div class="kind">Static Method</div>
+            <div class="privacy">PUBLIC</div>
+            <div class="summary">Advanced implementation that tiles both database and query points. This wrapper handles the dynamic aspects before calling the JIT-compiled function.</div>
+          </li><li id="dire_jax.hpindex.HPIndex._knn_tiled_jit">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.hpindex<wbr></wbr>.<wbr></wbr>HPIndex<wbr></wbr>._knn<wbr></wbr>_tiled<wbr></wbr>_jit</div>
+            <div class="url">dire_jax.hpindex.HPIndex.html#_knn_tiled_jit</div>
+            <div class="type">Function</div>
+            <div class="kind">Static Method</div>
+            <div class="privacy">PRIVATE</div>
+            <div class="summary">JIT-compiled implementation of tiled KNN with concrete batch parameters.</div>
+          </li><li id="dire_jax.hpindex._compute_batch_distances">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.hpindex<wbr></wbr>._compute<wbr></wbr>_batch<wbr></wbr>_distances</div>
+            <div class="url">dire_jax.hpindex.html#_compute_batch_distances</div>
+            <div class="type">Function</div>
+            <div class="kind">Function</div>
+            <div class="privacy">PRIVATE</div>
+            <div class="summary">Compute the squared distances between a batch of query points and all database points.</div>
           </li><li id="dire_jax.dire.DiRe">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re</div>
@@ -300,18 +348,34 @@
             <div class="kind">Instance Variable</div>
             <div class="privacy">PUBLIC</div>
             <div class="summary">Dimension of data</div>
-          </li><li id="dire_jax.dire.DiRe.distances">
+          </li><li id="dire_jax.dire.DiRe.distances_np">
             
-            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.distances</div>
-            <div class="url">dire_jax.dire.DiRe.html#distances</div>
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.distances<wbr></wbr>_np</div>
+            <div class="url">dire_jax.dire.DiRe.html#distances_np</div>
+            <div class="type">Attribute</div>
+            <div class="kind">Instance Variable</div>
+            <div class="privacy">PUBLIC</div>
+            <div class="summary"><span class="undocumented">Undocumented</span></div>
+          </li><li id="dire_jax.dire.DiRe.distances_jax">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.distances<wbr></wbr>_jax</div>
+            <div class="url">dire_jax.dire.DiRe.html#distances_jax</div>
             <div class="type">Attribute</div>
             <div class="kind">Instance Variable</div>
             <div class="privacy">PUBLIC</div>
             <div class="summary">Distances in the kNN graph</div>
-          </li><li id="dire_jax.dire.DiRe.indices">
+          </li><li id="dire_jax.dire.DiRe.indices_np">
             
-            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.indices</div>
-            <div class="url">dire_jax.dire.DiRe.html#indices</div>
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.indices<wbr></wbr>_np</div>
+            <div class="url">dire_jax.dire.DiRe.html#indices_np</div>
+            <div class="type">Attribute</div>
+            <div class="kind">Instance Variable</div>
+            <div class="privacy">PUBLIC</div>
+            <div class="summary"><span class="undocumented">Undocumented</span></div>
+          </li><li id="dire_jax.dire.DiRe.indices_jax">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.indices<wbr></wbr>_jax</div>
+            <div class="url">dire_jax.dire.DiRe.html#indices_jax</div>
             <div class="type">Attribute</div>
             <div class="kind">Instance Variable</div>
             <div class="privacy">PUBLIC</div>
@@ -387,7 +451,7 @@
             <div class="type">Function</div>
             <div class="kind">Method</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Fit the model to data and transform it into the low-dimensional layout.</div>
+            <div class="summary">Fit the model to data and transform it into a low-dimensional layout.</div>
           </li><li id="dire_jax.dire.DiRe.make_knn_adjacency">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.make<wbr></wbr>_knn<wbr></wbr>_adjacency</div>
@@ -395,7 +459,7 @@
             <div class="type">Function</div>
             <div class="kind">Method</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Internal routine building the adjacency matrix for the kNN graph</div>
+            <div class="summary">Internal routine building the adjacency matrix for the kNN graph.</div>
           </li><li id="dire_jax.dire.DiRe.do_pca_embedding">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.do<wbr></wbr>_pca<wbr></wbr>_embedding</div>
@@ -403,7 +467,7 @@
             <div class="type">Function</div>
             <div class="kind">Method</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Internal routine for initial PCA embedding</div>
+            <div class="summary">Initialize embedding using Principal Component Analysis (PCA).</div>
           </li><li id="dire_jax.dire.DiRe.do_spectral_embedding">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.do<wbr></wbr>_spectral<wbr></wbr>_embedding</div>
@@ -411,7 +475,7 @@
             <div class="type">Function</div>
             <div class="kind">Method</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Internal routine for initial spectral embedding</div>
+            <div class="summary">Initialize embedding using Spectral Embedding.</div>
           </li><li id="dire_jax.dire.DiRe.do_random_embedding">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.do<wbr></wbr>_random<wbr></wbr>_embedding</div>
@@ -419,7 +483,7 @@
             <div class="type">Function</div>
             <div class="kind">Method</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Internal routine for initial random projections embedding</div>
+            <div class="summary">Initialize embedding using Random Projection.</div>
           </li><li id="dire_jax.dire.DiRe.do_rand_sampling">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.do<wbr></wbr>_rand<wbr></wbr>_sampling</div>
@@ -427,7 +491,7 @@
             <div class="type">Function</div>
             <div class="kind">Method</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Random sampling of the closest n_samples by using random projections in n_dirs directions. Negative samples are added at the ratio of neg_ratio negative samples for each positive sample taken.</div>
+            <div class="summary">Sample points for force calculation using random projections.</div>
           </li><li id="dire_jax.dire.DiRe.do_layout">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.do<wbr></wbr>_layout</div>
@@ -435,7 +499,15 @@
             <div class="type">Function</div>
             <div class="kind">Method</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Internal routine for creating the lower-dimensional layout</div>
+            <div class="summary">Optimize the layout using force-directed placement.</div>
+          </li><li id="dire_jax.dire.DiRe._compute_forces">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>._compute<wbr></wbr>_forces</div>
+            <div class="url">dire_jax.dire.DiRe.html#_compute_forces</div>
+            <div class="type">Function</div>
+            <div class="kind">Method</div>
+            <div class="privacy">PRIVATE</div>
+            <div class="summary">Compute attractive and repulsive forces for points.</div>
           </li><li id="dire_jax.dire.DiRe.visualize">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.<wbr></wbr>Di<wbr></wbr>Re<wbr></wbr>.visualize</div>
@@ -443,7 +515,7 @@
             <div class="type">Function</div>
             <div class="kind">Method</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Generate a visualization of the data in the transformed space using a scatter plot. Supports both 2D and 3D visualizations depending on the specified dimension.</div>
+            <div class="summary">Generate an interactive visualization of the data in the transformed space.</div>
           </li><li id="dire_jax.dire.distribution_kernel">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.distribution<wbr></wbr>_kernel</div>
@@ -451,7 +523,7 @@
             <div class="type">Function</div>
             <div class="kind">Function</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Probability kernel</div>
+            <div class="summary">Probability kernel that maps distances to similarity scores.</div>
           </li><li id="dire_jax.dire.grad_coeff_att">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.grad<wbr></wbr>_coeff<wbr></wbr>_att</div>
@@ -459,7 +531,7 @@
             <div class="type">Function</div>
             <div class="kind">Function</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Attraction force</div>
+            <div class="summary">Coefficient for attraction force based on distance.</div>
           </li><li id="dire_jax.dire.grad_coeff_rep">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.grad<wbr></wbr>_coeff<wbr></wbr>_rep</div>
@@ -467,7 +539,7 @@
             <div class="type">Function</div>
             <div class="kind">Function</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Repulsion force</div>
+            <div class="summary">Coefficient for repulsion force based on distance.</div>
           </li><li id="dire_jax.dire.rand_directions">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.rand<wbr></wbr>_directions</div>
@@ -475,7 +547,7 @@
             <div class="type">Function</div>
             <div class="kind">Function</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Sampling random directions</div>
+            <div class="summary">Sample unit vectors in random directions.</div>
           </li><li id="dire_jax.dire.get_slice">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.get<wbr></wbr>_slice</div>
@@ -483,7 +555,7 @@
             <div class="type">Function</div>
             <div class="kind">Function</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Dynamic slice around i of (almost) k elements</div>
+            <div class="summary">Extract a slice of size k centered around index i.</div>
           </li><li id="dire_jax.dire.vmap_coeff_att">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.vmap<wbr></wbr>_coeff<wbr></wbr>_att</div>
@@ -491,7 +563,7 @@
             <div class="type">Attribute</div>
             <div class="kind">Variable</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Vectorized grad_coeff_att</div>
+            <div class="summary"><span class="undocumented">Undocumented</span></div>
           </li><li id="dire_jax.dire.vmap_coeff_rep">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.vmap<wbr></wbr>_coeff<wbr></wbr>_rep</div>
@@ -499,7 +571,7 @@
             <div class="type">Attribute</div>
             <div class="kind">Variable</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Vectorized grad_coeff_rep</div>
+            <div class="summary"><span class="undocumented">Undocumented</span></div>
           </li><li id="dire_jax.dire.vmap_get_slice">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>.vmap<wbr></wbr>_get<wbr></wbr>_slice</div>
@@ -507,7 +579,7 @@
             <div class="type">Attribute</div>
             <div class="kind">Variable</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Vectorized get_slice</div>
+            <div class="summary"><span class="undocumented">Undocumented</span></div>
           </li><li id="dire_jax.hpmetrics.welford_update">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.hpmetrics<wbr></wbr>.welford<wbr></wbr>_update</div>
@@ -668,6 +740,14 @@
             <div class="kind">Function</div>
             <div class="privacy">PUBLIC</div>
             <div class="summary">Compute kNN score (context preservation measure) by comparing kNN classifier accuracies on the high-dimensional data and on the low-dimensional embedding.</div>
+          </li><li id="dire_jax.hpmetrics.compute_quality_measures">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.hpmetrics<wbr></wbr>.compute<wbr></wbr>_quality<wbr></wbr>_measures</div>
+            <div class="url">dire_jax.hpmetrics.html#compute_quality_measures</div>
+            <div class="type">Function</div>
+            <div class="kind">Function</div>
+            <div class="privacy">PUBLIC</div>
+            <div class="summary">Compute quality measures for assessing the quality of dimensionality reduction.</div>
           </li><li id="dire_jax.hpmetrics.compute_context_measures">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.hpmetrics<wbr></wbr>.compute<wbr></wbr>_context<wbr></wbr>_measures</div>
@@ -675,7 +755,7 @@
             <div class="type">Function</div>
             <div class="kind">Function</div>
             <div class="privacy">PUBLIC</div>
-            <div class="summary">Parameters ---------- data: (numpy.ndarray) High-dimensional data. layout: (numpy.ndarray) Low-dimensional embedding. labels: (numpy.ndarray) Data labels. subsample_threshold: (float) Threshold used for subsampling the data...</div>
+            <div class="summary">Compute measures of how well the embedding preserves the context of the data.</div>
           </li><li id="dire_jax.dire_utils.display_layout">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>_utils<wbr></wbr>.display<wbr></wbr>_layout</div>
@@ -692,6 +772,14 @@
             <div class="kind">Function</div>
             <div class="privacy">PUBLIC</div>
             <div class="summary">Parameters ---------- data: (numpy.ndarray) High-dimensional data. layout: (numpy.ndarray) Low-dimensional embedding. n_neighbors: (int) Number of neighbors in the kNN graph.</div>
+          </li><li id="dire_jax.dire_utils.visualize_persistence_diagram">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>_utils<wbr></wbr>.visualize<wbr></wbr>_persistence<wbr></wbr>_diagram</div>
+            <div class="url">dire_jax.dire_utils.html#visualize_persistence_diagram</div>
+            <div class="type">Function</div>
+            <div class="kind">Function</div>
+            <div class="privacy">PUBLIC</div>
+            <div class="summary">Create a visualization of a persistence diagram.</div>
           </li><li id="dire_jax.dire_utils.do_persistence_analysis">
             
             <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.dire<wbr></wbr>_utils<wbr></wbr>.do<wbr></wbr>_persistence<wbr></wbr>_analysis</div>
@@ -740,6 +828,14 @@
             <div class="kind">Function</div>
             <div class="privacy">PUBLIC</div>
             <div class="summary">Benchmark a reducer on given data.</div>
+          </li><li id="dire_jax.HAS_UTILS">
+            
+            <div class="fullName">dire<wbr></wbr>_jax<wbr></wbr>.HAS<wbr></wbr>_UTILS</div>
+            <div class="url">index.html#HAS_UTILS</div>
+            <div class="type">Attribute</div>
+            <div class="kind">Variable</div>
+            <div class="privacy">PUBLIC</div>
+            <div class="summary"><span class="undocumented">Undocumented</span></div>
           </li>
        </ul>
     </div>

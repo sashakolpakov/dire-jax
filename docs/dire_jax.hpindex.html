@@ -6,7 +6,7 @@
 
   <head>
     
-    <title>dire_jax</title>
+    <title>dire_jax.hpindex</title>
     <meta name="generator" content="pydoctor 24.11.2"> 
         
     </meta>
@@ -109,8 +109,63 @@
   <div>
 
       <div class="thingTitle">
+        <span>Module</span>
+        <code class="thisobject"><a href="dire_jax.hpindex.html" class="internal-link" title="This module">hpindex</a></code> 
+      </div>
+      
+      <div>
+        
+
+        
+         
+
+        <div class="childrenKindTitle">Classes</div>
+        <ul>
+    
+    <li class="">
+        
+        
+        
+
+        
+            <div class="itemName"><code><a href="dire_jax.hpindex.HPIndex.html" class="internal-link" title="dire_jax.hpindex.HPIndex"><wbr></wbr>HPIndex</a></code>
+            </div>
+        
+
+    </li>
+</ul>
+
+        <div class="childrenKindTitle">Functions</div>
+        <ul>
+    
+    <li class="private">
+        
+        
+        
+
+        
+            <div class="itemName"><code><a href="#_compute_batch_distances" class="internal-link" title="dire_jax.hpindex._compute_batch_distances">_compute<wbr></wbr>_batch<wbr></wbr>_distances</a></code>
+            </div>
+        
+
+    </li>
+</ul> 
+
+        
+         
+
+        
+         
+
+        
+         
+        
+      </div>
+  </div><div>
+
+      <div class="thingTitle">
         <span>Package</span>
-        <code class="thisobject"><a href="index.html" class="internal-link" title="This package">dire<wbr></wbr>_jax</a></code> 
+        <code><a href="index.html" class="internal-link" title="The parent of this module">dire<wbr></wbr>_jax</a></code> 
       </div>
       
       <div>
@@ -139,7 +194,7 @@
             </div>
         
 
-    </li><li class="">
+    </li><li class=" thisobject">
         
         
         
@@ -180,7 +235,7 @@
         
 
         
-            <div class="itemName"><code><a href="#HAS_UTILS" class="internal-link" title="dire_jax.HAS_UTILS">HAS<wbr></wbr>_UTILS</a></code>
+            <div class="itemName"><code><a href="index.html#HAS_UTILS" class="internal-link" title="dire_jax.HAS_UTILS">HAS<wbr></wbr>_UTILS</a></code>
             </div>
         
 
@@ -209,14 +264,14 @@
         
 
         <div class="page-header">
-          <h1 class="package"><code><code><a href="index.html" class="internal-link">dire_jax</a></code></code></h1>
+          <h1 class="module"><code><code><a href="index.html" class="internal-link">dire_jax</a></code><wbr></wbr>.<code><a href="dire_jax.hpindex.html" class="internal-link" title="dire_jax.hpindex">hpindex</a></code></code></h1>
           <div id="showPrivate">
             <button class="btn btn-link" onclick="togglePrivate()">Toggle Private API</button>
           </div>
         </div>
 
         <div class="categoryHeader">
-          package documentation
+          module documentation
         </div>
 
         <div class="extrasDocstring">
@@ -225,73 +280,62 @@
         </div>
 
         <div class="moduleDocstring">
-          <div><p>A JAX-based dimensionality reducer.</p></div>
+          <div><p>A JAX-based implementation for efficient k-nearest neighbors.</p></div>
         </div>
 
         <div id="splitTables">
-          <table class="children sortable" id="id1">
+          <table class="children sortable" id="id6">
   
   
-  <tr class="module">
+  <tr class="class">
     
-    <td>Module</td>
-    <td><code><a href="dire_jax.dire.html" class="internal-link" title="dire_jax.dire">dire</a></code></td>
-    <td>Provides the main class for dimensionality reduction.</td>
-  </tr><tr class="module">
+    <td>Class</td>
+    <td><code><a href="dire_jax.hpindex.HPIndex.html" class="internal-link" title="dire_jax.hpindex.HPIndex"><wbr></wbr>HPIndex</a></code></td>
+    <td>A kernelized kNN index that uses batching / tiling to efficiently handle large datasets with limited memory usage.</td>
+  </tr><tr class="function private">
     
-    <td>Module</td>
-    <td><code><a href="dire_jax.dire_utils.html" class="internal-link" title="dire_jax.dire_utils">dire<wbr></wbr>_utils</a></code></td>
-    <td>Utilities for plotting, benchmarking, and miscellany</td>
-  </tr><tr class="module">
-    
-    <td>Module</td>
-    <td><code><a href="dire_jax.hpindex.html" class="internal-link" title="dire_jax.hpindex">hpindex</a></code></td>
-    <td>A JAX-based implementation for efficient k-nearest neighbors.</td>
-  </tr><tr class="module">
-    
-    <td>Module</td>
-    <td><code><a href="dire_jax.hpmetrics.html" class="internal-link" title="dire_jax.hpmetrics">hpmetrics</a></code></td>
-    <td>Auxiliary functions for high-performance benchmarking metrics</td>
+    <td>Function</td>
+    <td><code><a href="#_compute_batch_distances" class="internal-link" title="dire_jax.hpindex._compute_batch_distances">_compute<wbr></wbr>_batch<wbr></wbr>_distances</a></code></td>
+    <td>Compute the squared distances between a batch of query points and all database points.</td>
   </tr>
 </table>
           
 
-            <p class="fromInitPy">From <code>__init__.py</code>:</p><table class="children sortable" id="id2">
-  
-  
-  <tr class="variable">
-    
-    <td>Variable</td>
-    <td><code><a href="#HAS_UTILS" class="internal-link" title="dire_jax.HAS_UTILS">HAS<wbr></wbr>_UTILS</a></code></td>
-    <td><span class="undocumented">Undocumented</span></td>
-  </tr>
-</table>
+            
         </div>
 
         <div id="childList">
-          <div class="basevariable">
+          <div class="basefunction private">
   
   
-  <a name="dire_jax.HAS_UTILS">
+  <a name="dire_jax.hpindex._compute_batch_distances">
     
   </a>
-  <a name="HAS_UTILS">
+  <a name="_compute_batch_distances">
     
   </a>
   <div class="functionHeader">
     
-    <span class="py-defname">HAS_UTILS</span>: <code>bool</code> =
+    @jax.jit<br />
+    <span class="py-keyword">def</span> <span class="py-defname">_compute_batch_distances</span><span class="function-signature">(y_batch, x)</span>:
     
-    <a class="headerLink" href="#HAS_UTILS" title="dire_jax.HAS_UTILS">
+    <a class="headerLink" href="#_compute_batch_distances" title="dire_jax.hpindex._compute_batch_distances">
       
       
       ¶
     </a>
   </div>
-  <div class="functionBody">
+  <div class="docstring functionBody">
     
-    <div><p class="undocumented">Undocumented</p></div>
-    
+    <div><p class="pre">Compute the squared distances between a batch of query points and all
+database points.
+
+Args:
+    y_batch: (batch_size, d) array of query points
+    x: (n, d) array of database points
+
+Returns:
+    (batch_size, n) array of squared distances</p></div>
   </div>
 </div>
         </div>

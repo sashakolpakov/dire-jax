@@ -32,7 +32,7 @@
       
       <div class="navlinks">
         <span class="navbar-brand">
-          dire_jax <a href="index.html">API Documentation</a>
+          DiRe - JAX <a href="index.html">API Documentation</a>
         </span>
 
         <a href="moduleIndex.html">
@@ -273,6 +273,16 @@
         
 
         
+            <div class="itemName"><code><a href="dire_jax.hpindex.html" class="internal-link" title="dire_jax.hpindex">hpindex</a></code>
+            </div>
+        
+
+    </li><li class="">
+        
+        
+        
+
+        
             <div class="itemName"><code><a href="dire_jax.hpmetrics.html" class="internal-link" title="dire_jax.hpmetrics">hpmetrics</a></code>
             </div>
         
@@ -289,8 +299,21 @@
         
          
 
+        <div class="childrenKindTitle">Variables</div>
+        <ul>
+    
+    <li class="">
         
-         
+        
+        
+
+        
+            <div class="itemName"><code><a href="index.html#HAS_UTILS" class="internal-link" title="dire_jax.HAS_UTILS">HAS<wbr></wbr>_UTILS</a></code>
+            </div>
+        
+
+    </li>
+</ul> 
 
         
          
@@ -330,11 +353,13 @@
         </div>
 
         <div class="moduleDocstring">
-          <div><p>Provides the main class for dimension reduction</p></div>
+          <div><p>Provides the main class for dimensionality reduction.</p>
+<p>The DiRe (DImensionality REduction) class implements a modern approach to dimensionality reduction, leveraging JAX for efficient computation. It uses force-directed layout techniques combined with k-nearest neighbor graph construction to generate meaningful low-dimensional embeddings of high-dimensional data.</p>
+</div>
         </div>
 
         <div id="splitTables">
-          <table class="children sortable" id="id2">
+          <table class="children sortable" id="id3">
   
   
   <tr class="class">
@@ -346,42 +371,42 @@
     
     <td>Function</td>
     <td><code><a href="#distribution_kernel" class="internal-link" title="dire_jax.dire.distribution_kernel">distribution<wbr></wbr>_kernel</a></code></td>
-    <td>Probability kernel</td>
+    <td>Probability kernel that maps distances to similarity scores.</td>
   </tr><tr class="function">
     
     <td>Function</td>
     <td><code><a href="#get_slice" class="internal-link" title="dire_jax.dire.get_slice">get<wbr></wbr>_slice</a></code></td>
-    <td>Dynamic slice around i of (almost) k elements</td>
+    <td>Extract a slice of size k centered around index i.</td>
   </tr><tr class="function">
     
     <td>Function</td>
     <td><code><a href="#grad_coeff_att" class="internal-link" title="dire_jax.dire.grad_coeff_att">grad<wbr></wbr>_coeff<wbr></wbr>_att</a></code></td>
-    <td>Attraction force</td>
+    <td>Coefficient for attraction force based on distance.</td>
   </tr><tr class="function">
     
     <td>Function</td>
     <td><code><a href="#grad_coeff_rep" class="internal-link" title="dire_jax.dire.grad_coeff_rep">grad<wbr></wbr>_coeff<wbr></wbr>_rep</a></code></td>
-    <td>Repulsion force</td>
+    <td>Coefficient for repulsion force based on distance.</td>
   </tr><tr class="function">
     
     <td>Function</td>
     <td><code><a href="#rand_directions" class="internal-link" title="dire_jax.dire.rand_directions">rand<wbr></wbr>_directions</a></code></td>
-    <td>Sampling random directions</td>
+    <td>Sample unit vectors in random directions.</td>
   </tr><tr class="variable">
     
     <td>Variable</td>
     <td><code><a href="#vmap_coeff_att" class="internal-link" title="dire_jax.dire.vmap_coeff_att">vmap<wbr></wbr>_coeff<wbr></wbr>_att</a></code></td>
-    <td>Vectorized grad_coeff_att</td>
+    <td><span class="undocumented">Undocumented</span></td>
   </tr><tr class="variable">
     
     <td>Variable</td>
     <td><code><a href="#vmap_coeff_rep" class="internal-link" title="dire_jax.dire.vmap_coeff_rep">vmap<wbr></wbr>_coeff<wbr></wbr>_rep</a></code></td>
-    <td>Vectorized grad_coeff_rep</td>
+    <td><span class="undocumented">Undocumented</span></td>
   </tr><tr class="variable">
     
     <td>Variable</td>
     <td><code><a href="#vmap_get_slice" class="internal-link" title="dire_jax.dire.vmap_get_slice">vmap<wbr></wbr>_get<wbr></wbr>_slice</a></code></td>
-    <td>Vectorized get_slice</td>
+    <td><span class="undocumented">Undocumented</span></td>
   </tr>
 </table>
           
@@ -412,7 +437,23 @@
   </div>
   <div class="docstring functionBody">
     
-    <div><p>Probability kernel</p></div>
+    <div><p class="pre">Probability kernel that maps distances to similarity scores.
+
+This is a rational function approximation of a t-distribution.
+
+Parameters
+----------
+x : float or jax.numpy.ndarray
+    Distance value(s)
+a : float
+    Scale parameter that controls the steepness of the distribution
+b : float
+    Shape parameter that controls the tail behavior
+    
+Returns
+-------
+float or jax.numpy.ndarray
+    Similarity score(s) between 0 and 1</p></div>
   </div>
 </div><div class="basefunction">
   
@@ -436,7 +477,21 @@
   </div>
   <div class="docstring functionBody">
     
-    <div><p>Dynamic slice around i of (almost) k elements</p></div>
+    <div><p class="pre">Extract a slice of size k centered around index i.
+
+Parameters
+----------
+arr : jax.numpy.ndarray
+    Input array
+k : int
+    Size of the slice
+i : int
+    Center index position
+    
+Returns
+-------
+jax.numpy.ndarray
+    Slice of the input array</p></div>
   </div>
 </div><div class="basefunction">
   
@@ -460,7 +515,21 @@
   </div>
   <div class="docstring functionBody">
     
-    <div><p>Attraction force</p></div>
+    <div><p class="pre">Coefficient for attraction force based on distance.
+
+Parameters
+----------
+x : float or jax.numpy.ndarray
+    Distance value(s)
+a : float
+    Scale parameter from the distribution kernel
+b : float
+    Shape parameter from the distribution kernel
+    
+Returns
+-------
+float or jax.numpy.ndarray
+    Attraction coefficient(s)</p></div>
   </div>
 </div><div class="basefunction">
   
@@ -484,7 +553,21 @@
   </div>
   <div class="docstring functionBody">
     
-    <div><p>Repulsion force</p></div>
+    <div><p class="pre">Coefficient for repulsion force based on distance.
+
+Parameters
+----------
+x : float or jax.numpy.ndarray
+    Distance value(s)
+a : float
+    Scale parameter from the distribution kernel
+b : float
+    Shape parameter from the distribution kernel
+    
+Returns
+-------
+float or jax.numpy.ndarray
+    Repulsion coefficient(s), negative to push points apart</p></div>
   </div>
 </div><div class="basefunction">
   
@@ -508,7 +591,21 @@
   </div>
   <div class="docstring functionBody">
     
-    <div><p>Sampling random directions</p></div>
+    <div><p class="pre">Sample unit vectors in random directions.
+
+Parameters
+----------
+key : jax.random.PRNGKey
+    Random number generator key
+dim : int
+    Dimensionality of the vectors
+num : int
+    Number of random directions to sample
+    
+Returns
+-------
+jax.numpy.ndarray
+    Array of shape (num, dim) containing unit vectors</p></div>
   </div>
 </div><div class="basevariable">
   
@@ -531,7 +628,7 @@
   </div>
   <div class="functionBody">
     
-    <div><p>Vectorized grad_coeff_att</p></div>
+    <div><p class="undocumented">Undocumented</p></div>
     
   </div>
 </div><div class="basevariable">
@@ -555,7 +652,7 @@
   </div>
   <div class="functionBody">
     
-    <div><p>Vectorized grad_coeff_rep</p></div>
+    <div><p class="undocumented">Undocumented</p></div>
     
   </div>
 </div><div class="basevariable">
@@ -579,7 +676,7 @@
   </div>
   <div class="functionBody">
     
-    <div><p>Vectorized get_slice</p></div>
+    <div><p class="undocumented">Undocumented</p></div>
     
   </div>
 </div>
@@ -592,9 +689,9 @@
 
   
   <div class="container-fluid">
-    <a href="index.html">API Documentation</a> for dire_jax,
+    <a href="index.html">API Documentation</a> for DiRe - JAX,
   generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a>
-    24.11.2 at 2025-02-22 19:46:06.
+    24.11.2 at 2025-03-19 01:38:13.
   </div>
 
   <!-- Search related scripts needs to be loaded at the end of HTML 

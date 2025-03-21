@@ -32,7 +32,7 @@
       
       <div class="navlinks">
         <span class="navbar-brand">
-          dire_jax <a href="index.html">API Documentation</a>
+          DiRe - JAX <a href="index.html">API Documentation</a>
         </span>
 
         <a href="moduleIndex.html">
@@ -201,6 +201,16 @@
         
 
         
+            <div class="itemName"><code><a href="#visualize_persistence_diagram" class="internal-link" title="dire_jax.dire_utils.visualize_persistence_diagram">visualize<wbr></wbr>_persistence<wbr></wbr>_diagram</a></code>
+            </div>
+        
+
+    </li><li class="">
+        
+        
+        
+
+        
             <div class="itemName"><code><a href="#viz_benchmark" class="internal-link" title="dire_jax.dire_utils.viz_benchmark">viz<wbr></wbr>_benchmark</a></code>
             </div>
         
@@ -257,6 +267,16 @@
         
 
         
+            <div class="itemName"><code><a href="dire_jax.hpindex.html" class="internal-link" title="dire_jax.hpindex">hpindex</a></code>
+            </div>
+        
+
+    </li><li class="">
+        
+        
+        
+
+        
             <div class="itemName"><code><a href="dire_jax.hpmetrics.html" class="internal-link" title="dire_jax.hpmetrics">hpmetrics</a></code>
             </div>
         
@@ -273,8 +293,21 @@
         
          
 
+        <div class="childrenKindTitle">Variables</div>
+        <ul>
+    
+    <li class="">
         
-         
+        
+        
+
+        
+            <div class="itemName"><code><a href="index.html#HAS_UTILS" class="internal-link" title="dire_jax.HAS_UTILS">HAS<wbr></wbr>_UTILS</a></code>
+            </div>
+        
+
+    </li>
+</ul> 
 
         
          
@@ -318,7 +351,7 @@
         </div>
 
         <div id="splitTables">
-          <table class="children sortable" id="id4">
+          <table class="children sortable" id="id5">
   
   
   <tr class="function">
@@ -356,6 +389,11 @@
     <td>Function</td>
     <td><code><a href="#run_benchmark" class="internal-link" title="dire_jax.dire_utils.run_benchmark">run<wbr></wbr>_benchmark</a></code></td>
     <td>Benchmark a reducer on given data.</td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><code><a href="#visualize_persistence_diagram" class="internal-link" title="dire_jax.dire_utils.visualize_persistence_diagram">visualize<wbr></wbr>_persistence<wbr></wbr>_diagram</a></code></td>
+    <td>Create a visualization of a persistence diagram.</td>
   </tr><tr class="function">
     
     <td>Function</td>
@@ -407,7 +445,7 @@ float: elapsed runtime (in seconds) for a given block of code</p></div>
   <div class="functionHeader">
     
     
-    <span class="py-keyword">def</span> <span class="py-defname">display_layout</span><span class="function-signature">(layout, labels, point_size)</span>:
+    <span class="py-keyword">def</span> <span class="py-defname">display_layout</span><span class="function-signature">(layout, labels, point_size=2)</span>:
     
     <a class="headerLink" href="#display_layout" title="dire_jax.dire_utils.display_layout">
       
@@ -562,16 +600,23 @@ Earth Mover Distance.
 
 Parameters
 ----------
-data: (numpy.ndarray) High-dimensional data.
-layout: (numpy.ndarray) Low-dimensional embedding.
-dimension: (int) The dimension up to which persistence diagrams are computed.
-subsample_threshold: (float) The threshold used for subsampling the data points.
-rng_key: Random key used for generating random numbers for subsampling, ensuring reproducibility.
-n_steps: (int): The number of steps or points in the filtration range for computing Betti curves, default 100.
+data : numpy.ndarray
+    High-dimensional data.
+layout : numpy.ndarray
+    Low-dimensional embedding.
+dimension : int
+    The dimension up to which persistence diagrams are computed.
+subsample_threshold : float
+    The threshold used for subsampling the data points.
+rng_key : jax.random.PRNGKey
+    Random key used for generating random numbers for subsampling, ensuring reproducibility.
+n_steps : int, optional
+    The number of steps or points in the filtration range for computing Betti curves, default 100.
 
 Returns
 -------
-None: This function primarily prints results and may plot curves, but does not return data directly.</p></div>
+None
+    This function primarily visualizes results and prints metric values.</p></div>
   </div>
 </div><div class="basefunction">
   
@@ -611,6 +656,44 @@ Returns
 -------
 dict: If only_stats is True, a dictionary with stats of all metrics available.
 dict, dict: If only_stats is False, a dictionary with stats and a dictionary with the initial values of all metrics.</p></div>
+  </div>
+</div><div class="basefunction">
+  
+  
+  <a name="dire_jax.dire_utils.visualize_persistence_diagram">
+    
+  </a>
+  <a name="visualize_persistence_diagram">
+    
+  </a>
+  <div class="functionHeader">
+    
+    
+    <span class="py-keyword">def</span> <span class="py-defname">visualize_persistence_diagram</span><span class="function-signature">(diagram, dimension, title)</span>:
+    
+    <a class="headerLink" href="#visualize_persistence_diagram" title="dire_jax.dire_utils.visualize_persistence_diagram">
+      
+      
+      ¶
+    </a>
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p class="pre">Create a visualization of a persistence diagram.
+
+Parameters
+----------
+diagram : list of tuples
+    Persistence diagram represented as a list of (birth, death) tuples
+dimension : int
+    Homology dimension of the diagram
+title : str
+    Title for the visualization
+
+Returns
+-------
+plotly.graph_objects.Figure
+    Interactive visualization of the persistence diagram</p></div>
   </div>
 </div><div class="basefunction">
   
@@ -660,9 +743,9 @@ Returns
 
   
   <div class="container-fluid">
-    <a href="index.html">API Documentation</a> for dire_jax,
+    <a href="index.html">API Documentation</a> for DiRe - JAX,
   generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a>
-    24.11.2 at 2025-02-22 19:46:06.
+    24.11.2 at 2025-03-19 01:38:13.
   </div>
 
   <!-- Search related scripts needs to be loaded at the end of HTML 
