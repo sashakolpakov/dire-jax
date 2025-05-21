@@ -201,55 +201,58 @@ $$
 3. **Visualization:** Call `visualize` on the returned object.  
 4. **Metrics:** Access quantitative measures for analysis and hyperparameter tuning.
 
+# Code availaility
+The DiRe - JAX workflow is publicly available on GitHub at [https://github.com/sashakolpakov/dire-jax](https://github.com/sashakolpakov/dire-jax).
+
 # Benchmarks
 
 ## Dataset: Blobs
 
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![Blobs DiRe–JAX embedding](pics/embeddings/blobs-dire-jax.png)     | ![Blobs tSNE embedding](pics/embeddings/blobs-tsne.png)            |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![Blobs cuML UMAP embedding](pics/embeddings/blobs-cuml-umap.png)   | ![Blobs UMAP embedding](pics/embeddings/blobs-umap.png)            |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
++-------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Blobs DiRe–JAX embedding](pics/embeddings/blobs-dire-jax.png)   | ![Blobs tSNE embedding](pics/embeddings/blobs-tsne.png)             |
++---------------------------------------------------------------------+-------------------------------------------------------------------+
+| ![Blobs cuML UMAP embedding](pics/embeddings/blobs-cuml-umap.png) | ![Blobs UMAP embedding](pics/embeddings/blobs-umap.png)             |
++-------------------------------------------------------------------+---------------------------------------------------------------------+
 
 ## Dataset: MNIST Digits
 
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![MNIST DiRe–JAX embedding](pics/embeddings/mnist-dire-jax.png)     | ![MNIST tSNE embedding](pics/embeddings/mnist-tsne.png)            |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![MNIST cuML UMAP embedding](pics/embeddings/mnist-cuml-umap.png)   | ![MNIST UMAP embedding](pics/embeddings/mnist-umap.png)            |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
++-------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![MNIST DiRe–JAX embedding](pics/embeddings/mnist-dire-jax.png)   | ![MNIST tSNE embedding](pics/embeddings/mnist-tsne.png)             |
++-------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![MNIST cuML UMAP embedding](pics/embeddings/mnist-cuml-umap.png) | ![MNIST UMAP embedding](pics/embeddings/mnist-umap.png)             |
++-------------------------------------------------------------------+---------------------------------------------------------------------+
 
 ## Dataset: Disk Uniform
 
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![Disk DiRe–JAX embedding](pics/embeddings/disk-dire-jax.png)       | ![Disk tSNE embedding](pics/embeddings/disk-tsne.png)              |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![Disk cuML UMAP embedding](pics/embeddings/disk-cuml-umap.png)     | ![Disk UMAP embedding](pics/embeddings/disk-umap.png)              |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
++-------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Disk DiRe–JAX embedding](pics/embeddings/disk-dire-jax.png)     | ![Disk tSNE embedding](pics/embeddings/disk-tsne.png)               |
++-------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Disk cuML UMAP embedding](pics/embeddings/disk-cuml-umap.png)   | ![Disk UMAP embedding](pics/embeddings/disk-umap.png)               |
++-------------------------------------------------------------------+---------------------------------------------------------------------+
 
 ## Dataset: Two Half–Moons
 
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![Moons DiRe–JAX embedding](pics/embeddings/moons-dire-jax.png)     | ![Moons tSNE embedding](pics/embeddings/moons-tsne.png)            |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![Moons cuML UMAP embedding](pics/embeddings/moons-cuml-umap.png)   | ![Moons UMAP embedding](pics/embeddings/moons-umap.png)            |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
++-------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Moons DiRe–JAX embedding](pics/embeddings/moons-dire-jax.png)   | ![Moons tSNE embedding](pics/embeddings/moons-tsne.png)             |
++-------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Moons cuML UMAP embedding](pics/embeddings/moons-cuml-umap.png) | ![Moons UMAP embedding](pics/embeddings/moons-umap.png)             |
++-------------------------------------------------------------------+---------------------------------------------------------------------+
 
 ## Dataset: Levine 13
 
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![Levine 13 DiRe–JAX embedding](pics/embeddings/levine13-dire-jax.png) | ![Levine 13 tSNE embedding](pics/embeddings/levine13-tsne.png)    |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![Levine 13 cuML UMAP embedding](pics/embeddings/levine13-cuml-umap.png) | ![Levine 13 UMAP embedding](pics/embeddings/levine13-umap.png)    |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
++--------------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Levine 13 DiRe–JAX embedding](pics/embeddings/levine13-dire-jax.png)   | ![Levine 13 tSNE embedding](pics/embeddings/levine13-tsne.png)      |
++--------------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Levine 13 cuML UMAP embedding](pics/embeddings/levine13-cuml-umap.png) | ![Levine 13 UMAP embedding](pics/embeddings/levine13-umap.png)      |
++--------------------------------------------------------------------------+---------------------------------------------------------------------+
 
 ## Dataset: Levine 32
 
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![Levine 32 DiRe–JAX embedding](pics/embeddings/levine32-dire-jax.png) | ![Levine 32 tSNE embedding](pics/embeddings/levine32-tsne.png)    |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
-| ![Levine 32 cuML UMAP embedding](pics/embeddings/levine32-cuml-umap.png) | ![Levine 32 UMAP embedding](pics/embeddings/levine32-umap.png)    |
-+---------------------------------------------------------------------+---------------------------------------------------------------------+
++--------------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Levine 32 DiRe–JAX embedding](pics/embeddings/levine32-dire-jax.png)   | ![Levine 32 tSNE embedding](pics/embeddings/levine32-tsne.png)      |
++--------------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Levine 32 cuML UMAP embedding](pics/embeddings/levine32-cuml-umap.png) | ![Levine 32 UMAP embedding](pics/embeddings/levine32-umap.png)      |
++--------------------------------------------------------------------------+---------------------------------------------------------------------+
 
 
 # Future work
