@@ -56,7 +56,7 @@ reducer_blobs.visualize(labels=labels_blobs, point_size=4)
 
 The output should look similar to
 
-![12 blobs with 100k points in 1k dimensions embedded in dimension 2](images/blobs_layout.png)
+![12 blobs with 100k points in 1k dimensions embedded in dimension 2](pics/blobs_layout.png)
 
 
 ### Working paper
