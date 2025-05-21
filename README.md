@@ -61,7 +61,7 @@ The output should look similar to
 
 ### Working paper
 
-Our working paper is available in the repository. Also, check out the Jupyter notebook with benchmarking results.
+Our working paper is available in the repository and as a preprint [arXiv:2503.03156](https://arxiv.org/abs/2503.03156). Also, check out the Jupyter notebook with benchmarking results.
 
 
 ### Benchmarking and utilities
