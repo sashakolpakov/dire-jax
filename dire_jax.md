@@ -9,10 +9,14 @@ tags:
   - data visualization
 authors:
   - name: Alexander Kolpakov
+    orcid: 0000-0002-6764-8894
     affiliation: 1
+    equal-contrib: true
     corresponding: true
   - name: Igor Rivin
+    orcid: 0000-0001-9302-2169
     affiliation: 2
+    equal-contrib: true
 affiliations:
   - name: University of Austin, Austin TX, USA; akolpakov@uaustin.org
     index: 1
