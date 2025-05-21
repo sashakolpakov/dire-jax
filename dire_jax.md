@@ -205,158 +205,51 @@ $$
 
 ## Dataset: Blobs
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/blobs-dire-jax.png" alt="Blobs DiRe--JAX" width="300"><br>
-      Blobs DiRe–JAX embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/blobs-tsne.png" alt="Blobs tSNE" width="300"><br>
-      Blobs tSNE embedding
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/blobs-cuml-umap.png" alt="Blobs cuML UMAP" width="300"><br>
-      Blobs cuML UMAP embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/blobs-umap.png" alt="Blobs UMAP" width="300"><br>
-      Blobs UMAP embedding
-    </td>
-  </tr>
-</table>
-
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Blobs DiRe–JAX embedding](pics/embeddings/blobs-dire-jax.png)     | ![Blobs tSNE embedding](pics/embeddings/blobs-tsne.png)            |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Blobs cuML UMAP embedding](pics/embeddings/blobs-cuml-umap.png)   | ![Blobs UMAP embedding](pics/embeddings/blobs-umap.png)            |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
 
 ## Dataset: MNIST Digits
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/mnist-dire-jax.png" alt="MNIST DiRe--JAX" width="300"><br>
-      MNIST DiRe–JAX embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/mnist-tsne.png" alt="MNIST tSNE" width="300"><br>
-      MNIST tSNE embedding
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/mnist-cuml-umap.png" alt="MNIST cuML UMAP" width="300"><br>
-      MNIST cuML UMAP embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/mnist-umap.png" alt="MNIST UMAP" width="300"><br>
-      MNIST UMAP embedding
-    </td>
-  </tr>
-</table>
-
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![MNIST DiRe–JAX embedding](pics/embeddings/mnist-dire-jax.png)     | ![MNIST tSNE embedding](pics/embeddings/mnist-tsne.png)            |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![MNIST cuML UMAP embedding](pics/embeddings/mnist-cuml-umap.png)   | ![MNIST UMAP embedding](pics/embeddings/mnist-umap.png)            |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
 
 ## Dataset: Disk Uniform
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/disk-dire-jax.png" alt="Disk DiRe--JAX" width="300"><br>
-      Disk DiRe–JAX embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/disk-tsne.png" alt="Disk tSNE" width="300"><br>
-      Disk tSNE embedding
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/disk-cuml-umap.png" alt="Disk cuML UMAP" width="300"><br>
-      Disk cuML UMAP embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/disk-umap.png" alt="Disk UMAP" width="300"><br>
-      Disk UMAP embedding
-    </td>
-  </tr>
-</table>
-
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Disk DiRe–JAX embedding](pics/embeddings/disk-dire-jax.png)       | ![Disk tSNE embedding](pics/embeddings/disk-tsne.png)              |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Disk cuML UMAP embedding](pics/embeddings/disk-cuml-umap.png)     | ![Disk UMAP embedding](pics/embeddings/disk-umap.png)              |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
 
 ## Dataset: Two Half–Moons
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/moons-dire-jax.png" alt="Moons DiRe--JAX" width="300"><br>
-      Moons DiRe–JAX embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/moons-tsne.png" alt="Moons tSNE" width="300"><br>
-      Moons tSNE embedding
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/moons-cuml-umap.png" alt="Moons cuML UMAP" width="300"><br>
-      Moons cuML UMAP embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/moons-umap.png" alt="Moons UMAP" width="300"><br>
-      Moons UMAP embedding
-    </td>
-  </tr>
-</table>
-
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Moons DiRe–JAX embedding](pics/embeddings/moons-dire-jax.png)     | ![Moons tSNE embedding](pics/embeddings/moons-tsne.png)            |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Moons cuML UMAP embedding](pics/embeddings/moons-cuml-umap.png)   | ![Moons UMAP embedding](pics/embeddings/moons-umap.png)            |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
 
 ## Dataset: Levine 13
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/levine13-dire-jax.png" alt="Levine13 DiRe--JAX" width="300"><br>
-      Levine 13 DiRe–JAX embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/levine13-tsne.png" alt="Levine13 tSNE" width="300"><br>
-      Levine 13 tSNE embedding
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/levine13-cuml-umap.png" alt="Levine13 cuML UMAP" width="300"><br>
-      Levine 13 cuML UMAP embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/levine13-umap.png" alt="Levine13 UMAP" width="300"><br>
-      Levine 13 UMAP embedding
-    </td>
-  </tr>
-</table>
-
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Levine 13 DiRe–JAX embedding](pics/embeddings/levine13-dire-jax.png) | ![Levine 13 tSNE embedding](pics/embeddings/levine13-tsne.png)    |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Levine 13 cuML UMAP embedding](pics/embeddings/levine13-cuml-umap.png) | ![Levine 13 UMAP embedding](pics/embeddings/levine13-umap.png)    |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
 
 ## Dataset: Levine 32
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/levine32-dire-jax.png" alt="Levine32 DiRe--JAX" width="300"><br>
-      Levine 32 DiRe–JAX embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/levine32-tsne.png" alt="Levine32 tSNE" width="300"><br>
-      Levine 32 tSNE embedding
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="pics/embeddings/levine32-cuml-umap.png" alt="Levine32 cuML UMAP" width="300"><br>
-      Levine 32 cuML UMAP embedding
-    </td>
-    <td align="center">
-      <img src="pics/embeddings/levine32-umap.png" alt="Levine32 UMAP" width="300"><br>
-      Levine 32 UMAP embedding
-    </td>
-  </tr>
-</table>
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Levine 32 DiRe–JAX embedding](pics/embeddings/levine32-dire-jax.png) | ![Levine 32 tSNE embedding](pics/embeddings/levine32-tsne.png)    |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| ![Levine 32 cuML UMAP embedding](pics/embeddings/levine32-cuml-umap.png) | ![Levine 32 UMAP embedding](pics/embeddings/levine32-umap.png)    |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
 
 
 # Future work
