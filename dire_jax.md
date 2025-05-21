@@ -209,50 +209,50 @@ The DiRe - JAX workflow is publicly available on GitHub at [https://github.com/s
 ## Dataset: Blobs
 
 +----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Blobs DiRe–JAX embedding](pics/embeddings/blobs-dire-jax.png){height="20pt"}   | ![Blobs tSNE embedding](pics/embeddings/blobs-tsne.png){height="20pt"}             |
+| ![Blobs DiRe–JAX embedding](pics/embeddings/blobs-dire-jax.png){height="80pt"}   | ![Blobs tSNE embedding](pics/embeddings/blobs-tsne.png){height="80pt"}             |
 +----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Blobs cuML UMAP embedding](pics/embeddings/blobs-cuml-umap.png){height="20pt"} | ![Blobs UMAP embedding](pics/embeddings/blobs-umap.png){height="20pt"}             |
+| ![Blobs cuML UMAP embedding](pics/embeddings/blobs-cuml-umap.png){height="80pt"} | ![Blobs UMAP embedding](pics/embeddings/blobs-umap.png){height="80pt"}             |
 +----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
 
 ## Dataset: MNIST Digits
 
 +----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![MNIST DiRe–JAX embedding](pics/embeddings/mnist-dire-jax.png){height="20pt"}   | ![MNIST tSNE embedding](pics/embeddings/mnist-tsne.png){height="20pt"}             |
+| ![MNIST DiRe–JAX embedding](pics/embeddings/mnist-dire-jax.png){height="80pt"}   | ![MNIST tSNE embedding](pics/embeddings/mnist-tsne.png){height="80pt"}             |
 +----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![MNIST cuML UMAP embedding](pics/embeddings/mnist-cuml-umap.png){height="20pt"} | ![MNIST UMAP embedding](pics/embeddings/mnist-umap.png){height="20pt"}             |
+| ![MNIST cuML UMAP embedding](pics/embeddings/mnist-cuml-umap.png){height="80pt"} | ![MNIST UMAP embedding](pics/embeddings/mnist-umap.png){height="80pt"}             |
 +----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
 
 ## Dataset: Disk Uniform
 
-+----------------------------------------------------------------------------------+--------------------------------------------------------------------------------------+
-| ![Disk DiRe–JAX embedding](pics/embeddings/disk-dire-jax.png){height="20pt"}     | ![Disk tSNE embedding](pics/embeddings/disk-tsne.png){height="20pt"}               |
-+----------------------------------------------------------------------------------+--------------------------------------------------------------------------------------+
-| ![Disk cuML UMAP embedding](pics/embeddings/disk-cuml-umap.png){height="20pt"}   | ![Disk UMAP embedding](pics/embeddings/disk-umap.png){height="20pt"}               |
-+----------------------------------------------------------------------------------+--------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Disk DiRe–JAX embedding](pics/embeddings/disk-dire-jax.png){height="80pt"}     | ![Disk tSNE embedding](pics/embeddings/disk-tsne.png){height="80pt"}               |
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Disk cuML UMAP embedding](pics/embeddings/disk-cuml-umap.png){height="80pt"}   | ![Disk UMAP embedding](pics/embeddings/disk-umap.png){height="80pt"}               |
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
 
 ## Dataset: Two Half–Moons
 
 +----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Moons DiRe–JAX embedding](pics/embeddings/moons-dire-jax.png){height="20pt"}   | ![Moons tSNE embedding](pics/embeddings/moons-tsne.png){height="20pt"}             |
+| ![Moons DiRe–JAX embedding](pics/embeddings/moons-dire-jax.png){height="80pt"}   | ![Moons tSNE embedding](pics/embeddings/moons-tsne.png){height="80pt"}             |
 +----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Moons cuML UMAP embedding](pics/embeddings/moons-cuml-umap.png){height="20pt"} | ![Moons UMAP embedding](pics/embeddings/moons-umap.png){height="20pt"}             |
+| ![Moons cuML UMAP embedding](pics/embeddings/moons-cuml-umap.png){height="80pt"} | ![Moons UMAP embedding](pics/embeddings/moons-umap.png){height="80pt"}             |
 +----------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
 
 ## Dataset: Levine 13
 
-+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
-| ![Levine 13 DiRe–JAX embedding](pics/embeddings/levine13-dire-jax.png){height="20pt"}   | ![Levine 13 tSNE embedding](pics/embeddings/levine13-tsne.png){height="20pt"}      |
-+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
-| ![Levine 13 cuML UMAP embedding](pics/embeddings/levine13-cuml-umap.png){height="20pt"} | ![Levine 13 UMAP embedding](pics/embeddings/levine13-umap.png){height="20pt"}      |
-+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
++-----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Levine 13 DiRe–JAX embedding](pics/embeddings/levine13-dire-jax.png){height="80pt"}   | ![Levine 13 tSNE embedding](pics/embeddings/levine13-tsne.png){height="80pt"}      |
++-----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Levine 13 cuML UMAP embedding](pics/embeddings/levine13-cuml-umap.png){height="80pt"} | ![Levine 13 UMAP embedding](pics/embeddings/levine13-umap.png){height="80pt"}      |
++-----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
 
 ## Dataset: Levine 32
 
-+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
-| ![Levine 32 DiRe–JAX embedding](pics/embeddings/levine32-dire-jax.png){height="20pt"}   | ![Levine 32 tSNE embedding](pics/embeddings/levine32-tsne.png){height="20pt"}      |
-+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
-| ![Levine 32 cuML UMAP embedding](pics/embeddings/levine32-cuml-umap.png){height="20pt"} | ![Levine 32 UMAP embedding](pics/embeddings/levine32-umap.png){height="20pt"}      |
-+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
++-----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Levine 32 DiRe–JAX embedding](pics/embeddings/levine32-dire-jax.png){height="80pt"}   | ![Levine 32 tSNE embedding](pics/embeddings/levine32-tsne.png){height="80pt"}      |
++-----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Levine 32 cuML UMAP embedding](pics/embeddings/levine32-cuml-umap.png){height="80pt"} | ![Levine 32 UMAP embedding](pics/embeddings/levine32-umap.png){height="80pt"}      |
++-----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
 
 
 # Future work
