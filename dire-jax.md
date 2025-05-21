@@ -19,7 +19,7 @@ affiliations:
   - name: Temple University, Philadelphia PA, USA; rivin@temple.edu
     index: 2
 date: 21 May 2025
-bibliography: dire_short.bib
+bibliography: dire_jax.bib
 ---
 
 # Summary
@@ -50,7 +50,7 @@ This makes DiRe-JAX an essential toolkit for researchers and practitioners worki
 
 # Main methods
 
-The main class of DiRe--JAX is `DiRe`. Let $X \subset \mathbb{R}^n$ be the input data realized as a NumPy array. Then, `DiRe` performs the following main steps:
+The main class of DiRe-JAX is `DiRe`. Let $X \subset \mathbb{R}^n$ be the input data realized as a NumPy array. Then, `DiRe` performs the following main steps:
 
 1. **Capturing dataset topology:** Create the kNN graph of $X$, say $\Gamma$, for a given number of neighbors $k$ (`n_neighbors`) by calling `make_knn_adjacency`. This step uses a JAX kernel specifically developed by the authors to perform the computation on CPU, GPU, or TPU settings. Other libraries like FAISS [@faiss] may also be used, although they do not provide the same hardware universality.
 2. **Initial dimension reduction:** Produce $Y \subset \mathbb{R}^d$, the initial embedding of $X$, with $d \ll n$ (usually $d=2$ or $3$) given by the `dimension` parameter, using one of the available embedding methods: `random` (random projections from the Johnson–Lindenstrauss Lemma), `spectral` (using the kNN graph $\Gamma$ to construct the weighted Laplacian, optionally applying a similarity kernel), or `pca` (classical or kernel-based).
@@ -67,13 +67,13 @@ This embedding is based on the following classical Johnson–Lindenstrauss Lemma
 > Given $0 < \epsilon < 1$ and an integer $n$, let $X$ be a set of $n$ points in $\mathbb{R}^d$. For a random linear map $f: \mathbb{R}^d \to \mathbb{R}^k$ where $k = O\left(\frac{\log n}{\epsilon^2}\right)$, with high probability, for all $u, v \in X$:
 >
 > $$
-> (1 - \epsilon) \|u - v\|^2 \le \|f(u) - f(v)\|^2 \le (1 + \epsilon) \|u - v\|^2.
+> (1 - \epsilon) \lVert u - v \rVert^2 \le \lVert f(u) - f(v) \rVert^2 \le (1 + \epsilon) \lVert u - v \rVert^2.
 > $$
 >
 > The value
 >
 > $$
-> \text{dist}(f) = \frac{\|f(u) - f(v)\|}{\|u - v\|}
+> \text{dist}(f) = \frac{\lVert f(u) - f(v) \rVert}{\lVert u - v \rVert}
 > $$
 >
 > is called the *distortion* of $f$, and is expected to be close to $1.0$ for a high-quality embedding.
@@ -103,7 +103,7 @@ $$
 Under mild conditions on the spectrum, the bottleneck distance between persistence diagrams of $X$ and $X_k$ satisfies [@chazal-persistence]:
 
 $$
-d_b(D(X), D(X_k)) \le \|\widehat{X} - X\|_F = \varepsilon \|X\|_F.
+d_b(D(X), D(X_k)) \le \lVert \widehat{X} - X \rVert_F = \varepsilon \lVert X \rVert_F.
 $$
 
 Thus, PCA approximately preserves topological features up to controlled error.
@@ -117,13 +117,13 @@ Using the kNN graph $\Gamma$ of $X$, construct the graph Laplacian (optionally w
 After obtaining an initial embedding $Y$, DiRe--JAX applies an iterative force-directed layout to align $Y$’s local structure with that of $X$. Attraction and repulsion forces are modeled after tSNE and UMAP kernels:
 
 $$
-\varphi(x) = \frac{1}{1 + a \|x\|^{2b}},
+\varphi(x) = \frac{1}{1 + a \lVert x \rVert^{2b}},
 $$
 
 tuned by `min_dist` $= \delta$ and `spread` $= \sigma$ so that:
 
-- $\varphi(x) \approx 1.0$ for $\|x\| < \delta$, and
-- $\varphi(x) \approx \exp\bigl(-(\|x\| - \delta)/\sigma\bigr)$ otherwise.
+- $\varphi(x) \approx 1.0$ for $\lVert x \rVert < \delta$, and
+- $\varphi(x) \approx \exp\bigl(-(\lVert x \rVert - \delta)/\sigma\bigr)$ otherwise.
 
 Attraction forces apply to kNN neighbors in $\Gamma$, while all other pairs experience repulsion. Layout iterations run until a preset number of steps is reached.
 
@@ -201,33 +201,87 @@ $$
 
 ## Dataset: Blobs
 
-![Blobs DiRe--JAX](pics/embeddings/blobs-dire-jax.png) ![Blobs tSNE](pics/embeddings/blobs-tsne.png)  
-![Blobs cuML UMAP](pics/embeddings/blobs-cuml-umap.png) ![Blobs UMAP](pics/embeddings/blobs-umap.png)
+Blobs DiRe-JAX embedding
+![Blobs DiRe--JAX](pics/embeddings/blobs-dire-jax.png) 
+
+Blobs tSNE embedding
+![Blobs tSNE](pics/embeddings/blobs-tsne.png)  
+
+Blobs cuML UMAP embedding
+![Blobs cuML UMAP](pics/embeddings/blobs-cuml-umap.png) 
+
+Blobs UMAP embedding
+![Blobs UMAP](pics/embeddings/blobs-umap.png)
 
 ## Dataset: MNIST Digits
 
-![MNIST DiRe--JAX](pics/embeddings/mnist-dire-jax.png) ![MNIST tSNE](pics/embeddings/mnist-tsne.png)  
-![MNIST cuML UMAP](pics/embeddings/mnist-cuml-umap.png) ![MNIST UMAP](pics/embeddings/mnist-umap.png)
+MNIST DiRe-JAX embedding
+![MNIST DiRe--JAX](pics/embeddings/mnist-dire-jax.png) 
+
+MNIST tSNE embedding
+![MNIST tSNE](pics/embeddings/mnist-tsne.png)  
+
+MNIST cuML UMAP embedding
+![MNIST cuML UMAP](pics/embeddings/mnist-cuml-umap.png) 
+
+MNIST UMAP embedding
+![MNIST UMAP](pics/embeddings/mnist-umap.png)
 
 ## Dataset: Disk Uniform
 
-![Disk DiRe--JAX](pics/embeddings/disk-dire-jax.png) ![Disk tSNE](pics/embeddings/disk-tsne.png)  
-![Disk cuML UMAP](pics/embeddings/disk-cuml-umap.png) ![Disk UMAP](pics/embeddings/disk-umap.png)
+Disk DiRe-JAX embedding
+![Disk DiRe--JAX](pics/embeddings/disk-dire-jax.png) 
+
+Disk tSNE embedding
+![Disk tSNE](pics/embeddings/disk-tsne.png)  
+
+Disk cuML UMAP embedding
+![Disk cuML UMAP](pics/embeddings/disk-cuml-umap.png) 
+
+Disk UMAP embedding
+![Disk UMAP](pics/embeddings/disk-umap.png)
 
 ## Dataset: Two Half–Moons
 
-![Moons DiRe--JAX](pics/embeddings/moons-dire-jax.png) ![Moons tSNE](pics/embeddings/moons-tsne.png)  
-![Moons cuML UMAP](pics/embeddings/moons-cuml-umap.png) ![Moons UMAP](pics/embeddings/moons-umap.png)
+Moons DiRe-JAX embedding
+![Moons DiRe--JAX](pics/embeddings/moons-dire-jax.png) 
+
+Moons tSNE embedding
+![Moons tSNE](pics/embeddings/moons-tsne.png)  
+
+Moons cuML UMAP embedding
+![Moons cuML UMAP](pics/embeddings/moons-cuml-umap.png) 
+
+Moons UMAP embedding
+![Moons UMAP](pics/embeddings/moons-umap.png)
 
 ## Dataset: Levine 13
 
-![Levine13 DiRe--JAX](pics/embeddings/levine13-dire-jax.png) ![Levine13 tSNE](pics/embeddings/levine13-tsne.png)  
-![Levine13 cuML UMAP](pics/embeddings/levine13-cuml-umap.png) ![Levine13 UMAP](pics/embeddings/levine13-umap.png)
+Levine 13 DiRe-JAX embedding
+![Levine13 DiRe--JAX](pics/embeddings/levine13-dire-jax.png) 
+
+Levine 13 tSNE embedding
+![Levine13 tSNE](pics/embeddings/levine13-tsne.png)  
+
+Levine 13 cuML UMAP embedding
+![Levine13 cuML UMAP](pics/embeddings/levine13-cuml-umap.png) 
+
+Levine 13 UMAP embedding
+![Levine13 UMAP](pics/embeddings/levine13-umap.png)
 
 ## Dataset: Levine 32
 
-![Levine32 DiRe--JAX](pics/embeddings/levine32-dire-jax.png) ![Levine32 tSNE](pics/embeddings/levine32-tsne.png)  
-![Levine32 cuML UMAP](pics/embeddings/levine32-cuml-umap.png) ![Levine32 UMAP](pics/embeddings/levine32-umap.png)
+Levine 32 DiRe-JAX embedding
+![Levine32 DiRe--JAX](pics/embeddings/levine32-dire-jax.png) 
+
+Levine 32 tSNE embedding
+![Levine32 tSNE](pics/embeddings/levine32-tsne.png)  
+
+Levine 32 cuML UMAP embedding
+![Levine32 cuML UMAP](pics/embeddings/levine32-cuml-umap.png) 
+
+Levine 32 UMAP embedding
+![Levine32 UMAP](pics/embeddings/levine32-umap.png)
 
 # Future work
 
