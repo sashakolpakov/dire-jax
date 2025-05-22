@@ -23,7 +23,7 @@ affiliations:
   - name: Temple University, Philadelphia PA, USA; rivin@temple.edu
     index: 2
 date: 21 May 2025
-bibliography: dire_jax.bib
+bibliography: paper.bib
 ---
 
 # Summary
