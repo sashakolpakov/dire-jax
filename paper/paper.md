@@ -39,7 +39,7 @@ This makes it suitable for a wide range of applications in machine learning, bio
 Traditional dimensionality reduction techniques such as UMAP and tSNE are widely used for visualizing high-dimensional data in lower-dimensional spaces, 
 usually 2D and sometimes 3D. Other uses include dimensionality reduction to other, possibly higher and thus non-visual dimensions, for the subsequent use of classifiers such as SVMs.
 
-However, these methods often struggle with scalability, interpretability, and preservation of global data structures. UMAP, while fast and scalable, may overemphasize 
+However, these methods often struggle with scalability, interpretability, and preservation of global data structures. For example, while fast and scalable, UMAP may overemphasize 
 local structures at the expense of global data relationships [@pachter]. And tSNE, while known for producing high-quality visualizations, may be computationally 
 expensive and sensitive to hyperparameter tuning [@kobak2019art].
 
@@ -51,6 +51,35 @@ DiRe-JAX also includes a wealth of metrics for analyzing embedding quality and f
 hyperparameter optimization become feasible even in low-cost environments like Google Colab.
 
 This makes DiRe-JAX an essential toolkit for researchers and practitioners working with complex, high-dimensional data.
+
+# Benchmarks
+
+A few benchmark below provide some visuals regarding the global structure changes or preservation by various methods, such as 
+
+## Dataset: Disk Uniform
+
++-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Disk DiRe–JAX embedding](../pics/embeddings/disk-dire-jax.png){height="80pt"}     | ![Disk tSNE embedding](../pics/embeddings/disk-tsne.png){height="80pt"}            |
++-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Disk cuML UMAP embedding](../pics/embeddings/disk-cuml-umap.png){height="80pt"}   | ![Disk UMAP embedding](../pics/embeddings/disk-umap.png){height="80pt"}            |
++-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+
+## Dataset: Two Half–Moons
+
++-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Moons DiRe–JAX embedding](../pics/embeddings/moons-dire-jax.png){height="80pt"}   | ![Moons tSNE embedding](../pics/embeddings/moons-tsne.png){height="80pt"}          |
++-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Moons cuML UMAP embedding](../pics/embeddings/moons-cuml-umap.png){height="80pt"} | ![Moons UMAP embedding](../pics/embeddings/moons-umap.png){height="80pt"}          |
++-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+
+
+## Dataset: Levine 32
+
++--------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Levine 32 DiRe–JAX embedding](../pics/embeddings/levine32-dire-jax.png){height="80pt"}   | ![Levine 32 tSNE embedding](../pics/embeddings/levine32-tsne.png){height="80pt"}   |
++--------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| ![Levine 32 cuML UMAP embedding](../pics/embeddings/levine32-cuml-umap.png){height="80pt"} | ![Levine 32 UMAP embedding](../pics/embeddings/levine32-umap.png){height="80pt"}   |
++--------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
 
 # Main methods
 
@@ -131,135 +160,11 @@ tuned by `min_dist` $= \delta$ and `spread` $= \sigma$ so that:
 
 Attraction forces apply to kNN neighbors in $\Gamma$, while all other pairs experience repulsion. Layout iterations run until a preset number of steps is reached.
 
-# Quantitative measures
-
-## Measuring the global structure
-
-### Persistence diagrams
-
-Compute Vietoris–Rips complexes $VR_t(X)$ and track homology groups $H_k(VR_t(X);\mathbb{F})$ across scales, extracting birth–death pairs $(b_\alpha,d_\alpha)$. Compare diagrams via bottleneck and Wasserstein distances [@persim-docs].
-
-### Betti curves
-
-Plot Betti numbers $\beta_k(t) = \mathrm{rank} H_k(VR_t(X))$ and compare curves using Dynamic Time Warping (DTW) [@salvador-fastdtw], Time Warp Edit Distance (TWED) [@marteau-twed], and Earth Mover's Distance (EMD) [@flamary-pot].
-
-### Global structure preservation
-
-For embedding $Y=f(X)$, measure $d_b(D_k(X), D_k(Y))$ and $d_W(D_k(X),D_k(Y))$ for $k=0,1$, normalized by sample size. For Betti curves, normalize mass before EMD and rescale distances appropriately.
-
-## Measuring the local structure
-
-### Embedding stress
-
-For each edge $e=(x,y) \in \Gamma$, define local stress:
-
-$$
-\lambda(e) = 
-\left|
-  1 - \frac{\lVert x-y\rVert_2}{\lVert f(x)-f(y)\rVert_2}
-\right|
-$$
-
-and total stress:
-
-$$
-\sigma(f,\Gamma) = \frac{\sqrt{\mathrm{Var}\Lambda}}{\mathbb{E}\Lambda},
-$$
-
-where $\Lambda = (\lambda(e))_{e\in\text{edges}(\Gamma)}$.
-
-### Neighborhood preservation
-
-Compute neighbor sets $N_X(x)$ and $N_Y(f(x))$. Define preservation sequence $N(X,f)=\bigl(\tfrac{|N_X(x)\cap N_Y(f(x))|}{|N_X(x)|}\bigr)_{x\in X}$ and index:
-
-$$
-\nu(X,f) = \left(\mathbb{E} N(X,f),\sqrt{\mathrm{Var}N(X,f)}\right).
-$$
-
-## Measuring context loss
-
-### Linear SVM classifier accuracy
-
-Train/test linear SVM on $X$ and $Y$, yielding accuracies $\alpha_X,\alpha_Y$. Define context loss:
-
-$$
-\kappa_{\mathrm{SVM}} = \log\min\left(\tfrac{\alpha_X}{\alpha_Y},\tfrac{\alpha_Y}{\alpha_X}\right).
-$$
-
-### $k$NN classifier accuracy
-
-Compare $k$NN classifier accuracies $\alpha_X,\alpha_Y$ and define:
-
-$$
-\kappa_{k\mathrm{NN}} = \log\frac{\alpha_Y}{\alpha_X}.
-$$
-
-# General workflow
-
-1. **Data Preprocessing:** External; users may normalize or transform data via scikit-learn.  
-2. **Embedding:** Instantiate `DiRe` and call `fit_transform`.  
-3. **Visualization:** Call `visualize` on the returned object.  
-4. **Metrics:** Access quantitative measures for analysis and hyperparameter tuning.
-
 # Code availaility
-The DiRe - JAX workflow is publicly available on GitHub at [https://github.com/sashakolpakov/dire-jax](https://github.com/sashakolpakov/dire-jax).
+The DiRe - JAX workflow is available on [GitHub](https://github.com/sashakolpakov/dire-jax). An installable package is available on [PyPI](https://pypi.org/project/dire-jax/). 
 
-# Benchmarks
-
-## Dataset: Blobs
-
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Blobs DiRe–JAX embedding](../pics/embeddings/blobs-dire-jax.png){height="80pt"}   | ![Blobs tSNE embedding](../pics/embeddings/blobs-tsne.png){height="80pt"}          |
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Blobs cuML UMAP embedding](../pics/embeddings/blobs-cuml-umap.png){height="80pt"} | ![Blobs UMAP embedding](../pics/embeddings/blobs-umap.png){height="80pt"}          |
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-
-## Dataset: MNIST Digits
-
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![MNIST DiRe–JAX embedding](../pics/embeddings/mnist-dire-jax.png){height="80pt"}   | ![MNIST tSNE embedding](../pics/embeddings/mnist-tsne.png){height="80pt"}          |
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![MNIST cuML UMAP embedding](../pics/embeddings/mnist-cuml-umap.png){height="80pt"} | ![MNIST UMAP embedding](../pics/embeddings/mnist-umap.png){height="80pt"}          |
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-
-## Dataset: Disk Uniform
-
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Disk DiRe–JAX embedding](../pics/embeddings/disk-dire-jax.png){height="80pt"}     | ![Disk tSNE embedding](../pics/embeddings/disk-tsne.png){height="80pt"}            |
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Disk cuML UMAP embedding](../pics/embeddings/disk-cuml-umap.png){height="80pt"}   | ![Disk UMAP embedding](../pics/embeddings/disk-umap.png){height="80pt"}            |
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-
-## Dataset: Two Half–Moons
-
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Moons DiRe–JAX embedding](../pics/embeddings/moons-dire-jax.png){height="80pt"}   | ![Moons tSNE embedding](../pics/embeddings/moons-tsne.png){height="80pt"}          |
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Moons cuML UMAP embedding](../pics/embeddings/moons-cuml-umap.png){height="80pt"} | ![Moons UMAP embedding](../pics/embeddings/moons-umap.png){height="80pt"}          |
-+-------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-
-## Dataset: Levine 13
-
-+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Levine 13 DiRe–JAX embedding](../pics/embeddings/levine13-dire-jax.png){height="80pt"}   | ![Levine 13 tSNE embedding](../pics/embeddings/levine13-tsne.png){height="80pt"}   |
-+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Levine 13 cuML UMAP embedding](../pics/embeddings/levine13-cuml-umap.png){height="80pt"} | ![Levine 13 UMAP embedding](../pics/embeddings/levine13-umap.png){height="80pt"}   |
-+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-
-## Dataset: Levine 32
-
-+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Levine 32 DiRe–JAX embedding](../pics/embeddings/levine32-dire-jax.png){height="80pt"}   | ![Levine 32 tSNE embedding](../pics/embeddings/levine32-tsne.png){height="80pt"}   |
-+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-| ![Levine 32 cuML UMAP embedding](../pics/embeddings/levine32-cuml-umap.png){height="80pt"} | ![Levine 32 UMAP embedding](../pics/embeddings/levine32-umap.png){height="80pt"}   |
-+--------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
-
-
-# Future work
-
-1. Add more quantitative measures and hyperparameter optimization features.  
-2. Improve performance of persistent homology computations beyond dimensions 0 and 1.  
-3. Explore alternative distance metrics for kNN graph construction and embedding space.
+# Whitepaper
+The DiRe - JAX whitepaper is available on the [arXiv](https://arxiv.org/abs/2503.03156) preprint server.
 
 # Acknowledgements
 
