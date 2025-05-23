@@ -1,5 +1,9 @@
 # DiRe - JAX
 
+[![status](https://joss.theoj.org/papers/65406329a65d9f2dadae8b66a1c7f9ad/status.svg)](https://joss.theoj.org/papers/65406329a65d9f2dadae8b66a1c7f9ad)
+
+## This is a designated branch for JOSS review only. No new commits will be pushed into it unless they are JOSS-related. 
+
 ### A new DImensionality REduction package written in JAX 
 
 We offer a new dimension reduction tool called DiRe - JAX that is benchmarked against the existing approaches: UMAP (original and Rapids.AI versions), and tSNE (Rapids.AI version)
