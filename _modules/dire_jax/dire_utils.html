@@ -43,7 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">dire_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../benchmarking.html">Benchmarking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 </ul>
@@ -107,7 +107,7 @@
 <span class="c1"># Display a given layout with labels and with given point size</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="display_layout">
-<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.display_layout">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire_utils.display_layout">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">display_layout</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
@@ -163,7 +163,7 @@
 <span class="c1"># Print out local metrics for a given high-dimensional data, low-dimensional layout pair</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="do_local_analysis">
-<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.do_local_analysis">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire_utils.do_local_analysis">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">do_local_analysis</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
@@ -192,7 +192,7 @@
 <span class="c1"># Create a plotly visualization of persistence diagrams</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="visualize_persistence_diagram">
-<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.visualize_persistence_diagram">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire_utils.visualize_persistence_diagram">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">visualize_persistence_diagram</span><span class="p">(</span><span class="n">diagram</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a visualization of a persistence diagram.</span>
@@ -276,7 +276,7 @@
 <span class="c1"># Visualise the Betti curves and persistence diagrams.</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="do_persistence_analysis">
-<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.do_persistence_analysis">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire_utils.do_persistence_analysis">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">do_persistence_analysis</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a comprehensive persistence analysis by subsampling data, computing persistence diagrams, and</span>
@@ -381,7 +381,7 @@
 <span class="c1"># Do quality and context analysis</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="do_context_analysis">
-<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.do_context_analysis">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire_utils.do_context_analysis">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">do_context_analysis</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
@@ -421,7 +421,7 @@
 <span class="c1"># Timing a given block of code; adding the measurement to a given dictionary of metrics</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="block_timing">
-<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.block_timing">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire_utils.block_timing">[docs]</a>
 <span class="nd">@contextmanager</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">block_timing</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -439,7 +439,7 @@
 <span class="c1"># Visualising a single benchmark on a given reducer with (data, labels)</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="viz_benchmark">
-<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.viz_benchmark">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire_utils.viz_benchmark">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">viz_benchmark</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run a benchmarking process for dimensionality reduction using provided reducer.</span>
@@ -503,7 +503,7 @@
 <span class="c1"># Computing local and global metrics, and context preservation measures.</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="do_metrics">
-<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.do_metrics">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire_utils.do_metrics">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">do_metrics</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute local and global metrics, and context preservation measures.</span>
@@ -568,7 +568,7 @@
 <span class="c1"># Benchmark a reducer on given data</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="run_benchmark">
-<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.run_benchmark">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire_utils.run_benchmark">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">run_benchmark</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">num_trials</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">only_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Benchmark a reducer on given data.</span>

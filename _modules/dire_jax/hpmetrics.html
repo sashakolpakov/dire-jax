@@ -43,7 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">dire_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../benchmarking.html">Benchmarking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 </ul>
@@ -107,7 +107,7 @@
 
 
 <div class="viewcode-block" id="welford_update">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.welford_update">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.welford_update">[docs]</a>
 <span class="nd">@jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">welford_update</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">new_value</span><span class="p">,</span> <span class="n">finite_threshold</span><span class="o">=</span><span class="mf">1e12</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -140,7 +140,7 @@
 
 
 <div class="viewcode-block" id="welford_finalize">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.welford_finalize">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.welford_finalize">[docs]</a>
 <span class="nd">@jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">welford_finalize</span><span class="p">(</span><span class="n">agg</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -165,7 +165,7 @@
 
 
 <div class="viewcode-block" id="welford">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.welford">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.welford">[docs]</a>
 <span class="nd">@jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">welford</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -195,7 +195,7 @@
 <span class="c1"># Make the kNN graph of given data with k=n_neighbors</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="make_knn_graph">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.make_knn_graph">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.make_knn_graph">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_knn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the distances to nearest neighbors and their indices in the kNN graph of data.</span>
@@ -258,7 +258,7 @@
 <span class="c1"># Embedding stress</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_stress">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_stress">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_stress">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_stress</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the stress of an embedding based on the distances in the original high-dimensional</span>
@@ -305,7 +305,7 @@
 <span class="c1"># Neighborhood preservation score</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_neighbor_score">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_neighbor_score">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_neighbor_score">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_neighbor_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the neighborhood preservation score between high-dimensional data and its corresponding low-dimensional</span>
@@ -361,7 +361,7 @@
 <span class="c1"># 2. Neighborhood preservation score (mean, std).</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_local_metrics">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_local_metrics">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_local_metrics">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_local_metrics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">memory_efficient</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute local metrics of the (data, layout) pair.</span>
@@ -420,7 +420,7 @@
 <span class="c1"># Bernoulli trial subsampling</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="threshold_subsample">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.threshold_subsample">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.threshold_subsample">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">threshold_subsample</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Subsample multiple arrays based on a specified threshold.</span>
@@ -455,7 +455,7 @@
 <span class="c1"># Producing diagrams in dimensions up to dim (inclusive) for data and layout</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="diagrams">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.diagrams">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.diagrams">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">diagrams</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">max_dim</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate persistence diagrams for high-dimensional and low-dimensional data up to a specified dimension,</span>
@@ -491,7 +491,7 @@
 <span class="c1"># Betti curve of a diagram (in a single given dimension)</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="betti_curve">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.betti_curve">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.betti_curve">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">betti_curve</span><span class="p">(</span><span class="n">diagram</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the Betti curve from a persistence diagram, which is a function of the number of features</span>
@@ -532,7 +532,7 @@
 <span class="c1"># Compute normalized Dynamic Time Warp (DTW) distance (using Euclidean metric)</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_dtw">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_dtw">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_dtw">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_dtw</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute normalized Dynamic Time Warp (DTW) distance (using Euclidean metric)</span>
@@ -564,7 +564,7 @@
 <span class="c1"># Compute normalized Time Warp Edit Distance (TWED) using Euclidean metric</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_twed">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_twed">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_twed">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_twed</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute normalized Time Warp Edit Distance (TWED) distance using Euclidean metric</span>
@@ -599,7 +599,7 @@
 <span class="c1"># Compute normalized Earth Mover Distance (EMD) distance (using Euclidean metric)</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_emd">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_emd">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_emd">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_emd</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">adjust_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute normalized Earth Mover Distance (EMD) distance (using Euclidean metric)</span>
@@ -638,7 +638,7 @@
 <span class="c1"># Compute normalized Wasserstein distance</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_wasserstein">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_wasserstein">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_wasserstein">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_wasserstein</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute normalized Wasserstein distance between two persistence diagrams</span>
@@ -666,7 +666,7 @@
 <span class="c1"># Compute normalized bottleneck distance</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_bottleneck">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_bottleneck">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_bottleneck">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_bottleneck</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute normalized bottleneck distance between two persistence diagrams</span>
@@ -699,7 +699,7 @@
 <span class="c1"># together with diagrams and Betti curves, if necessary.</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_global_metrics">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_global_metrics">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_global_metrics">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_global_metrics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">metrics_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute and compare persistence metrics between high-dimensional and low-dimensional data representations.</span>
@@ -794,7 +794,7 @@
 <span class="c1"># Compute linear SVM accuracy of given labelled data X with labels y</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_svm_accuracy">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_svm_accuracy">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_svm_accuracy">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_svm_accuracy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">reg_param</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute linear SVM classifier accuracy for given labelled data X with labels y.</span>
@@ -841,7 +841,7 @@
 <span class="c1"># and on the low-dimensional embedding</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_svm_score">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_svm_score">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_svm_score">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_svm_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute SVM score (context preservation measure) by comparing linear SVM classifier accuracies</span>
@@ -895,7 +895,7 @@
 <span class="c1"># Compute kNN classifier accuracy</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_knn_accuracy">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_knn_accuracy">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_knn_accuracy">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_knn_accuracy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute kNN classifier accuracy for given labelled data X with labels y.</span>
@@ -939,7 +939,7 @@
 <span class="c1"># Compute kNN context preservation score</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_knn_score">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_knn_score">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_knn_score">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_knn_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute kNN score (context preservation measure) by comparing kNN classifier accuracies</span>
@@ -982,7 +982,7 @@
 <span class="c1"># Compute quality measures for dimensionality reduction</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_quality_measures">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_quality_measures">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_quality_measures">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_quality_measures</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute quality measures for assessing the quality of dimensionality reduction.</span>
@@ -1148,7 +1148,7 @@
 <span class="c1"># Compute context measures (context preservation)</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="compute_context_measures">
-<a class="viewcode-back" href="../../api/dire_jax.hpmetrics.html#dire_jax.hpmetrics.compute_context_measures">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_context_measures">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_context_measures</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute measures of how well the embedding preserves the context of the data.</span>

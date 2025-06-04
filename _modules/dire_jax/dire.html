@@ -43,7 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">dire_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../benchmarking.html">Benchmarking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 </ul>
@@ -127,7 +127,7 @@
 <span class="c1"># Main class for Dimensionality Reduction</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="DiRe">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DiRe</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dimension Reduction (DiRe) is a class designed to reduce the dimensionality of high-dimensional</span>
@@ -216,7 +216,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="DiRe.__init__">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.__init__">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">dimension</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                  <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
@@ -312,7 +312,7 @@
     <span class="c1">#</span>
 
 <div class="viewcode-block" id="DiRe.find_ab_params">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.find_ab_params">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.find_ab_params">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">find_ab_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">spread</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Rational function approximation to the probabilistic t-kernel</span>
@@ -342,7 +342,7 @@
     <span class="c1">#</span>
 
 <div class="viewcode-block" id="DiRe.fit">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.fit">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.fit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fit the model to data: create the kNN graph and fit the probability kernel to force layout parameters.</span>
@@ -381,7 +381,7 @@
     <span class="c1">#</span>
 
 <div class="viewcode-block" id="DiRe.transform">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.transform">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.transform">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform the fitted data into a lower-dimensional layout.</span>
@@ -430,7 +430,7 @@
 
 
 <div class="viewcode-block" id="DiRe.fit_transform">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.fit_transform">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.fit_transform">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fit the model to data and transform it into a low-dimensional layout.</span>
@@ -469,7 +469,7 @@
     <span class="c1">#</span>
 
 <div class="viewcode-block" id="DiRe.make_knn_adjacency">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.make_knn_adjacency">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.make_knn_adjacency">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_knn_adjacency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Internal routine building the adjacency matrix for the kNN graph.</span>
@@ -552,7 +552,7 @@
     <span class="c1">#</span>
 
 <div class="viewcode-block" id="DiRe.do_pca_embedding">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.do_pca_embedding">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.do_pca_embedding">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">do_pca_embedding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize embedding using Principal Component Analysis (PCA).</span>
@@ -584,7 +584,7 @@
 
 
 <div class="viewcode-block" id="DiRe.do_spectral_embedding">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.do_spectral_embedding">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.do_spectral_embedding">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">do_spectral_embedding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize embedding using Spectral Embedding.</span>
@@ -631,7 +631,7 @@
 
 
 <div class="viewcode-block" id="DiRe.do_random_embedding">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.do_random_embedding">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.do_random_embedding">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">do_random_embedding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize embedding using Random Projection.</span>
@@ -668,7 +668,7 @@
     <span class="c1">#</span>
 
 <div class="viewcode-block" id="DiRe.do_rand_sampling">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.do_rand_sampling">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.do_rand_sampling">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">do_rand_sampling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">n_dirs</span><span class="p">,</span> <span class="n">neg_ratio</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sample points for force calculation using random projections.</span>
@@ -754,7 +754,7 @@
     <span class="c1">#</span>
 
 <div class="viewcode-block" id="DiRe.do_layout">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.do_layout">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.do_layout">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">do_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">large_dataset_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_cpu</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Optimize the layout using force-directed placement with JAX kernels.</span>
@@ -964,7 +964,7 @@
     <span class="c1">#</span>
 
 <div class="viewcode-block" id="DiRe.visualize">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.DiRe.visualize">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.DiRe.visualize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">visualize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.7</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate an interactive visualization of the data in the transformed space.</span>
@@ -1097,7 +1097,7 @@
 <span class="c1">#</span>
 
 <div class="viewcode-block" id="compute_forces_kernel">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.compute_forces_kernel">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.compute_forces_kernel">[docs]</a>
 <span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_forces_kernel</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1184,7 +1184,7 @@
 <span class="c1">#</span>
 
 <div class="viewcode-block" id="distribution_kernel">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.distribution_kernel">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.distribution_kernel">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">distribution_kernel</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1212,7 +1212,7 @@
 
 <span class="c1"># Helper functions for force calculations</span>
 <div class="viewcode-block" id="jax_coeff_att">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.jax_coeff_att">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.jax_coeff_att">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">jax_coeff_att</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;JAX-optimized attraction coefficient function.&quot;&quot;&quot;</span>
@@ -1221,7 +1221,7 @@
 
 
 <div class="viewcode-block" id="jax_coeff_rep">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.jax_coeff_rep">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.jax_coeff_rep">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">jax_coeff_rep</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;JAX-optimized repulsion coefficient function.&quot;&quot;&quot;</span>
@@ -1230,7 +1230,7 @@
 
 
 <div class="viewcode-block" id="rand_directions">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.rand_directions">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.rand_directions">[docs]</a>
 <span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">rand_directions</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1257,7 +1257,7 @@
 
 
 <div class="viewcode-block" id="get_slice">
-<a class="viewcode-back" href="../../api/dire_jax.dire.html#dire_jax.dire.get_slice">[docs]</a>
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.dire.get_slice">[docs]</a>
 <span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_slice</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
