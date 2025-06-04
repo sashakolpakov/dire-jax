@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; dire-jax 0.0.1 documentation</title>
+  <title>dire_jax &mdash; dire-jax 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -46,7 +46,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">dire_jax</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="dire_jax.html">dire_jax package</a></li>
 </ul>
 </li>
@@ -68,7 +68,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">API Reference</li>
+      <li class="breadcrumb-item active">dire_jax</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/modules.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -78,17 +78,158 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="api-reference">
-<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+  <section id="dire-jax">
+<h1>dire_jax<a class="headerlink" href="#dire-jax" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="dire_jax.html">dire_jax package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="dire_jax.html#module-contents">Module contents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dire_jax.html#submodules">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="dire_jax.dire.html">dire_jax.dire module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="dire_jax.hpindex.html">dire_jax.hpindex module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="dire_jax.dire_utils.html">dire_jax.dire_utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="dire_jax.hpmetrics.html">dire_jax.hpmetrics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dire_jax.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dire_jax.html#module-dire_jax.dire">dire_jax.dire module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe"><code class="docutils literal notranslate"><span class="pre">DiRe</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.dimension"><code class="docutils literal notranslate"><span class="pre">DiRe.dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.n_neighbors"><code class="docutils literal notranslate"><span class="pre">DiRe.n_neighbors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.init_embedding_type"><code class="docutils literal notranslate"><span class="pre">DiRe.init_embedding_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.sim_kernel"><code class="docutils literal notranslate"><span class="pre">DiRe.sim_kernel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.pca_kernel"><code class="docutils literal notranslate"><span class="pre">DiRe.pca_kernel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.max_iter_layout"><code class="docutils literal notranslate"><span class="pre">DiRe.max_iter_layout</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.min_dist"><code class="docutils literal notranslate"><span class="pre">DiRe.min_dist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.spread"><code class="docutils literal notranslate"><span class="pre">DiRe.spread</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.cutoff"><code class="docutils literal notranslate"><span class="pre">DiRe.cutoff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.n_sample_dirs"><code class="docutils literal notranslate"><span class="pre">DiRe.n_sample_dirs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.sample_size"><code class="docutils literal notranslate"><span class="pre">DiRe.sample_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.neg_ratio"><code class="docutils literal notranslate"><span class="pre">DiRe.neg_ratio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.logger"><code class="docutils literal notranslate"><span class="pre">DiRe.logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.verbose"><code class="docutils literal notranslate"><span class="pre">DiRe.verbose</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.memm"><code class="docutils literal notranslate"><span class="pre">DiRe.memm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.mpa"><code class="docutils literal notranslate"><span class="pre">DiRe.mpa</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.fit_transform"><code class="docutils literal notranslate"><span class="pre">DiRe.fit_transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.visualize"><code class="docutils literal notranslate"><span class="pre">DiRe.visualize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.__init__"><code class="docutils literal notranslate"><span class="pre">DiRe.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id0"><code class="docutils literal notranslate"><span class="pre">DiRe.dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id1"><code class="docutils literal notranslate"><span class="pre">DiRe.n_neighbors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id2"><code class="docutils literal notranslate"><span class="pre">DiRe.init_embedding_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id3"><code class="docutils literal notranslate"><span class="pre">DiRe.sim_kernel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id4"><code class="docutils literal notranslate"><span class="pre">DiRe.pca_kernel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id5"><code class="docutils literal notranslate"><span class="pre">DiRe.max_iter_layout</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id6"><code class="docutils literal notranslate"><span class="pre">DiRe.min_dist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id7"><code class="docutils literal notranslate"><span class="pre">DiRe.spread</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id8"><code class="docutils literal notranslate"><span class="pre">DiRe.cutoff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id9"><code class="docutils literal notranslate"><span class="pre">DiRe.n_sample_dirs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id10"><code class="docutils literal notranslate"><span class="pre">DiRe.sample_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id11"><code class="docutils literal notranslate"><span class="pre">DiRe.neg_ratio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id12"><code class="docutils literal notranslate"><span class="pre">DiRe.logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.find_ab_params"><code class="docutils literal notranslate"><span class="pre">DiRe.find_ab_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.fit"><code class="docutils literal notranslate"><span class="pre">DiRe.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.transform"><code class="docutils literal notranslate"><span class="pre">DiRe.transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id13"><code class="docutils literal notranslate"><span class="pre">DiRe.fit_transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.make_knn_adjacency"><code class="docutils literal notranslate"><span class="pre">DiRe.make_knn_adjacency()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.do_pca_embedding"><code class="docutils literal notranslate"><span class="pre">DiRe.do_pca_embedding()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.do_spectral_embedding"><code class="docutils literal notranslate"><span class="pre">DiRe.do_spectral_embedding()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.do_random_embedding"><code class="docutils literal notranslate"><span class="pre">DiRe.do_random_embedding()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.do_rand_sampling"><code class="docutils literal notranslate"><span class="pre">DiRe.do_rand_sampling()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.dire.DiRe.do_layout"><code class="docutils literal notranslate"><span class="pre">DiRe.do_layout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id14"><code class="docutils literal notranslate"><span class="pre">DiRe.visualize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire.compute_forces_kernel"><code class="docutils literal notranslate"><span class="pre">compute_forces_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire.distribution_kernel"><code class="docutils literal notranslate"><span class="pre">distribution_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire.jax_coeff_att"><code class="docutils literal notranslate"><span class="pre">jax_coeff_att()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire.jax_coeff_rep"><code class="docutils literal notranslate"><span class="pre">jax_coeff_rep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire.rand_directions"><code class="docutils literal notranslate"><span class="pre">rand_directions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire.get_slice"><code class="docutils literal notranslate"><span class="pre">get_slice()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dire_jax.html#module-dire_jax.dire_utils">dire_jax.dire_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire_utils.display_layout"><code class="docutils literal notranslate"><span class="pre">display_layout()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire_utils.do_local_analysis"><code class="docutils literal notranslate"><span class="pre">do_local_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire_utils.visualize_persistence_diagram"><code class="docutils literal notranslate"><span class="pre">visualize_persistence_diagram()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire_utils.do_persistence_analysis"><code class="docutils literal notranslate"><span class="pre">do_persistence_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire_utils.do_context_analysis"><code class="docutils literal notranslate"><span class="pre">do_context_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire_utils.block_timing"><code class="docutils literal notranslate"><span class="pre">block_timing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire_utils.viz_benchmark"><code class="docutils literal notranslate"><span class="pre">viz_benchmark()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire_utils.do_metrics"><code class="docutils literal notranslate"><span class="pre">do_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.dire_utils.run_benchmark"><code class="docutils literal notranslate"><span class="pre">run_benchmark()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dire_jax.html#module-dire_jax.hpindex">dire_jax.hpindex module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpindex.HPIndex"><code class="docutils literal notranslate"><span class="pre">HPIndex</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.hpindex.HPIndex.knn_tiled"><code class="docutils literal notranslate"><span class="pre">HPIndex.knn_tiled()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dire_jax.html#module-dire_jax.hpmetrics">dire_jax.hpmetrics module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.welford_update"><code class="docutils literal notranslate"><span class="pre">welford_update()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.welford_finalize"><code class="docutils literal notranslate"><span class="pre">welford_finalize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.welford"><code class="docutils literal notranslate"><span class="pre">welford()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.make_knn_graph"><code class="docutils literal notranslate"><span class="pre">make_knn_graph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_stress"><code class="docutils literal notranslate"><span class="pre">compute_stress()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_neighbor_score"><code class="docutils literal notranslate"><span class="pre">compute_neighbor_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_local_metrics"><code class="docutils literal notranslate"><span class="pre">compute_local_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.threshold_subsample"><code class="docutils literal notranslate"><span class="pre">threshold_subsample()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.diagrams"><code class="docutils literal notranslate"><span class="pre">diagrams()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.betti_curve"><code class="docutils literal notranslate"><span class="pre">betti_curve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_dtw"><code class="docutils literal notranslate"><span class="pre">compute_dtw()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_twed"><code class="docutils literal notranslate"><span class="pre">compute_twed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_emd"><code class="docutils literal notranslate"><span class="pre">compute_emd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_wasserstein"><code class="docutils literal notranslate"><span class="pre">compute_wasserstein()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_bottleneck"><code class="docutils literal notranslate"><span class="pre">compute_bottleneck()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_global_metrics"><code class="docutils literal notranslate"><span class="pre">compute_global_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_svm_accuracy"><code class="docutils literal notranslate"><span class="pre">compute_svm_accuracy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_svm_score"><code class="docutils literal notranslate"><span class="pre">compute_svm_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_knn_accuracy"><code class="docutils literal notranslate"><span class="pre">compute_knn_accuracy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_knn_score"><code class="docutils literal notranslate"><span class="pre">compute_knn_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_quality_measures"><code class="docutils literal notranslate"><span class="pre">compute_quality_measures()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.hpmetrics.compute_context_measures"><code class="docutils literal notranslate"><span class="pre">compute_context_measures()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dire_jax.html#module-dire_jax">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe"><code class="docutils literal notranslate"><span class="pre">DiRe</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.dimension"><code class="docutils literal notranslate"><span class="pre">DiRe.dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.n_neighbors"><code class="docutils literal notranslate"><span class="pre">DiRe.n_neighbors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.init_embedding_type"><code class="docutils literal notranslate"><span class="pre">DiRe.init_embedding_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.sim_kernel"><code class="docutils literal notranslate"><span class="pre">DiRe.sim_kernel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.pca_kernel"><code class="docutils literal notranslate"><span class="pre">DiRe.pca_kernel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.max_iter_layout"><code class="docutils literal notranslate"><span class="pre">DiRe.max_iter_layout</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.min_dist"><code class="docutils literal notranslate"><span class="pre">DiRe.min_dist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.spread"><code class="docutils literal notranslate"><span class="pre">DiRe.spread</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.cutoff"><code class="docutils literal notranslate"><span class="pre">DiRe.cutoff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.n_sample_dirs"><code class="docutils literal notranslate"><span class="pre">DiRe.n_sample_dirs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.sample_size"><code class="docutils literal notranslate"><span class="pre">DiRe.sample_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.neg_ratio"><code class="docutils literal notranslate"><span class="pre">DiRe.neg_ratio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.logger"><code class="docutils literal notranslate"><span class="pre">DiRe.logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.verbose"><code class="docutils literal notranslate"><span class="pre">DiRe.verbose</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.memm"><code class="docutils literal notranslate"><span class="pre">DiRe.memm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.mpa"><code class="docutils literal notranslate"><span class="pre">DiRe.mpa</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.fit_transform"><code class="docutils literal notranslate"><span class="pre">DiRe.fit_transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.visualize"><code class="docutils literal notranslate"><span class="pre">DiRe.visualize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.__init__"><code class="docutils literal notranslate"><span class="pre">DiRe.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.do_layout"><code class="docutils literal notranslate"><span class="pre">DiRe.do_layout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.do_pca_embedding"><code class="docutils literal notranslate"><span class="pre">DiRe.do_pca_embedding()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.do_rand_sampling"><code class="docutils literal notranslate"><span class="pre">DiRe.do_rand_sampling()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.do_random_embedding"><code class="docutils literal notranslate"><span class="pre">DiRe.do_random_embedding()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.do_spectral_embedding"><code class="docutils literal notranslate"><span class="pre">DiRe.do_spectral_embedding()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.find_ab_params"><code class="docutils literal notranslate"><span class="pre">DiRe.find_ab_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.fit"><code class="docutils literal notranslate"><span class="pre">DiRe.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id15"><code class="docutils literal notranslate"><span class="pre">DiRe.fit_transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.make_knn_adjacency"><code class="docutils literal notranslate"><span class="pre">DiRe.make_knn_adjacency()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#dire_jax.DiRe.transform"><code class="docutils literal notranslate"><span class="pre">DiRe.transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id16"><code class="docutils literal notranslate"><span class="pre">DiRe.visualize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id17"><code class="docutils literal notranslate"><span class="pre">DiRe.dimension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id18"><code class="docutils literal notranslate"><span class="pre">DiRe.n_neighbors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id19"><code class="docutils literal notranslate"><span class="pre">DiRe.init_embedding_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id20"><code class="docutils literal notranslate"><span class="pre">DiRe.sim_kernel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id21"><code class="docutils literal notranslate"><span class="pre">DiRe.pca_kernel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id22"><code class="docutils literal notranslate"><span class="pre">DiRe.max_iter_layout</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id23"><code class="docutils literal notranslate"><span class="pre">DiRe.min_dist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id24"><code class="docutils literal notranslate"><span class="pre">DiRe.spread</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id25"><code class="docutils literal notranslate"><span class="pre">DiRe.cutoff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id26"><code class="docutils literal notranslate"><span class="pre">DiRe.n_sample_dirs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id27"><code class="docutils literal notranslate"><span class="pre">DiRe.sample_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id28"><code class="docutils literal notranslate"><span class="pre">DiRe.neg_ratio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dire_jax.html#id29"><code class="docutils literal notranslate"><span class="pre">DiRe.logger</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

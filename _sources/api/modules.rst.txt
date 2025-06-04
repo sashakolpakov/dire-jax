@@ -1,5 +1,5 @@
-API Reference
-=============
+dire_jax
+========
 
 .. toctree::
    :maxdepth: 4

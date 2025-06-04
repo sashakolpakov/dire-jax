@@ -18,9 +18,7 @@
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="dire_jax.hpmetrics module" href="dire_jax.hpmetrics.html" />
-    <link rel="prev" title="dire_jax.hpindex module" href="dire_jax.hpindex.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,23 +41,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="dire_jax.html">dire_jax package</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="dire_jax.html#module-contents">Module contents</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="dire_jax.html#submodules">Submodules</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="dire_jax.dire.html">dire_jax.dire module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="dire_jax.hpindex.html">dire_jax.hpindex module</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">dire_jax.dire_utils module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="dire_jax.hpmetrics.html">dire_jax.hpmetrics module</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">dire_jax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../benchmarking.html">Benchmarking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
 </ul>
@@ -78,8 +63,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">API Reference</a></li>
-          <li class="breadcrumb-item"><a href="dire_jax.html">dire_jax package</a></li>
       <li class="breadcrumb-item active">dire_jax.dire_utils module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/dire_jax.dire_utils.rst.txt" rel="nofollow"> View page source</a>
@@ -92,15 +75,206 @@
              
   <section id="dire-jax-dire-utils-module">
 <h1>dire_jax.dire_utils module<a class="headerlink" href="#dire-jax-dire-utils-module" title="Link to this heading"></a></h1>
+<p>Utilities for plotting, benchmarking, and miscellany</p>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">display_layout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire_utils.html#display_layout"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a><em>) </em><em>Layout to display</em><em>, </em><em>must have dimension 2</em><em> or </em><em>3.</em>)</p></li>
+<li><p><strong>labels</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a><em>) </em><em>Labels to generate color and legend.</em>)</p></li>
+<li><p><strong>point_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Point size for plotting.</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Plot of the layout if the latter has dimension 2 or 3 (using Plotly Express).
+For higher-dimensional data no plot is provided, and the function returns <cite>None</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)">object</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">do_local_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire_utils.html#do_local_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a><em>) </em><em>High-dimensional data.</em>)</p></li>
+<li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a><em>) </em><em>Low-dimensional embedding.</em>)</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>neighbors in the kNN graph.</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Prints out the local metrics (embedding stress, neighborhood preservation score, etc.)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">visualize_persistence_diagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diagram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire_utils.html#visualize_persistence_diagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Create a visualization of a persistence diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>diagram</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>tuples</em>) – Persistence diagram represented as a list of (birth, death) tuples</p></li>
+<li><p><strong>dimension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Homology dimension of the diagram</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Title for the visualization</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Interactive visualization of the persistence diagram</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>plotly.graph_objects.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">do_persistence_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsample_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire_utils.html#do_persistence_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Perform a comprehensive persistence analysis by subsampling data, computing persistence diagrams, and
+calculating distances between Betti curves of high-dimensional and low-dimensional data. This analysis
+includes computing distances such as Dynamic Time Warp (DTW), Time Warp Edit Distance (TWED), and
+Earth Mover Distance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a>) – High-dimensional data.</p></li>
+<li><p><strong>layout</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a>) – Low-dimensional embedding.</p></li>
+<li><p><strong>dimension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The dimension up to which persistence diagrams are computed.</p></li>
+<li><p><strong>subsample_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The threshold used for subsampling the data points.</p></li>
+<li><p><strong>rng_key</strong> (<em>jax.random.PRNGKey</em>) – Random key used for generating random numbers for subsampling, ensuring reproducibility.</p></li>
+<li><p><strong>n_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – The number of steps or points in the filtration range for computing Betti curves, default 100.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>This function primarily visualizes results and prints metric values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">do_context_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsample_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng_key</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire_utils.html#do_context_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a><em>) </em><em>High-dimensional data.</em>)</p></li>
+<li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a><em>) </em><em>Low-dimensional embedding.</em>)</p></li>
+<li><p><strong>labels</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a><em>) </em><em>Data labels</em><em>, </em><em>required for context preservation analysis.</em>)</p></li>
+<li><p><strong>subsample_threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Subsample thresholds.</em>)</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors for the kNN graph</em><em> of </em><em>data.</em>)</p></li>
+<li><p><strong>rng_key</strong> (<em>Random key used for generating random numbers for subsampling</em><em>, </em><em>ensuring reproducibility.</em>)</p></li>
+<li><p><strong>kwargs</strong> (<em>Keyword arguments for kNN and SVM score procedure</em><em>, </em><em>and similar.</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>This function prints out context preservation measures.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">block_timing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire_utils.html#block_timing"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>float</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>elapsed runtime (in seconds) for a given block of code</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">viz_benchmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reducer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire_utils.html#viz_benchmark"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Run a benchmarking process for dimensionality reduction using provided reducer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reducer</strong> ((object) Dimensionality reduction model with a <cite>fit_transform</cite> method.) – It should also have an <cite>n_neighbors</cite> attribute for computing neighborhood scores.</p></li>
+<li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a><em>) </em><em>High-dimensional data to be reduced.</em>)</p></li>
+<li><p><strong>kwargs</strong> (Keyword arguments for benchmark’s metrics (such as <cite>labels</cite> if using labeled data, maximum <cite>dimension</cite> for) – persistence homology computation, threshold <cite>subsample_threshold</cite> for subsampling, etc.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>`None`</strong> – conducts persistence analysis, prints the embedding stress and neighborhood preservation score,
+and times the embedding process.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>This function does not return anything. It performs the embedding, displays the layout,</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">do_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reducer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire_utils.html#do_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Compute local and global metrics, and context preservation measures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reducer</strong> ((object) The dimensionality reduction model with a <cite>fit_transform</cite> method.) – It should also have an <cite>n_neighbors</cite> attribute for computing neighborhood scores.</p></li>
+<li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a><em>) </em><em>The high-dimensional data to be reduced.</em>)</p></li>
+<li><p><strong>kwargs</strong> (Keyword arguments to be passed to <cite>compute_local_metrics</cite>, <cite>compute_global_metrics</cite>,) – and <cite>compute_context_measures</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dict</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary of local and global metrics, and context preservation measures.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">run_benchmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reducer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire_utils.html#run_benchmark"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Benchmark a reducer on given data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reducer</strong> ((object) The dimensionality reduction model with a <cite>fit_transform</cite> method.) – It should also have an <cite>n_neighbors</cite> attribute for computing neighborhood scores.</p></li>
+<li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>numpy.ndarray</em></a><em>) </em><em>The high-dimensional data to be reduced as a benchmark.</em>)</p></li>
+<li><p><strong>num_trials</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>The number</em><em> of </em><em>runs to collect stats.</em>)</p></li>
+<li><p><strong>only_stats</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>) </em><em>If True</em><em>, </em><em>only the tuple</em><em> (</em><em>mean</em><em>, </em><em>std</em><em>) </em><em>for each metrics is returned.</em>) – If False, both stats and values for all runs are returned.</p></li>
+<li><p><strong>kwargs</strong> (<em>Keyword arguments to be passed to do_metrics.</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>dict</strong> (<em>If only_stats is True, a dictionary with stats of all metrics available.</em>)</p></li>
+<li><p><strong>dict, dict</strong> (<em>If only_stats is False, a dictionary with stats and a dictionary with the initial values of all metrics.</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="dire_jax.hpindex.html" class="btn btn-neutral float-left" title="dire_jax.hpindex module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="dire_jax.hpmetrics.html" class="btn btn-neutral float-right" title="dire_jax.hpmetrics module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

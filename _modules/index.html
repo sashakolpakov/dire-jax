@@ -3,10 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dire_jax.hpindex module &mdash; dire-jax 0.0.1 documentation</title>
+  <title>Overview: module code &mdash; dire-jax 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -44,7 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">dire_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">dire_jax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../benchmarking.html">Benchmarking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
 </ul>
@@ -63,9 +62,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">dire_jax.hpindex module</li>
+      <li class="breadcrumb-item active">Overview: module code</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/api/dire_jax.hpindex.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -73,42 +71,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="dire-jax-hpindex-module">
-<h1>dire_jax.hpindex module<a class="headerlink" href="#dire-jax-hpindex-module" title="Link to this heading"></a></h1>
-<p>A JAX-based implementation for efficient k-nearest neighbors.</p>
-<dl class="py class">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HPIndex</span></span><a class="reference internal" href="../_modules/dire_jax/hpindex.html#HPIndex"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>A kernelized kNN index that uses batching / tiling to efficiently handle
-large datasets with limited memory usage.</p>
-<dl class="py method">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">knn_tiled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k=5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_tile_size=8192</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_batch_size=1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'jax.numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/hpindex.html#HPIndex.knn_tiled"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Advanced implementation that tiles both database and query points.
-This wrapper handles the dynamic aspects before calling the JIT-compiled
-function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> – (n, d) array of database points</p></li>
-<li><p><strong>y</strong> – (m, d) array of query points</p></li>
-<li><p><strong>k</strong> – number of nearest neighbors</p></li>
-<li><p><strong>x_tile_size</strong> – size of database tiles</p></li>
-<li><p><strong>y_batch_size</strong> – size of query batches</p></li>
-<li><p><strong>dtype</strong> – desired floating-point dtype (e.g., jnp.float32 or jnp.float64)</p></li>
+  <h1>All modules for which code is available</h1>
+<ul><li><a href="dire_jax/dire.html">dire_jax.dire</a></li>
+<li><a href="dire_jax/dire_utils.html">dire_jax.dire_utils</a></li>
+<li><a href="dire_jax/hpindex.html">dire_jax.hpindex</a></li>
+<li><a href="dire_jax/hpmetrics.html">dire_jax.hpmetrics</a></li>
 </ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>(m, k) array of indices of nearest neighbors</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-
 
            </div>
           </div>

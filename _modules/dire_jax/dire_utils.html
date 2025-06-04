@@ -1,0 +1,642 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dire_jax.dire_utils &mdash; dire-jax 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            dire-jax
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">dire_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../benchmarking.html">Benchmarking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">dire-jax</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">dire_jax.dire_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dire_jax.dire_utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># dire_utils.py</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utilities for plotting, benchmarking, and miscellany</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1"># Imports</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">perf_counter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.express</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">px</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">random</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.hpmetrics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">compute_local_metrics</span><span class="p">,</span>
+                        <span class="n">compute_global_metrics</span><span class="p">,</span>
+                        <span class="n">compute_context_measures</span><span class="p">,</span>
+                        <span class="n">compute_quality_measures</span><span class="p">)</span>
+
+<span class="c1">#</span>
+<span class="c1"># Auxiliary functions for plotting, benchmarking, and miscellany</span>
+<span class="c1"># that are not included in other packages and classes</span>
+<span class="c1">#</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Display a given layout with labels and with given point size</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="display_layout">
+<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.display_layout">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">display_layout</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    layout: (numpy.ndarray) Layout to display, must have dimension 2 or 3.</span>
+<span class="sd">    labels: (numpy.ndarray) Labels to generate color and legend.</span>
+<span class="sd">    point_size: (int) Point size for plotting.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    object:</span>
+<span class="sd">        Plot of the layout if the latter has dimension 2 or 3 (using Plotly Express).</span>
+<span class="sd">        For higher-dimensional data no plot is provided, and the function returns `None`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="n">dimension</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1">#</span>
+    <span class="k">if</span> <span class="n">dimension</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+
+        <span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span>
+            <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;label&#39;</span><span class="p">,</span>
+                                <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Layout in dimension </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span>
+                                <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Layout in dimension </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">figure</span><span class="o">.</span><span class="n">update_traces</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">point_size</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">figure</span>
+    <span class="c1">#</span>
+    <span class="k">if</span> <span class="n">dimension</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+
+        <span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span>
+            <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter_3d</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;label&#39;</span><span class="p">,</span>
+                                   <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Layout in dimension </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter_3d</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="s1">&#39;z&#39;</span><span class="p">,</span>
+                                   <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Layout in dimension </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">figure</span><span class="o">.</span><span class="n">update_traces</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">point_size</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">figure</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Print out local metrics for a given high-dimensional data, low-dimensional layout pair</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="do_local_analysis">
+<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.do_local_analysis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">do_local_analysis</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: (numpy.ndarray) High-dimensional data.</span>
+<span class="sd">    layout: (numpy.ndarray) Low-dimensional embedding.</span>
+<span class="sd">    n_neighbors: (int) Number of neighbors in the kNN graph.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None: Prints out the local metrics (embedding stress, neighborhood preservation score, etc.)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Compute local metrics</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing kNN graphs and local metrics&quot;</span><span class="p">)</span>
+    <span class="n">local_metrics</span> <span class="o">=</span> <span class="n">compute_local_metrics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Printing local metrics</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Embedding stress (scaling adjusted): </span><span class="si">{</span><span class="n">local_metrics</span><span class="p">[</span><span class="s1">&#39;stress&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Neighborhood preservation score (mean, std): </span><span class="si">{</span><span class="n">local_metrics</span><span class="p">[</span><span class="s1">&#39;neighbor&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Create a plotly visualization of persistence diagrams</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="visualize_persistence_diagram">
+<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.visualize_persistence_diagram">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">visualize_persistence_diagram</span><span class="p">(</span><span class="n">diagram</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a visualization of a persistence diagram.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    diagram : list of tuples</span>
+<span class="sd">        Persistence diagram represented as a list of (birth, death) tuples</span>
+<span class="sd">    dimension : int</span>
+<span class="sd">        Homology dimension of the diagram</span>
+<span class="sd">    title : str</span>
+<span class="sd">        Title for the visualization</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    plotly.graph_objects.Figure</span>
+<span class="sd">        Interactive visualization of the persistence diagram</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Filter out points with infinite death time for visualization</span>
+    <span class="n">filtered_diagram</span> <span class="o">=</span> <span class="p">[(</span><span class="n">b</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">diagram</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">d</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">filtered_diagram</span><span class="p">:</span>  <span class="c1"># Handle empty diagrams</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Create dataframe for plotting</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">filtered_diagram</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;birth&#39;</span><span class="p">,</span> <span class="s1">&#39;death&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Calculate the persistence (death - birth) for each point</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;persistence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;death&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;birth&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Calculate the diagonal line range for reference</span>
+    <span class="n">max_value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;death&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;birth&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">1.05</span>
+    <span class="n">diagonal</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="p">],</span>
+        <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="p">]</span>
+    <span class="p">})</span>
+
+    <span class="c1"># Create the scatter plot</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">df</span><span class="p">,</span> 
+        <span class="n">x</span><span class="o">=</span><span class="s1">&#39;birth&#39;</span><span class="p">,</span> 
+        <span class="n">y</span><span class="o">=</span><span class="s1">&#39;death&#39;</span><span class="p">,</span> 
+        <span class="n">size</span><span class="o">=</span><span class="s1">&#39;persistence&#39;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;persistence&#39;</span><span class="p">,</span>
+        <span class="n">color_continuous_scale</span><span class="o">=</span><span class="s1">&#39;Viridis&#39;</span><span class="p">,</span>
+        <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">labels</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;birth&#39;</span><span class="p">:</span> <span class="s1">&#39;Birth&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;death&#39;</span><span class="p">:</span> <span class="s1">&#39;Death&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;persistence&#39;</span><span class="p">:</span> <span class="s1">&#39;Persistence&#39;</span>
+        <span class="p">},</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2"> (Dimension </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add the diagonal line</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">diagonal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">diagonal</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+        <span class="n">line</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dash&quot;</span><span class="p">:</span> <span class="s1">&#39;dash&#39;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s1">&#39;gray&#39;</span><span class="p">},</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Diagonal&#39;</span><span class="p">,</span>
+        <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Configure layout</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">xaxis_title</span><span class="o">=</span><span class="s1">&#39;Birth&#39;</span><span class="p">,</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="s1">&#39;Death&#39;</span><span class="p">,</span>
+        <span class="n">xaxis</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;range&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="p">]},</span>
+        <span class="n">yaxis</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;range&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="p">]},</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">600</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Do persistence analysis: compute persistence diagrams and Betti curves, and find various distances between them.</span>
+<span class="c1"># Visualise the Betti curves and persistence diagrams.</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="do_persistence_analysis">
+<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.do_persistence_analysis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">do_persistence_analysis</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform a comprehensive persistence analysis by subsampling data, computing persistence diagrams, and</span>
+<span class="sd">    calculating distances between Betti curves of high-dimensional and low-dimensional data. This analysis</span>
+<span class="sd">    includes computing distances such as Dynamic Time Warp (DTW), Time Warp Edit Distance (TWED), and</span>
+<span class="sd">    Earth Mover Distance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : numpy.ndarray</span>
+<span class="sd">        High-dimensional data.</span>
+<span class="sd">    layout : numpy.ndarray</span>
+<span class="sd">        Low-dimensional embedding.</span>
+<span class="sd">    dimension : int</span>
+<span class="sd">        The dimension up to which persistence diagrams are computed.</span>
+<span class="sd">    subsample_threshold : float</span>
+<span class="sd">        The threshold used for subsampling the data points.</span>
+<span class="sd">    rng_key : jax.random.PRNGKey</span>
+<span class="sd">        Random key used for generating random numbers for subsampling, ensuring reproducibility.</span>
+<span class="sd">    n_steps : int, optional</span>
+<span class="sd">        The number of steps or points in the filtration range for computing Betti curves, default 100.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">        This function primarily visualizes results and prints metric values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Computing persistence up to dimension </span><span class="si">{</span><span class="n">dimension</span><span class="si">}</span><span class="s2"> and global metrics&quot;</span><span class="p">)</span>
+    <span class="n">gdict</span> <span class="o">=</span> <span class="n">compute_global_metrics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                                   <span class="n">layout</span><span class="p">,</span>
+                                   <span class="n">dimension</span><span class="p">,</span>
+                                   <span class="n">subsample_threshold</span><span class="p">,</span>
+                                   <span class="n">rng_key</span><span class="p">,</span>
+                                   <span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">,</span>
+                                   <span class="n">metrics_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span>
+
+    <span class="n">global_metrics</span> <span class="o">=</span> <span class="n">gdict</span><span class="p">[</span><span class="s1">&#39;metrics&#39;</span><span class="p">]</span>
+    <span class="n">diags</span> <span class="o">=</span> <span class="n">gdict</span><span class="p">[</span><span class="s1">&#39;diags&#39;</span><span class="p">]</span>  <span class="c1"># Persistence diagrams</span>
+    <span class="n">bettis</span> <span class="o">=</span> <span class="n">gdict</span><span class="p">[</span><span class="s1">&#39;bettis&#39;</span><span class="p">]</span> <span class="c1"># Betti curves</span>
+
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimension</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Visualize persistence diagrams</span>
+        <span class="n">hd_diagram_fig</span> <span class="o">=</span> <span class="n">visualize_persistence_diagram</span><span class="p">(</span>
+            <span class="n">diags</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">dim</span><span class="p">],</span> 
+            <span class="n">dim</span><span class="p">,</span> 
+            <span class="s2">&quot;High-dimensional Data Persistence Diagram&quot;</span>
+        <span class="p">)</span>
+        <span class="n">ld_diagram_fig</span> <span class="o">=</span> <span class="n">visualize_persistence_diagram</span><span class="p">(</span>
+            <span class="n">diags</span><span class="p">[</span><span class="s1">&#39;layout&#39;</span><span class="p">][</span><span class="n">dim</span><span class="p">],</span> 
+            <span class="n">dim</span><span class="p">,</span> 
+            <span class="s2">&quot;Low-dimensional Layout Persistence Diagram&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">hd_diagram_fig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">hd_diagram_fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ld_diagram_fig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ld_diagram_fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="c1"># Extracting and visualizing Betti curves</span>
+        <span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span> <span class="o">=</span> <span class="n">bettis</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">dim</span><span class="p">]</span>
+        <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span> <span class="o">=</span> <span class="n">bettis</span><span class="p">[</span><span class="s1">&#39;layout&#39;</span><span class="p">][</span><span class="n">dim</span><span class="p">]</span>
+
+        <span class="c1"># Normalising Betti curves for plotting</span>
+        <span class="c1"># This ensures comparable scales regardless of filtration range</span>
+        <span class="n">axis_x_hd_</span><span class="p">,</span> <span class="n">axis_y_hd_</span> <span class="o">=</span> <span class="n">axis_x_hd</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">),</span> <span class="n">axis_y_hd</span>
+        <span class="n">axis_x_ld_</span><span class="p">,</span> <span class="n">axis_y_ld_</span> <span class="o">=</span> <span class="n">axis_x_ld</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis_x_ld</span><span class="p">),</span> <span class="n">axis_y_ld</span>
+
+        <span class="c1"># Plotting normalized Betti curves</span>
+        <span class="n">df_hd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">axis_x_hd_</span><span class="p">,</span>
+            <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">axis_y_hd_</span><span class="p">,</span>
+            <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Betti </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s1"> High-dimensional&#39;</span>
+        <span class="p">})</span>
+        <span class="n">df_ld</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">axis_x_ld_</span><span class="p">,</span>
+            <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">axis_y_ld_</span><span class="p">,</span>
+            <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Betti </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s1"> Low-dimensional&#39;</span>
+        <span class="p">})</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df_hd</span><span class="p">,</span> <span class="n">df_ld</span><span class="p">])</span>
+
+        <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span> 
+            <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> 
+            <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> 
+            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> 
+            <span class="n">labels</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="s1">&#39;Filtration Level&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;Rank&#39;</span><span class="p">},</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Betti </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s1"> High-dimensional vs Low-dimensional&#39;</span>
+        <span class="p">)</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="c1"># Printing global metrics</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Distance `DTW` for dimension </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">global_metrics</span><span class="p">[</span><span class="s1">&#39;dtw&#39;</span><span class="p">][</span><span class="n">dim</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Distance `TWED` for dimension </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">global_metrics</span><span class="p">[</span><span class="s1">&#39;twed&#39;</span><span class="p">][</span><span class="n">dim</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Distance `EMD` for dimension </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">global_metrics</span><span class="p">[</span><span class="s1">&#39;emd&#39;</span><span class="p">][</span><span class="n">dim</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Distance `Wasserstein` for dimension </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">global_metrics</span><span class="p">[</span><span class="s1">&#39;wass&#39;</span><span class="p">][</span><span class="n">dim</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Distance `bottleneck` for dimension </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">global_metrics</span><span class="p">[</span><span class="s1">&#39;bott&#39;</span><span class="p">][</span><span class="n">dim</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Do quality and context analysis</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="do_context_analysis">
+<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.do_context_analysis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">do_context_analysis</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: (numpy.ndarray) High-dimensional data.</span>
+<span class="sd">    layout: (numpy.ndarray) Low-dimensional embedding.</span>
+<span class="sd">    labels: (numpy.ndarray) Data labels, required for context preservation analysis.</span>
+<span class="sd">    subsample_threshold: (float) Subsample thresholds.</span>
+<span class="sd">    n_neighbors: (int) Number of nearest neighbors for the kNN graph of data.</span>
+<span class="sd">    rng_key: Random key used for generating random numbers for subsampling, ensuring reproducibility.</span>
+<span class="sd">    kwargs: Keyword arguments for kNN and SVM score procedure, and similar.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None: This function prints out context preservation measures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Context analysis needs labelled data&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing context measures&#39;</span><span class="p">)</span>
+    <span class="n">context_measures</span> <span class="o">=</span> <span class="n">compute_context_measures</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                                                <span class="n">layout</span><span class="p">,</span>
+                                                <span class="n">labels</span><span class="p">,</span>
+                                                <span class="n">subsample_threshold</span><span class="p">,</span>
+                                                <span class="n">n_neighbors</span><span class="p">,</span>
+                                                <span class="n">rng_key</span><span class="p">,</span>
+                                                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Context preservation score (SVM): </span><span class="si">{</span><span class="n">context_measures</span><span class="p">[</span><span class="s1">&#39;svm&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Context preservation score (kNN): </span><span class="si">{</span><span class="n">context_measures</span><span class="p">[</span><span class="s1">&#39;knn&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Timing a given block of code; adding the measurement to a given dictionary of metrics</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="block_timing">
+<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.block_timing">[docs]</a>
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">block_timing</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float: elapsed runtime (in seconds) for a given block of code</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">perf_counter</span><span class="p">()</span>
+    <span class="k">yield</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">perf_counter</span><span class="p">()</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Visualising a single benchmark on a given reducer with (data, labels)</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="viz_benchmark">
+<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.viz_benchmark">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">viz_benchmark</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run a benchmarking process for dimensionality reduction using provided reducer.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    reducer: (object) Dimensionality reduction model with a `fit_transform` method.</span>
+<span class="sd">                      It should also have an `n_neighbors` attribute for computing neighborhood scores.</span>
+<span class="sd">    data: (numpy.ndarray) High-dimensional data to be reduced.</span>
+<span class="sd">    kwargs: Keyword arguments for benchmark&#39;s metrics (such as `labels` if using labeled data, maximum `dimension` for</span>
+<span class="sd">            persistence homology computation, threshold `subsample_threshold` for subsampling, etc.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    `None`: This function does not return anything. It performs the embedding, displays the layout,</span>
+<span class="sd">            conducts persistence analysis, prints the embedding stress and neighborhood preservation score,</span>
+<span class="sd">            and times the embedding process.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">block_timing</span><span class="p">()</span> <span class="k">as</span> <span class="n">bt</span><span class="p">:</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Embedding time: </span><span class="si">{</span><span class="n">bt</span><span class="p">()</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> seconds&#39;</span><span class="p">)</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;labels&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">dimension</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;dimension&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">subsample_threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;subsample_threshold&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">rng_key</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;rng_key&#39;</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>
+    <span class="n">point_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;point_size&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;n_neighbors&#39;</span><span class="p">,</span> <span class="n">reducer</span><span class="o">.</span><span class="n">n_neighbors</span><span class="p">)</span>
+
+    <span class="n">display_layout</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span>
+                   <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">point_size</span><span class="o">=</span><span class="n">point_size</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">do_persistence_analysis</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                            <span class="n">layout</span><span class="p">,</span>
+                            <span class="n">dimension</span><span class="o">=</span><span class="n">dimension</span><span class="p">,</span>
+                            <span class="n">subsample_threshold</span><span class="o">=</span><span class="n">subsample_threshold</span><span class="p">,</span>
+                            <span class="n">rng_key</span><span class="o">=</span><span class="n">rng_key</span><span class="p">,</span>
+                            <span class="p">)</span>
+
+    <span class="n">do_local_analysis</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                      <span class="n">layout</span><span class="p">,</span>
+                      <span class="n">n_neighbors</span><span class="o">=</span><span class="n">n_neighbors</span><span class="p">,</span>
+                      <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">do_context_analysis</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                            <span class="n">layout</span><span class="p">,</span>
+                            <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+                            <span class="n">subsample_threshold</span><span class="o">=</span><span class="n">subsample_threshold</span><span class="p">,</span>
+                            <span class="n">n_neighbors</span><span class="o">=</span><span class="n">n_neighbors</span><span class="p">,</span>
+                            <span class="n">rng_key</span><span class="o">=</span><span class="n">rng_key</span><span class="p">,</span>
+                            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data has no labels: no context analysis performed&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Computing local and global metrics, and context preservation measures.</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="do_metrics">
+<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.do_metrics">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">do_metrics</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute local and global metrics, and context preservation measures.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    reducer: (object) The dimensionality reduction model with a `fit_transform` method.</span>
+<span class="sd">                      It should also have an `n_neighbors` attribute for computing neighborhood scores.</span>
+<span class="sd">    data: (numpy.ndarray) The high-dimensional data to be reduced.</span>
+<span class="sd">    kwargs: Keyword arguments to be passed to `compute_local_metrics`, `compute_global_metrics`,</span>
+<span class="sd">            and `compute_context_measures`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict: A dictionary of local and global metrics, and context preservation measures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mdict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">with</span> <span class="n">block_timing</span><span class="p">()</span> <span class="k">as</span> <span class="n">bt</span><span class="p">:</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">mdict</span><span class="p">[</span><span class="s1">&#39;timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bt</span><span class="p">()</span>
+
+    <span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;n_neighbors&#39;</span><span class="p">,</span> <span class="n">reducer</span><span class="o">.</span><span class="n">n_neighbors</span><span class="p">)</span>
+    <span class="n">ldict</span> <span class="o">=</span> <span class="n">compute_local_metrics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+    <span class="n">mdict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ldict</span><span class="p">)</span>
+
+    <span class="n">dimension</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;dimension&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">subsample_threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;subsample_threshold&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">rng_key</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;rng_key&#39;</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>
+    <span class="n">n_steps</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;n_steps&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">gdict</span> <span class="o">=</span> <span class="n">compute_global_metrics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                                   <span class="n">layout</span><span class="p">,</span>
+                                   <span class="n">dimension</span><span class="p">,</span>
+                                   <span class="n">subsample_threshold</span><span class="p">,</span>
+                                   <span class="n">rng_key</span><span class="p">,</span>
+                                   <span class="n">n_steps</span><span class="p">,</span>
+                                   <span class="n">metrics_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">mdict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">gdict</span><span class="p">[</span><span class="s1">&#39;metrics&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Add quality measures for the embedding</span>
+    <span class="n">qdict</span> <span class="o">=</span> <span class="n">compute_quality_measures</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">)</span>
+    <span class="n">mdict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">qdict</span><span class="p">)</span>
+
+    <span class="c1"># Add context measures if labels are provided</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;labels&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cdict</span> <span class="o">=</span> <span class="n">compute_context_measures</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                                         <span class="n">layout</span><span class="p">,</span>
+                                         <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+                                         <span class="n">subsample_threshold</span><span class="o">=</span><span class="n">subsample_threshold</span><span class="p">,</span>
+                                         <span class="n">n_neighbors</span><span class="o">=</span><span class="n">n_neighbors</span><span class="p">,</span>
+                                         <span class="n">rng_key</span><span class="o">=</span><span class="n">rng_key</span><span class="p">,</span>
+                                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">mdict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">cdict</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mdict</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Benchmark a reducer on given data</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="run_benchmark">
+<a class="viewcode-back" href="../../api/dire_jax.dire_utils.html#dire_jax.dire_utils.run_benchmark">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_benchmark</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">num_trials</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">only_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Benchmark a reducer on given data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    reducer: (object) The dimensionality reduction model with a `fit_transform` method.</span>
+<span class="sd">                      It should also have an `n_neighbors` attribute for computing neighborhood scores.</span>
+<span class="sd">    data: (numpy.ndarray) The high-dimensional data to be reduced as a benchmark.</span>
+<span class="sd">    num_trials: (int) The number of runs to collect stats.</span>
+<span class="sd">    only_stats: (bool) If True, only the tuple (mean, std) for each metrics is returned.</span>
+<span class="sd">                       If False, both stats and values for all runs are returned.</span>
+<span class="sd">    kwargs: Keyword arguments to be passed to do_metrics.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict: If only_stats is True, a dictionary with stats of all metrics available.</span>
+<span class="sd">    dict, dict: If only_stats is False, a dictionary with stats and a dictionary with the initial values of all metrics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">benchmark_vals</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">benchmark_stat</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">rng_key</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;rng_key&#39;</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">rng_key</span><span class="p">,</span> <span class="n">num_trials</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+
+        <span class="n">mdict</span> <span class="o">=</span> <span class="n">do_metrics</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">rng_key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">mdict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">benchmark_vals</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="n">benchmark_vals</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">mean_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">std_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">benchmark_stat</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mean_vals</span><span class="p">,</span> <span class="n">std_vals</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">only_stats</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">benchmark_stat</span>
+    <span class="k">return</span> <span class="n">benchmark_stat</span><span class="p">,</span> <span class="n">benchmark_vals</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alexander Kolpakov, Igor Rivin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
