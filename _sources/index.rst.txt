@@ -1,4 +1,4 @@
-Welcome to dire-jax's documentation!
+Welcome to DiRe-JAX's documentation!
 ====================================
 
 .. image:: https://img.shields.io/badge/View-PDF-red?logo=adobe
