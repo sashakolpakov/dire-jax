@@ -3,6 +3,16 @@ API Reference
 
 DiRe-JAX is a high-performance dimensionality reduction library built on JAX, designed for efficient processing of large-scale, high-dimensional datasets.
 
+DiRe JAX Overview
+-----------------
+
+.. automodule:: dire_jax
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :noindex:
+
+
 Core Components
 ---------------
 
@@ -37,15 +47,6 @@ Performance Metrics
 ~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: dire_jax.hpmetrics
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :noindex:
-
-Package Overview
-----------------
-
-.. automodule:: dire_jax
    :members:
    :undoc-members:
    :show-inheritance:
