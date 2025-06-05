@@ -53,7 +53,7 @@ If you've installed DiRe-JAX with the `[utils]` extra, you can use the benchmark
 .. code-block:: python
 
     from dire_jax import DiRe
-    from dire_jax.dire_utils import benchmark_reducer, display_layout
+    from dire_jax.dire_utils import run_benchmark, viz_benchmark
     from sklearn.datasets import make_blobs
     
     # Create data
@@ -62,8 +62,24 @@ If you've installed DiRe-JAX with the `[utils]` extra, you can use the benchmark
     # Initialize reducer
     reducer = DiRe(dimension=2, n_neighbors=15)
     
-    # Run benchmark
-    benchmark_results = benchmark_reducer(reducer, features, labels)
+    # Then either run the benchmark ...
+    benchmark_results = run_benchmark(reducer,
+				      features,
+                          	      labels=labels,
+                          	      dimension=1, # for persistence homology
+                             	      subsample_threshold=0.1, # subsample for speed
+                          	      rng_key=random.PRNGKey(42),
+                          	      num_trials=1, # choose sample size
+                          	      only_stats=True,)
     
-    # Print results
+    # and print the results ... 
     print(benchmark_results)
+
+    # ... or visualize the benchmark ...
+    viz_benchmark(reducer,
+                  features,
+                  labels=labels,
+                  dimension=1, # for persistence homology
+                  subsample_threshold=0.1, # subsample for speed
+                  rng_key=random.PRNGKey(42),
+                  point_size=2)

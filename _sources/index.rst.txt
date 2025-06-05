@@ -35,8 +35,6 @@ Example Usage
 .. code-block:: python
 
     from dire_jax import DiRe
-    from dire_jax.dire_utils import display_layout
-    
     from sklearn.datasets import make_blobs
     
     n_samples  = 100_000
