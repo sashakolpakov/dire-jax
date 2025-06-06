@@ -160,8 +160,8 @@ tuned by `min_dist` $= \delta$ and `spread` $= \sigma$ so that:
 
 Attraction forces apply to kNN neighbors in $\Gamma$, while all other pairs experience repulsion. Layout iterations run until a preset number of steps is reached.
 
-# Code availaility
-The DiRe - JAX workflow is available on [GitHub](https://github.com/sashakolpakov/dire-jax). An installable package is available on [PyPI](https://pypi.org/project/dire-jax/). 
+# Code availability
+The DiRe - JAX repository is available on [GitHub](https://github.com/sashakolpakov/dire-jax). An installable package is available on [PyPI](https://pypi.org/project/dire-jax/). 
 
 # Whitepaper
 The DiRe - JAX whitepaper is available on the [arXiv](https://arxiv.org/abs/2503.03156) preprint server.
