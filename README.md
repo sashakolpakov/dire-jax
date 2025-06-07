@@ -1,18 +1,8 @@
 # DiRe - JAX
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![PyPI](https://img.shields.io/pypi/v/dire-jax.svg)](https://pypi.org/project/dire-jax/)
+[![status](https://joss.theoj.org/papers/65406329a65d9f2dadae8b66a1c7f9ad/status.svg)](https://joss.theoj.org/papers/65406329a65d9f2dadae8b66a1c7f9ad)
 
-
-<!-- CI status from GitHub Actions -->
-[![CI](https://img.shields.io/github/actions/workflow/status/sashakolpakov/dire-jax/pylint.yml?branch=main&label=CI&logo=github)](https://github.com/sashakolpakov/dire-jax/actions/workflows/pylint.yml) <!-- Docs status from GitHub Actions -->
-[![Docs](https://img.shields.io/github/actions/workflow/status/sashakolpakov/dire-jax/deploy_docs.yml?branch=main&label=Docs&logo=github)](https://github.com/sashakolpakov/dire-jax/actions/workflows/deploy_docs.yml) <!-- Docs health via HTTP ping -->
-[![Docs](https://img.shields.io/website-up-down-green-red/https/sashakolpakov.github.io/dire-jax?label=API%20Documentation)](https://sashakolpakov.github.io/dire-jax/)
-
-
-
-
+## This is a designated branch for JOSS review only. No new commits will be pushed into it unless they are JOSS-related. 
 
 
 ### A new DImensionality REduction package written in JAX 
@@ -78,7 +68,7 @@ reducer_blobs.visualize(labels=labels_blobs, point_size=4)
 
 The output should look similar to
 
-![12 blobs with 100k points in 1k dimensions embedded in dimension 2](images/blobs_layout.png)
+![12 blobs with 100k points in 1k dimensions embedded in dimension 2](pics/blobs_layout.png)
 
 ### Documentation 
 
@@ -91,6 +81,7 @@ Our working paper is available on the arXiv. [![Paper](https://img.shields.io/ba
  Also, check out the Jupyter notebook with benchmarking results. [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](
   https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/tests/dire_benchmarks.ipynb
 )
+
 
 
 ### Benchmarking and utilities
