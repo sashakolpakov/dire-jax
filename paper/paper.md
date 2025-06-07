@@ -167,6 +167,6 @@ The DiRe - JAX repository is available on [GitHub](https://github.com/sashakolpa
 The DiRe - JAX whitepaper is available on the [arXiv](https://arxiv.org/abs/2503.03156) preprint server.
 
 # Acknowledgements
-The authors would like to thank @Treys925 (Trey Smith, University of Michigan, Ann Arbor), @crhea93 (Carter Lee Rhea, Université de Montréal), and @lmcinnes (Leland McInnes, Tutte Institute for Mathematics and Computing) for their helpful comments and suggestions. This work is supported by the Google Cloud Research Award number GCP19980904.
+The authors would like to thank [@Treys925](https://github.com/Treys925) (Trey Smith, University of Michigan, Ann Arbor), [@crhea93](https://github.com/crhea93) (Carter Lee Rhea, Université de Montréal), and [@lmcinnes](https://github.com/lmcinnes) (Leland McInnes, Tutte Institute for Mathematics and Computing) for their helpful comments and suggestions. This work is supported by the Google Cloud Research Award number GCP19980904.
 
 # References
