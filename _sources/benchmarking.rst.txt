@@ -21,6 +21,7 @@ The `dire_utils` module provides functions for benchmarking:
 .. code-block:: python
 
     from dire_jax.dire_utils import run_benchmark, viz_benchmark
+    from jax import random
 
     # Run a single benchmark or a larger sample
     results = run_benchmark(reducer,

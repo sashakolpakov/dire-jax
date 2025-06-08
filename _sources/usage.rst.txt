@@ -19,7 +19,7 @@ DiRe-JAX provides a high-performance dimensionality reduction tool based on JAX.
         dimension=2,            # Target dimension
         n_neighbors=15,         # Number of neighbors to consider
         init_embedding_type='pca',  # Initialization method
-        max_iter_layout=100,    # Maximum number of layout iterations
+        max_iter_layout=128,    # Maximum number of layout iterations
         verbose=True            # Show progress
     )
     
@@ -55,6 +55,7 @@ If you've installed DiRe-JAX with the `[utils]` extra, you can use the benchmark
     from dire_jax import DiRe
     from dire_jax.dire_utils import run_benchmark, viz_benchmark
     from sklearn.datasets import make_blobs
+    from jax import random
     
     # Create data
     features, labels = make_blobs(n_samples=10000, n_features=100, centers=5, random_state=42)

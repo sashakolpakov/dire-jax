@@ -97,6 +97,7 @@
 <h2>Benchmarking Functions<a class="headerlink" href="#benchmarking-functions" title="Link to this heading"></a></h2>
 <p>The <cite>dire_utils</cite> module provides functions for benchmarking:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax.dire_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_benchmark</span><span class="p">,</span> <span class="n">viz_benchmark</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">random</span>
 
 <span class="c1"># Run a single benchmark or a larger sample</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">run_benchmark</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span>
