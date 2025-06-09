@@ -28,7 +28,7 @@ bibliography: paper.bib
 
 # Summary
 
-DiRe - JAX is a new dimensionality reduction toolkit designed to address some of the challenges faced by traditional methods like UMAP and tSNE 
+DiRe - JAX is a new dimensionality reduction toolkit designed to address some of the challenges faced by traditional methods like UMAP and tSNE, 
 such as loss of global structure and computational efficiency. Built on the JAX framework, DiRe leverages modern hardware acceleration to provide 
 an efficient, scalable, and interpretable solution for visualizing complex data structures and for quantitative analysis of lower-dimensional embeddings. 
 The toolkit shows considerable promise in preserving both local and global structures within the data as compared to state-of-the-art UMAP and tSNE implementations. 
@@ -54,7 +54,7 @@ This makes DiRe-JAX an essential toolkit for researchers and practitioners worki
 
 # Benchmarks
 
-A few benchmark below provide some visuals regarding the global structure changes or preservation by various methods, such as 
+A few benchmark below provide some visuals regarding the global structure changes or preservation by various methods, such as: 
 
 ## Dataset: Disk Uniform
 
