@@ -139,7 +139,7 @@ $$
 d_b(D(X), D(X_k)) \le \lVert \widehat{X} - X \rVert_F = \varepsilon \lVert X \rVert_F.
 $$
 
-Thus, PCA approximately preserves topological features up to controlled error.
+Thus, PCA approximately preserves topological features up to a controlled relative error $\varepsilon > 0$.
 
 ## Spectral Laplacian embedding
 
@@ -147,10 +147,10 @@ Using the kNN graph $\Gamma$ of $X$, construct the graph Laplacian (optionally w
 
 ## Force-directed layout
 
-After obtaining an initial embedding $Y$, DiRe--JAX applies an iterative force-directed layout to align $Y$’s local structure with that of $X$. Attraction and repulsion forces are modeled after tSNE and UMAP kernels:
+After obtaining an initial embedding $Y$, DiRe--JAX applies an iterative force-directed layout to align $Y$’s local structure with that of $X$. Attraction and repulsion forces are modeled after tSNE and UMAP kernels
 
 $$
-\varphi(x) = \frac{1}{1 + a \lVert x \rVert^{2b}},
+\varphi(x) = \frac{1}{1 + a \lVert x \rVert^{2b}}, \text{ with } a, b > 0,
 $$
 
 tuned by `min_dist` $= \delta$ and `spread` $= \sigma$ so that:
