@@ -89,31 +89,30 @@
 <span class="c1"># Imports</span>
 <span class="c1">#</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">random</span><span class="w"> </span><span class="kn">import</span> <span class="n">randint</span>
 
 <span class="c1"># JAX-related imports</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span><span class="p">,</span> <span class="n">lax</span><span class="p">,</span> <span class="n">vmap</span><span class="p">,</span> <span class="n">random</span><span class="p">,</span> <span class="n">device_put</span><span class="p">,</span> <span class="n">device_get</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-
 <span class="c1"># Scientific and numerical libraries</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.csgraph</span><span class="w"> </span><span class="kn">import</span> <span class="n">laplacian</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">curve_fit</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">csr_matrix</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">eigsh</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCA</span><span class="p">,</span> <span class="n">KernelPCA</span>
-
 <span class="c1"># Data structures and visualization</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">plotly.express</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">px</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">device_get</span><span class="p">,</span> <span class="n">device_put</span><span class="p">,</span> <span class="n">jit</span><span class="p">,</span> <span class="n">lax</span><span class="p">,</span> <span class="n">random</span><span class="p">,</span> <span class="n">vmap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">curve_fit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">csr_matrix</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.csgraph</span><span class="w"> </span><span class="kn">import</span> <span class="n">laplacian</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">eigsh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransformerMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCA</span><span class="p">,</span> <span class="n">KernelPCA</span>
 <span class="c1"># Utilities</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
 
 <span class="c1"># Nearest neighbor search</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.hpindex</span><span class="w"> </span><span class="kn">import</span> <span class="n">HPIndex</span>
@@ -123,12 +122,13 @@
 <span class="c1">#</span>
 <span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
+
 <span class="c1">#</span>
 <span class="c1"># Main class for Dimensionality Reduction</span>
 <span class="c1">#</span>
 <div class="viewcode-block" id="DiRe">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.DiRe">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DiRe</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DiRe</span><span class="p">(</span><span class="n">TransformerMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dimension Reduction (DiRe) is a class designed to reduce the dimensionality of high-dimensional</span>
 <span class="sd">    data using various embedding techniques and optimization algorithms. It supports embedding</span>
@@ -137,9 +137,9 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    dimension: (int) Embedding dimension, default 2.</span>
+<span class="sd">    n_components: (int) Embedding dimension, default 2.</span>
 <span class="sd">    n_neighbors: (int) Number of nearest neighbors to consider for each point, default 16.</span>
-<span class="sd">    init_embedding_type: (str)</span>
+<span class="sd">    init: (str)</span>
 <span class="sd">        Method to initialize the embedding; choices are:</span>
 <span class="sd">         - &#39;random&#39; for random projection based on the Johnson-Lindenstrauss lemma;</span>
 <span class="sd">         - &#39;spectral&#39; for spectral embedding (with sim_kernel as similarity kernel);</span>
@@ -167,19 +167,21 @@
 <span class="sd">        Custom logger for logging events; if None, a default logger is created, default `None`.</span>
 <span class="sd">    verbose: (bool)</span>
 <span class="sd">        Flag to enable verbose output, default `True`.</span>
+<span class="sd">    random_state: (int)</span>
+<span class="sd">        Random seed to make stochastic computations reproducible.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    dimension: int</span>
+<span class="sd">    n_components: int</span>
 <span class="sd">        Target dimensionality of the output space.</span>
 <span class="sd">    n_neighbors: int</span>
 <span class="sd">        Number of neighbors to consider in the k-nearest neighbors graph.</span>
-<span class="sd">    init_embedding_type: str</span>
+<span class="sd">    init: str</span>
 <span class="sd">        Chosen method for initial embedding.</span>
 <span class="sd">    sim_kernel: callable</span>
-<span class="sd">        Similarity kernel function to be used if &#39;init_embedding_type&#39; is &#39;spectral&#39;, by default `None`.</span>
+<span class="sd">        Similarity kernel function to be used if &#39;init&#39; is &#39;spectral&#39;, by default `None`.</span>
 <span class="sd">    pca_kernel: callable</span>
-<span class="sd">        Kernel function to be used if &#39;init_embedding_type&#39; is &#39;pca&#39;, by default `None`.</span>
+<span class="sd">        Kernel function to be used if &#39;init&#39; is &#39;pca&#39;, by default `None`.</span>
 <span class="sd">    max_iter_layout: int</span>
 <span class="sd">        Maximum iterations for optimizing the layout.</span>
 <span class="sd">    min_dist: float</span>
@@ -192,6 +194,9 @@
 <span class="sd">        Number of random directions sampled.</span>
 <span class="sd">    sample_size: int or &#39;auto&#39;</span>
 <span class="sd">        Number of samples per random direction, unless chosen automatically with &#39;auto&#39;.</span>
+<span class="sd">    batch_size : int or None, optional</span>
+<span class="sd">        Number of samples to process at once. If None, a suitable value</span>
+<span class="sd">        will be automatically determined based on dataset size.</span>
 <span class="sd">    neg_ratio: int</span>
 <span class="sd">        Ratio of negative to positive samples in the sampling process.</span>
 <span class="sd">    logger: logger.Logger or `None`</span>
@@ -217,33 +222,37 @@
 
 <div class="viewcode-block" id="DiRe.__init__">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.DiRe.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">dimension</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                 <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-                 <span class="n">init_embedding_type</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span>
-                 <span class="n">sim_kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">pca_kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
-                 <span class="n">min_dist</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
-                 <span class="n">spread</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-                 <span class="n">cutoff</span><span class="o">=</span><span class="mf">42.0</span><span class="p">,</span>
-                 <span class="n">n_sample_dirs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-                 <span class="n">sample_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-                 <span class="n">neg_ratio</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-                 <span class="n">my_logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                 <span class="n">memm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">mpa</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+        <span class="n">init</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
+        <span class="n">sim_kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">pca_kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+        <span class="n">min_dist</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+        <span class="n">spread</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">cutoff</span><span class="o">=</span><span class="mf">42.0</span><span class="p">,</span>
+        <span class="n">n_sample_dirs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="n">sample_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">neg_ratio</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="n">my_logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">memm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">mpa</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Class constructor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">#</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Embedding dimension &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">n_neighbors</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Number of neighbors for kNN computations&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">init_embedding_type</span> <span class="o">=</span> <span class="n">init_embedding_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">init</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Type of the initial embedding (PCA, random, spectral) &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sim_kernel</span> <span class="o">=</span> <span class="n">sim_kernel</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Similarity kernel &quot;&quot;&quot;</span>
@@ -291,10 +300,12 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Column indices for nearest neighbors &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_adjacency</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; kNN adjacency matrix &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
         <span class="c1">#</span>
         <span class="k">if</span> <span class="n">my_logger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
-            <span class="n">sink</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="k">if</span> <span class="n">verbose</span> <span class="k">else</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+            <span class="n">sink</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="k">if</span> <span class="n">verbose</span> <span class="k">else</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sink</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot; System logger &quot;&quot;&quot;</span>
@@ -302,7 +313,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">my_logger</span>
         <span class="c1"># Memory manager to be adjusted for each particular type of hardware</span>
         <span class="c1"># Below are some minimalist settings that may give less than satisfactory performance</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">memm</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;gpu&#39;</span><span class="p">:</span> <span class="mi">16384</span><span class="p">,</span> <span class="s1">&#39;tpu&#39;</span><span class="p">:</span> <span class="mi">8192</span><span class="p">,</span> <span class="s1">&#39;other&#39;</span><span class="p">:</span> <span class="mi">8192</span><span class="p">}</span> <span class="k">if</span> <span class="n">memm</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">memm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memm</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="mi">16384</span><span class="p">,</span> <span class="s2">&quot;tpu&quot;</span><span class="p">:</span> <span class="mi">8192</span><span class="p">,</span> <span class="s2">&quot;other&quot;</span><span class="p">:</span> <span class="mi">8192</span><span class="p">}</span> <span class="k">if</span> <span class="n">memm</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">memm</span>
         <span class="c1"># Using Mixed Precision Arithmetic flag (True = MPA, False = no MPA)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="o">=</span> <span class="n">mpa</span></div>
 
@@ -319,7 +330,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">#</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;find_ab_params ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;find_ab_params ...&quot;</span><span class="p">)</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">curve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
             <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>
@@ -331,8 +342,8 @@
         <span class="n">yv</span><span class="p">[</span><span class="n">xv</span> <span class="o">&gt;=</span> <span class="n">min_dist</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">xv</span><span class="p">[</span><span class="n">xv</span> <span class="o">&gt;=</span> <span class="n">min_dist</span><span class="p">]</span> <span class="o">-</span> <span class="n">min_dist</span><span class="p">)</span> <span class="o">/</span> <span class="n">spread</span><span class="p">)</span>
         <span class="n">params</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">)</span>
         <span class="c1">#</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;a = </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">, b = </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;find_ab_params done ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;a = </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, b = </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;find_ab_params done ...&quot;</span><span class="p">)</span>
         <span class="c1">#</span>
         <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 
@@ -343,125 +354,94 @@
 
 <div class="viewcode-block" id="DiRe.fit">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.DiRe.fit">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fit the model to data: create the kNN graph and fit the probability kernel to force layout parameters.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        data: (numpy.ndarray)</span>
+<span class="sd">        X: (numpy.ndarray)</span>
 <span class="sd">            High-dimensional data to fit the model. Shape (n_samples, n_features).</span>
+<span class="sd">        y: None</span>
+<span class="sd">            Ignored, exists for sklearn compatibility.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        self: The DiRe instance fitted to data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
+
+<div class="viewcode-block" id="DiRe.fit_transform">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.DiRe.fit_transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit the model to data and transform it into a low-dimensional layout.</span>
+
+<span class="sd">        This is a convenience method that combines the fitting and transformation</span>
+<span class="sd">        steps. It first builds the kNN graph and then creates the optimized</span>
+<span class="sd">        layout in a single operation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X: numpy.ndarray</span>
+<span class="sd">            High-dimensional data to fit and transform.</span>
+<span class="sd">            Shape (n_samples, n_features)</span>
+<span class="sd">        y: None</span>
+<span class="sd">            Ignored, exists for sklearn API compatibility.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            The lower-dimensional embedding of the data.</span>
+<span class="sd">            Shape (n_samples, dimension)</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This method is more memory-efficient than calling fit() and transform()</span>
+<span class="sd">        separately, as it avoids storing intermediate results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fit ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;fit ...&quot;</span><span class="p">)</span>
         <span class="c1">#</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">X</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dimension </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_dim</span><span class="si">}</span><span class="s1">, number of samples </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Dimension </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_dim</span><span class="si">}</span><span class="s2">, number of samples </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">make_knn_adjacency</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_knn_adjacency</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_ab_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spread</span><span class="p">)</span>
         <span class="c1">#</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fit done ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;fit done ...&quot;</span><span class="p">)</span>
         <span class="c1">#</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-
-    <span class="c1">#</span>
-    <span class="c1"># Transform fitted data into lower-dimensional representation</span>
-    <span class="c1">#</span>
-
-<div class="viewcode-block" id="DiRe.transform">
-<a class="viewcode-back" href="../../api/modules.html#dire_jax.DiRe.transform">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Transform the fitted data into a lower-dimensional layout.</span>
-<span class="sd">        </span>
-<span class="sd">        This method applies the selected embedding initialization technique</span>
-<span class="sd">        to the data that has already been fitted (creating the kNN graph), </span>
-<span class="sd">        and then optimizes the layout using force-directed placement.</span>
-<span class="sd">        </span>
-<span class="sd">        The transformation process involves:</span>
-
-<span class="sd">        1. Creating an initial embedding using the specified method</span>
-<span class="sd">           (random projection, PCA, or spectral embedding)</span>
-<span class="sd">        2. Optimizing the layout with attractive and repulsive forces</span>
-<span class="sd">        </span>
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        numpy.ndarray</span>
-<span class="sd">            The lower-dimensional data embedding with shape (n_samples, dimension).</span>
-<span class="sd">            Points are arranged to preserve the local structure of the original data.</span>
-<span class="sd">            </span>
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ValueError</span>
-<span class="sd">            If an unsupported embedding initialization method is specified.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;transform ...&#39;</span><span class="p">)</span>
+        <span class="c1"># Store the data and perform fitting (build kNN graph)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;transform ...&quot;</span><span class="p">)</span>
 
         <span class="c1"># Create initial embedding based on specified initialization method</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_embedding_type</span> <span class="o">==</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">do_random_embedding</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_embedding_type</span> <span class="o">==</span> <span class="s1">&#39;spectral&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span> <span class="o">==</span> <span class="s2">&quot;spectral&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">do_spectral_embedding</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_embedding_type</span> <span class="o">==</span> <span class="s1">&#39;pca&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span> <span class="o">==</span> <span class="s2">&quot;pca&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">do_pca_embedding</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">error_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Unsupported embedding method: &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">init_embedding_type</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Unsupported embedding method: &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
 
         <span class="c1"># Optimize the layout using force-directed placement</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do_layout</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;transform done ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;transform done ...&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span></div>
-
-
-<div class="viewcode-block" id="DiRe.fit_transform">
-<a class="viewcode-back" href="../../api/modules.html#dire_jax.DiRe.fit_transform">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Fit the model to data and transform it into a low-dimensional layout.</span>
-<span class="sd">        </span>
-<span class="sd">        This is a convenience method that combines the fitting and transformation</span>
-<span class="sd">        steps. It first builds the kNN graph and then creates the optimized</span>
-<span class="sd">        layout in a single operation.</span>
-<span class="sd">        </span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        data : numpy.ndarray</span>
-<span class="sd">            High-dimensional data to fit and transform.</span>
-<span class="sd">            Shape (n_samples, n_features)</span>
-<span class="sd">            </span>
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        numpy.ndarray</span>
-<span class="sd">            The lower-dimensional embedding of the data.</span>
-<span class="sd">            Shape (n_samples, dimension)</span>
-<span class="sd">            </span>
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        This method is more memory-efficient than calling fit() and transform()</span>
-<span class="sd">        separately, as it avoids storing intermediate results.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Store the data and perform fitting (build kNN graph)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
-
-        <span class="c1"># Transform the data (create initial embedding and optimize layout)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">()</span></div>
 
 
     <span class="c1">#</span>
@@ -493,7 +473,7 @@
 <span class="sd">        - row_idx, col_idx: Indices for constructing the sparse adjacency matrix</span>
 <span class="sd">        - adjacency: Sparse adjacency matrix of the kNN graph</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;make_knn_adjacency ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;make_knn_adjacency ...&quot;</span><span class="p">)</span>
 
         <span class="c1"># Ensure data is in the right format for HPIndex</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
@@ -502,22 +482,36 @@
         <span class="c1"># Determine appropriate batch size for memory efficiency</span>
         <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Process in chunks to reduce peak memory usage</span>
-            <span class="k">if</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;tpu&#39;</span><span class="p">:</span>
-                <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s1">&#39;tpu&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;gpu&#39;</span><span class="p">:</span>
-                <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s1">&#39;gpu&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;tpu&quot;</span><span class="p">:</span>
+                <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s2">&quot;tpu&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+                <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s1">&#39;other&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
+                <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s2">&quot;other&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Using batch size: </span><span class="si">{</span><span class="n">batch_size</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[KNN] Using precision: </span><span class="si">{</span><span class="s1">&#39;float32&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;float64&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using batch size: </span><span class="si">{</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;[KNN] Using precision: </span><span class="si">{</span><span class="s1">&#39;float32&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;float64&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">knn_tiled</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+                <span class="n">n_neighbors</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">knn_tiled</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+                <span class="n">n_neighbors</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># Wait until ready</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="o">.</span><span class="n">block_until_ready</span><span class="p">()</span>
@@ -538,13 +532,13 @@
         <span class="n">data_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_np</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_adjacency</span> <span class="o">=</span> <span class="n">csr_matrix</span><span class="p">(</span>
             <span class="p">(</span><span class="n">data_values</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_row_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_col_idx</span><span class="p">)),</span>
-            <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="c1"># Clean up resources</span>
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;make_knn_adjacency done ...&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;make_knn_adjacency done ...&quot;</span><span class="p">)</span></div>
 
 
     <span class="c1">#</span>
@@ -556,31 +550,28 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">do_pca_embedding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize embedding using Principal Component Analysis (PCA).</span>
-<span class="sd">        </span>
+
 <span class="sd">        This method creates an initial embedding of the data using PCA, which finds</span>
 <span class="sd">        a linear projection of the high-dimensional data into a lower-dimensional space</span>
 <span class="sd">        that maximizes the variance. If a kernel is specified, Kernel PCA is used instead,</span>
 <span class="sd">        which can capture nonlinear relationships.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Sets the init_embedding attribute with the PCA projection of the data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;do_pca_embedding ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_pca_embedding ...&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pca_kernel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Use Kernel PCA for nonlinear dimensionality reduction</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using kernelized PCA embedding...&#39;</span><span class="p">)</span>
-            <span class="n">pca</span> <span class="o">=</span> <span class="n">KernelPCA</span><span class="p">(</span>
-                <span class="n">n_components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span>
-                <span class="n">kernel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pca_kernel</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using kernelized PCA embedding...&quot;</span><span class="p">)</span>
+            <span class="n">pca</span> <span class="o">=</span> <span class="n">KernelPCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pca_kernel</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Use standard PCA for linear dimensionality reduction</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using standard PCA embedding...&#39;</span><span class="p">)</span>
-            <span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using standard PCA embedding...&quot;</span><span class="p">)</span>
+            <span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;do_pca_embedding done ...&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_pca_embedding done ...&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DiRe.do_spectral_embedding">
@@ -588,28 +579,28 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">do_spectral_embedding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize embedding using Spectral Embedding.</span>
-<span class="sd">        </span>
+
 <span class="sd">        This method creates an initial embedding of the data using spectral embedding,</span>
 <span class="sd">        which is based on the eigenvectors of the graph Laplacian. It relies on the</span>
 <span class="sd">        kNN graph structure to find a lower-dimensional representation that preserves</span>
 <span class="sd">        local relationships.</span>
-<span class="sd">        </span>
+
 <span class="sd">        If a similarity kernel is specified, it is applied to transform the distances</span>
 <span class="sd">        in the adjacency matrix before computing the Laplacian.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Sets the init_embedding attribute with the spectral embedding of the data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;do_spectral_embedding ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_spectral_embedding ...&quot;</span><span class="p">)</span>
 
         <span class="c1"># Apply similarity kernel if provided</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_kernel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Applying similarity kernel to adjacency matrix...&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying similarity kernel to adjacency matrix...&quot;</span><span class="p">)</span>
             <span class="c1"># Transform distances using the similarity kernel</span>
             <span class="n">data_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_kernel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_adjacency</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
             <span class="c1"># Create a new adjacency matrix with transformed values</span>
             <span class="n">adj_mat</span> <span class="o">=</span> <span class="n">csr_matrix</span><span class="p">(</span>
                 <span class="p">(</span><span class="n">data_values</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_row_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_col_idx</span><span class="p">)),</span>
-                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">adj_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjacency</span>
@@ -621,13 +612,13 @@
         <span class="n">lap</span> <span class="o">=</span> <span class="n">laplacian</span><span class="p">(</span><span class="n">symmetric_adj</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># Find the k smallest eigenvectors (k = dimension + 1)</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">eigsh</span><span class="p">(</span><span class="n">lap</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;SM&#39;</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">eigsh</span><span class="p">(</span><span class="n">lap</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;SM&quot;</span><span class="p">)</span>
 
         <span class="c1"># Skip the first eigenvector (corresponds to constant function)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span> <span class="o">=</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;do_spectral_embedding done ...&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_spectral_embedding done ...&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DiRe.do_random_embedding">
@@ -635,23 +626,26 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">do_random_embedding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize embedding using Random Projection.</span>
-<span class="sd">        </span>
+
 <span class="sd">        This method creates an initial embedding of the data using random projection,</span>
 <span class="sd">        which is a simple and computationally efficient technique for dimensionality</span>
 <span class="sd">        reduction. It projects the data onto a randomly generated basis, providing</span>
 <span class="sd">        a good starting point for further optimization.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Random projection is supported by the Johnson-Lindenstrauss lemma, which</span>
 <span class="sd">        guarantees that the distances between points are approximately preserved</span>
 <span class="sd">        under certain conditions.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Sets the init_embedding attribute with the random projection of the data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;do_random_embedding ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_random_embedding ...&quot;</span><span class="p">)</span>
 
         <span class="c1"># Create a random projection matrix</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>  <span class="c1"># Fixed seed for reproducibility</span>
-        <span class="n">rand_basis</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_dim</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="n">rand_basis</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_dim</span><span class="p">))</span>
 
         <span class="c1"># Move data and projection matrix to device memory</span>
         <span class="n">data_matrix</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
@@ -660,7 +654,7 @@
         <span class="c1"># Project data onto random basis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span> <span class="o">=</span> <span class="n">data_matrix</span> <span class="o">@</span> <span class="n">rand_basis</span><span class="o">.</span><span class="n">T</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;do_random_embedding done ...&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_random_embedding done ...&quot;</span><span class="p">)</span></div>
 
 
     <span class="c1">#</span>
@@ -672,12 +666,12 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">do_rand_sampling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">n_dirs</span><span class="p">,</span> <span class="n">neg_ratio</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sample points for force calculation using random projections.</span>
-<span class="sd">        </span>
+
 <span class="sd">        This method implements an efficient sampling strategy to identify points</span>
 <span class="sd">        for applying attractive and repulsive forces during layout optimization.</span>
 <span class="sd">        It uses random projections to quickly identify nearby points in different</span>
 <span class="sd">        directions, and also adds random negative samples for repulsion.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        key : jax.random.PRNGKey</span>
@@ -690,12 +684,12 @@
 <span class="sd">            Number of random directions to sample</span>
 <span class="sd">        neg_ratio : int</span>
 <span class="sd">            Ratio of negative samples to positive samples</span>
-<span class="sd">            </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        jax.numpy.ndarray</span>
 <span class="sd">            Array of sampled indices for force calculations</span>
-<span class="sd">            </span>
+
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        The sampling strategy works as follows:</span>
@@ -704,18 +698,18 @@
 <span class="sd">        3. For each point, take the n_samples closest points in each direction</span>
 <span class="sd">        4. Add random negative samples for repulsion</span>
 <span class="sd">        5. Combine all sampled indices</span>
-<span class="sd">        </span>
+
 <span class="sd">        This approach is more efficient than a full nearest neighbor search</span>
 <span class="sd">        while still capturing the important local relationships.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;do_rand_sampling ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_rand_sampling ...&quot;</span><span class="p">)</span>
 
         <span class="n">sampled_indices_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">arr_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
 
         <span class="c1"># Get random unit vectors for projections</span>
         <span class="n">key</span><span class="p">,</span> <span class="n">subkey</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="n">direction_vectors</span> <span class="o">=</span> <span class="n">rand_directions</span><span class="p">(</span><span class="n">subkey</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span> <span class="n">n_dirs</span><span class="p">)</span>
+        <span class="n">direction_vectors</span> <span class="o">=</span> <span class="n">rand_directions</span><span class="p">(</span><span class="n">subkey</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="n">n_dirs</span><span class="p">)</span>
 
         <span class="c1"># For each direction, sample points based on projections</span>
         <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">direction_vectors</span><span class="p">:</span>
@@ -744,7 +738,7 @@
         <span class="c1"># Combine all sampled indices</span>
         <span class="n">sampled_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">sampled_indices_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;do_rand_sampling done ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_rand_sampling done ...&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">sampled_indices</span></div>
 
@@ -778,7 +772,7 @@
 <span class="sd">            If True, force computations on CPU instead of GPU, which can</span>
 <span class="sd">            be helpful for large datasets that exceed GPU memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;do_layout ...&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_layout ...&quot;</span><span class="p">)</span>
 
         <span class="c1"># Setup parameters</span>
         <span class="n">cutoff</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="p">])</span>
@@ -786,7 +780,7 @@
 
         <span class="c1"># Handle automatic batch size calculation if needed</span>
         <span class="n">sample_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_size</span>
-        <span class="k">if</span> <span class="n">sample_size</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sample_size</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
             <span class="c1"># Scale batch size based on dataset size and neighborhood size</span>
             <span class="n">sample_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">))</span>
             <span class="c1"># Ensure batch size is reasonable (not too small or large)</span>
@@ -794,15 +788,18 @@
 
         <span class="c1"># Determine if we should use memory-efficient mode for large datasets</span>
         <span class="k">if</span> <span class="n">large_dataset_mode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">large_dataset_mode</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span> <span class="o">&gt;</span> <span class="mi">65536</span><span class="p">)</span> <span class="ow">or</span>
-                                  <span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;tpu&#39;</span><span class="p">))</span>
+            <span class="n">large_dataset_mode</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span> <span class="o">&gt;</span> <span class="mi">65536</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;tpu&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Other parameters</span>
         <span class="n">n_dirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sample_dirs</span>
         <span class="n">neg_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neg_ratio</span>
 
         <span class="c1"># Debug initial embedding precision</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[LAYOUT] Initial embedding precision: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;[LAYOUT] Initial embedding precision: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># we shall use force_cpu only as a flag passed to the routine</span>
         <span class="c1"># force_cpu = force_cpu or large_dataset_mode and (jax.devices()[0].platform == &#39;tpu&#39;)</span>
@@ -810,7 +807,7 @@
         <span class="c1"># Initialize and normalize positions</span>
         <span class="k">if</span> <span class="n">force_cpu</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Forcing computations on CPU&quot;</span><span class="p">)</span>
-            <span class="n">cpu_device</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">cpu_device</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cpu_device</span><span class="p">)</span>
             <span class="n">neighbor_indices_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indices_np</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cpu_device</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -821,23 +818,22 @@
         <span class="n">init_pos_jax</span> <span class="o">/=</span> <span class="n">init_pos_jax</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Normalize variance</span>
 
         <span class="c1"># Set random seed for reproducibility</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
 
         <span class="c1"># Optimization loop</span>
         <span class="k">for</span> <span class="n">iter_id</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_iterations</span><span class="p">)):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Iteration </span><span class="si">{</span><span class="n">iter_id</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Iteration </span><span class="si">{</span><span class="n">iter_id</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="c1"># Sample random points for repulsion</span>
             <span class="n">sample_indices_jax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_rand_sampling</span><span class="p">(</span>
-                <span class="n">key</span><span class="p">,</span>
-                <span class="n">init_pos_jax</span><span class="p">,</span>
-                <span class="n">sample_size</span><span class="p">,</span>
-                <span class="n">n_dirs</span><span class="p">,</span>
-                <span class="n">neg_ratio</span>
+                <span class="n">key</span><span class="p">,</span> <span class="n">init_pos_jax</span><span class="p">,</span> <span class="n">sample_size</span><span class="p">,</span> <span class="n">n_dirs</span><span class="p">,</span> <span class="n">neg_ratio</span>
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">force_cpu</span><span class="p">:</span>
-                <span class="n">cpu_device</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">cpu_device</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">sample_indices_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="n">sample_indices_jax</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cpu_device</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">sample_indices_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="n">sample_indices_jax</span><span class="p">)</span>
@@ -845,12 +841,12 @@
             <span class="c1"># Split computation for memory efficiency if needed</span>
             <span class="k">if</span> <span class="n">large_dataset_mode</span><span class="p">:</span>
                 <span class="c1"># Process in chunks to reduce peak memory usage</span>
-                <span class="k">if</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;tpu&#39;</span><span class="p">:</span>
-                    <span class="n">chunk_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s1">&#39;tpu&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;gpu&#39;</span><span class="p">:</span>
-                    <span class="n">chunk_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s1">&#39;gpu&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;tpu&quot;</span><span class="p">:</span>
+                    <span class="n">chunk_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s2">&quot;tpu&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+                    <span class="n">chunk_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">chunk_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s1">&#39;other&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
+                    <span class="n">chunk_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memm</span><span class="p">[</span><span class="s2">&quot;other&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
                     <span class="c1"># this is actually inefficient, but let&#39;s postpone</span>
 
                 <span class="n">all_forces</span> <span class="o">=</span> <span class="p">[]</span>
@@ -867,7 +863,7 @@
                         <span class="n">chunk_indices</span><span class="p">,</span>
                         <span class="n">neighbor_indices_jax</span><span class="p">[</span><span class="n">chunk_indices</span><span class="p">],</span>
                         <span class="n">sample_indices_jax</span><span class="p">[</span><span class="n">chunk_indices</span><span class="p">],</span>
-                        <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">iter_id</span> <span class="o">/</span> <span class="n">num_iterations</span>
+                        <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">iter_id</span> <span class="o">/</span> <span class="n">num_iterations</span><span class="p">,</span>
                     <span class="p">)</span>
 
                     <span class="n">all_forces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk_force</span><span class="p">)</span>
@@ -885,7 +881,7 @@
                     <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">),</span>
                     <span class="n">neighbor_indices_jax</span><span class="p">,</span>
                     <span class="n">sample_indices_jax</span><span class="p">,</span>
-                    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">iter_id</span> <span class="o">/</span> <span class="n">num_iterations</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">iter_id</span> <span class="o">/</span> <span class="n">num_iterations</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="c1"># Clip forces to prevent extreme movements</span>
@@ -910,11 +906,13 @@
         <span class="c1"># Clear any cached values to free memory</span>
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;do_layout done ...&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_layout done ...&quot;</span><span class="p">)</span></div>
 
 
     <span class="c1"># Modified _compute_forces method to use the kernel</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_forces</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute attractive and repulsive forces for points using JAX kernels.</span>
 
@@ -965,14 +963,23 @@
 
 <div class="viewcode-block" id="DiRe.visualize">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.DiRe.visualize">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">visualize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.7</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">visualize</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
+        <span class="n">opacity</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate an interactive visualization of the data in the transformed space.</span>
-<span class="sd">        </span>
+
 <span class="sd">        This method creates a scatter plot visualization of the embedded data, supporting</span>
 <span class="sd">        both 2D and 3D visualizations depending on the specified dimension. Points can be</span>
 <span class="sd">        colored by provided labels for clearer visualization of clusters or categories.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        labels : numpy.ndarray or None, optional</span>
@@ -983,7 +990,7 @@
 <span class="sd">        title : str or None, optional</span>
 <span class="sd">            Title for the visualization. If None, a default title will be used. Default is None.</span>
 <span class="sd">        colormap : str or None, optional</span>
-<span class="sd">            Name of the colormap to use for labels (e.g., &#39;viridis&#39;, &#39;plasma&#39;). </span>
+<span class="sd">            Name of the colormap to use for labels (e.g., &#39;viridis&#39;, &#39;plasma&#39;).</span>
 <span class="sd">            If None, the default Plotly colormap will be used. Default is None.</span>
 <span class="sd">        width : int, optional</span>
 <span class="sd">            Width of the figure in pixels. Default is 800.</span>
@@ -991,11 +998,11 @@
 <span class="sd">            Height of the figure in pixels. Default is 600.</span>
 <span class="sd">        opacity : float, optional</span>
 <span class="sd">            Opacity of the points (0.0 to 1.0). Default is 0.7.</span>
-<span class="sd">            </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        plotly.graph_objs._figure.Figure or None</span>
-<span class="sd">            A Plotly figure object if the visualization is successful; </span>
+<span class="sd">            A Plotly figure object if the visualization is successful;</span>
 <span class="sd">            None if no layout is available or dimension &gt; 3.</span>
 
 <span class="sd">        Notes</span>
@@ -1005,83 +1012,74 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Check if layout is available</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;visualize ERROR: no layout available&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;visualize ERROR: no layout available&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># Set default title if not provided</span>
         <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">init_embedding_type</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2"> Initialized </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="si">}</span><span class="s2">D Embedding&quot;</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2"> Initialized </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="si">}</span><span class="s2">D Embedding&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Common visualization parameters</span>
         <span class="n">vis_params</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s1">&#39;label&#39;</span> <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s1">&#39;color_continuous_scale&#39;</span><span class="p">:</span> <span class="n">colormap</span><span class="p">,</span>
-            <span class="s1">&#39;opacity&#39;</span><span class="p">:</span> <span class="n">opacity</span><span class="p">,</span>
-            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
-            <span class="s1">&#39;hover_data&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;label&quot;</span> <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;color_continuous_scale&quot;</span><span class="p">:</span> <span class="n">colormap</span><span class="p">,</span>
+            <span class="s2">&quot;opacity&quot;</span><span class="p">:</span> <span class="n">opacity</span><span class="p">,</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+            <span class="s2">&quot;hover_data&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="c1"># Create 2D visualization</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;visualize: 2D ...&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;visualize: 2D ...&quot;</span><span class="p">)</span>
 
             <span class="c1"># Create dataframe for plotting</span>
-            <span class="n">datadf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">])</span>
+            <span class="n">datadf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">])</span>
 
             <span class="c1"># Add labels if provided</span>
             <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">datadf</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span>
+                <span class="n">datadf</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span>
 
             <span class="c1"># Create scatter plot</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-                <span class="n">datadf</span><span class="p">,</span>
-                <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span>
-                <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">vis_params</span>
-            <span class="p">)</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">datadf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">vis_params</span><span class="p">)</span>
 
             <span class="c1"># Update layout</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
                 <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
                 <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-                <span class="n">xaxis_title</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span>
-                <span class="n">yaxis_title</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span>
+                <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Create 3D visualization</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;visualize: 3D ...&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;visualize: 3D ...&quot;</span><span class="p">)</span>
 
             <span class="c1"># Create dataframe for plotting</span>
-            <span class="n">datadf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">])</span>
+            <span class="n">datadf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">])</span>
 
             <span class="c1"># Add labels if provided</span>
             <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">datadf</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span>
+                <span class="n">datadf</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span>
 
             <span class="c1"># Create 3D scatter plot</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter_3d</span><span class="p">(</span>
-                <span class="n">datadf</span><span class="p">,</span>
-                <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span>
-                <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span>
-                <span class="n">z</span><span class="o">=</span><span class="s1">&#39;z&#39;</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">vis_params</span>
-            <span class="p">)</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter_3d</span><span class="p">(</span><span class="n">datadf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">vis_params</span><span class="p">)</span>
 
             <span class="c1"># Update layout</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
                 <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
                 <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
                 <span class="n">scene</span><span class="o">=</span><span class="p">{</span>
-                    <span class="s2">&quot;xaxis_title&quot;</span><span class="p">:</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span>
-                    <span class="s2">&quot;yaxis_title&quot;</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span>
-                    <span class="s2">&quot;zaxis_title&quot;</span><span class="p">:</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span>
-                <span class="p">}</span>
+                    <span class="s2">&quot;xaxis_title&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;yaxis_title&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;zaxis_title&quot;</span><span class="p">:</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
             <span class="p">)</span>
 
         <span class="c1"># Return None for higher dimensions</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;visualize ERROR: dimension &gt; 3&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;visualize ERROR: dimension &gt; 3&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># Update marker properties</span>
@@ -1096,10 +1094,13 @@
 <span class="c1"># Kernel for force-directed layout</span>
 <span class="c1">#</span>
 
+
 <div class="viewcode-block" id="compute_forces_kernel">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.compute_forces_kernel">[docs]</a>
 <span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_forces_kernel</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_forces_kernel</span><span class="p">(</span>
+    <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    JAX-optimized kernel for computing attractive and repulsive forces.</span>
 
@@ -1142,9 +1143,7 @@
 
         <span class="c1"># Compute attraction-repulsion coefficients</span>
         <span class="n">grad_coeff</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-            <span class="n">mask</span><span class="p">,</span>
-            <span class="mf">1.0</span> <span class="o">*</span> <span class="n">jax_coeff_att</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">jax_coeff_rep</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span>
-            <span class="mf">0.0</span>
+            <span class="n">mask</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">jax_coeff_att</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">jax_coeff_rep</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="mf">0.0</span>
         <span class="p">)</span>
 
         <span class="c1"># Sum forces from all neighbors</span>
@@ -1183,6 +1182,7 @@
 <span class="c1"># Auxiliary functions for force-directed layout</span>
 <span class="c1">#</span>
 
+
 <div class="viewcode-block" id="distribution_kernel">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.distribution_kernel">[docs]</a>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
@@ -1216,7 +1216,7 @@
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">jax_coeff_att</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;JAX-optimized attraction coefficient function.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">distribution_kernel</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">distribution_kernel</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span></div>
 
 
 
@@ -1235,7 +1235,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">rand_directions</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sample unit vectors in random directions.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    key : jax.random.PRNGKey</span>
@@ -1244,7 +1244,7 @@
 <span class="sd">        Dimensionality of the vectors</span>
 <span class="sd">    num : int</span>
 <span class="sd">        Number of random directions to sample</span>
-<span class="sd">        </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    jax.numpy.ndarray</span>
@@ -1262,7 +1262,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">get_slice</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract a slice of size k centered around index i.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    arr : jax.numpy.ndarray</span>
@@ -1271,7 +1271,7 @@
 <span class="sd">        Size of the slice</span>
 <span class="sd">    i : int</span>
 <span class="sd">        Center index position</span>
-<span class="sd">        </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    jax.numpy.ndarray</span>
