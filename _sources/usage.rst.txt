@@ -16,9 +16,9 @@ DiRe-JAX provides a high-performance dimensionality reduction tool based on JAX.
     
     # Initialize DiRe with desired parameters
     reducer = DiRe(
-        dimension=2,            # Target dimension
+        n_components=2,         # Target dimension
         n_neighbors=15,         # Number of neighbors to consider
-        init_embedding_type='pca',  # Initialization method
+        init='pca',             # Initialization method
         max_iter_layout=128,    # Maximum number of layout iterations
         verbose=True            # Show progress
     )
@@ -34,16 +34,18 @@ Advanced Configuration
 
 DiRe offers several parameters that can be tuned to optimize the dimensionality reduction process:
 
-* `dimension`: Target dimension for the embedding (typically 2 or 3)
+* `n_components`: Target dimension for the embedding (typically 2 or 3)
 * `n_neighbors`: Number of neighbors to consider when constructing the graph
-* `init_embedding_type`: Method to initialize the embedding ('pca', 'random')
+* `init`: Method to initialize the embedding ('pca', 'random', 'spectral')
 * `max_iter_layout`: Maximum number of iterations for the layout algorithm
 * `min_dist`: Minimum distance between points in the embedding
 * `spread`: Controls how spread out the embedding is
 * `cutoff`: Maximum distance for neighbor connections
 * `n_sample_dirs`: Number of sample directions for the layout algorithm
 * `sample_size`: Sample size for the layout algorithm
+* `batch_size`: Number of samples to process at once for memory efficiency
 * `neg_ratio`: Ratio of negative to positive samples
+* `random_state`: Random seed for reproducible results
 
 Benchmarking
 ------------
@@ -61,7 +63,7 @@ If you've installed DiRe-JAX with the `[utils]` extra, you can use the benchmark
     features, labels = make_blobs(n_samples=10000, n_features=100, centers=5, random_state=42)
     
     # Initialize reducer
-    reducer = DiRe(dimension=2, n_neighbors=15)
+    reducer = DiRe(n_components=2, n_neighbors=15)
     
     # Then either run the benchmark ...
     benchmark_results = run_benchmark(reducer,
