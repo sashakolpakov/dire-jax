@@ -19,6 +19,8 @@ DiRe-JAX provides a high-performance dimensionality reduction tool based on JAX.
         n_components=2,         # Target dimension
         n_neighbors=15,         # Number of neighbors to consider
         init='pca',             # Initialization method
+        metric='lp',            # Distance metric for kNN computation ('lp', 'l1', 'linf', 'cosine')
+        p=2,                    # For lp metric, p=2 gives squared L2 distance
         max_iter_layout=128,    # Maximum number of layout iterations
         verbose=True            # Show progress
     )
@@ -29,6 +31,32 @@ DiRe-JAX provides a high-performance dimensionality reduction tool based on JAX.
     # Visualize the results
     reducer.visualize()
 
+Distance Metrics
+----------------
+
+DiRe supports multiple distance metrics for k-nearest neighbor computation:
+
+.. code-block:: python
+
+    # L1 Manhattan distance
+    reducer_l1 = DiRe(metric='l1')
+    
+    # L2 squared distance (default when p=2)  
+    reducer_l2 = DiRe(metric='lp', p=2)
+    
+    # L-infinity Chebyshev distance
+    reducer_linf = DiRe(metric='linf')
+    
+    # Cosine distance
+    reducer_cosine = DiRe(metric='cosine')
+
+Available metrics:
+
+* `'lp'`: p-th power of Lp distance (requires `p` parameter, must be ≥ 2)
+* `'l1'`: Manhattan/L1 distance
+* `'linf'`: Chebyshev/L-infinity distance
+* `'cosine'`: Cosine distance
+
 Advanced Configuration
 ----------------------
 
@@ -37,6 +65,8 @@ DiRe offers several parameters that can be tuned to optimize the dimensionality 
 * `n_components`: Target dimension for the embedding (typically 2 or 3)
 * `n_neighbors`: Number of neighbors to consider when constructing the graph
 * `init`: Method to initialize the embedding ('pca', 'random', 'spectral')
+* `metric`: Distance metric for k-nearest neighbor computation ('lp', 'l1', 'linf', 'cosine')
+* `p`: Power parameter for 'lp' metric (default 2, must be >= 2)
 * `max_iter_layout`: Maximum number of iterations for the layout algorithm
 * `min_dist`: Minimum distance between points in the embedding
 * `spread`: Controls how spread out the embedding is
@@ -63,7 +93,7 @@ If you've installed DiRe-JAX with the `[utils]` extra, you can use the benchmark
     features, labels = make_blobs(n_samples=10000, n_features=100, centers=5, random_state=42)
     
     # Initialize reducer
-    reducer = DiRe(n_components=2, n_neighbors=15)
+    reducer = DiRe(n_components=2, n_neighbors=15, metric='lp', p=2)
     
     # Then either run the benchmark ...
     benchmark_results = run_benchmark(reducer,

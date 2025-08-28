@@ -45,6 +45,8 @@ Example Usage
     reducer_blobs = DiRe(n_components=2,
                          n_neighbors=16,
                          init='pca',
+                         metric='lp',        # Distance metric for kNN computation ('lp', 'l1', 'linf', 'cosine')
+                         p=2,                # For lp metric, p=2 gives squared L2 distance
                          max_iter_layout=32,
                          min_dist=1e-4,
                          spread=1.0,

@@ -146,6 +146,13 @@
 <span class="sd">         - &#39;pca&#39; for PCA embedding (classical, no kernel).</span>
 
 <span class="sd">         By default, &#39;random&#39;.</span>
+<span class="sd">    metric: (str) Distance metric for k-nearest neighbor computation. Options:</span>
+<span class="sd">        - &#39;lp&#39;: p-th power of Lp distance (default p=2 for squared L2)</span>
+<span class="sd">        - &#39;l1&#39;: Manhattan/L1 distance</span>
+<span class="sd">        - &#39;linf&#39;: Chebyshev/L-infinity distance</span>
+<span class="sd">        - &#39;cosine&#39;: Cosine distance</span>
+<span class="sd">        </span>
+<span class="sd">        By default, &#39;lp&#39;.</span>
 <span class="sd">    sim_kernel: (callable)</span>
 <span class="sd">        A similarity kernel function that transforms a distance metric to a similarity score.</span>
 <span class="sd">        The function should have the form `lambda distance: float -&gt; similarity: float`; default `None`.</span>
@@ -169,6 +176,8 @@
 <span class="sd">        Flag to enable verbose output, default `True`.</span>
 <span class="sd">    random_state: (int)</span>
 <span class="sd">        Random seed to make stochastic computations reproducible.</span>
+<span class="sd">    **metric_kwargs: Additional keyword arguments for specific distance metrics.</span>
+<span class="sd">        For &#39;lp&#39; metric: p (int) - power for Lp norm (default 2, must be &gt;= 2).</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -178,6 +187,10 @@
 <span class="sd">        Number of neighbors to consider in the k-nearest neighbors graph.</span>
 <span class="sd">    init: str</span>
 <span class="sd">        Chosen method for initial embedding.</span>
+<span class="sd">    metric: str</span>
+<span class="sd">        Distance metric used for k-nearest neighbor computations.</span>
+<span class="sd">    metric_kwargs: dict</span>
+<span class="sd">        Additional parameters for the distance metric (e.g., p for &#39;lp&#39; metric).</span>
 <span class="sd">    sim_kernel: callable</span>
 <span class="sd">        Similarity kernel function to be used if &#39;init&#39; is &#39;spectral&#39;, by default `None`.</span>
 <span class="sd">    pca_kernel: callable</span>
@@ -227,6 +240,7 @@
         <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
         <span class="n">init</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
+        <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;lp&quot;</span><span class="p">,</span>
         <span class="n">sim_kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">pca_kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
@@ -242,6 +256,7 @@
         <span class="n">memm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">mpa</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Class constructor</span>
@@ -254,6 +269,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Number of neighbors for kNN computations&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">init</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Type of the initial embedding (PCA, random, spectral) &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Distance metric for kNN computations &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric_kwargs</span> <span class="o">=</span> <span class="n">metric_kwargs</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Additional parameters for distance metrics &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sim_kernel</span> <span class="o">=</span> <span class="n">sim_kernel</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Similarity kernel &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pca_kernel</span> <span class="o">=</span> <span class="n">pca_kernel</span>
@@ -499,18 +518,22 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
                 <span class="n">n_neighbors</span><span class="p">,</span>
-                <span class="n">batch_size</span><span class="p">,</span>
-                <span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
+                <span class="n">x_tile_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">y_batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
                 <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">knn_tiled</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
                 <span class="n">n_neighbors</span><span class="p">,</span>
-                <span class="n">batch_size</span><span class="p">,</span>
-                <span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
+                <span class="n">x_tile_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">y_batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
                 <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Wait until ready</span>
