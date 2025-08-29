@@ -114,11 +114,12 @@ for manifold learning.</p>
 </dd>
 </dl>
 </p></li>
-<li><p><strong>metric</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>) </em><em>Distance metric for k-nearest neighbor computation. Options:</em>) – <ul>
+<li><p><strong>metric</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>callable</em><em>) </em><em>Distance metric for k-nearest neighbor computation. Options:</em>) – <ul>
 <li><p>‘lp’: p-th power of Lp distance (default p=2 for squared L2)</p></li>
 <li><p>’l1’: Manhattan/L1 distance</p></li>
 <li><p>’linf’: Chebyshev/L-infinity distance</p></li>
 <li><p>’cosine’: Cosine distance</p></li>
+<li><p>callable: Custom metric function with signature my_metric(y_batch, x, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs)</p></li>
 </ul>
 <p>By default, ‘lp’.</p>
 </p></li>
@@ -134,7 +135,8 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <li><p><strong>my_logger</strong> ((logger.Logger or <cite>None</cite>)) – Custom logger for logging events; if None, a default logger is created, default <cite>None</cite>.</p></li>
 <li><p><strong>verbose</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>)</em>) – Flag to enable verbose output, default <cite>True</cite>.</p></li>
 <li><p><strong>random_state</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Random seed to make stochastic computations reproducible.</p></li>
-<li><p><strong>**metric_kwargs</strong> (<em>Additional keyword arguments for specific distance metrics.</em>) – For ‘lp’ metric: p (int) - power for Lp norm (default 2, must be &gt;= 2).</p></li>
+<li><p><strong>**metric_kwargs</strong> (<em>Additional keyword arguments for distance metrics.</em>) – For ‘lp’ metric: p (int) - power for Lp norm (default 2, must be &gt;= 2).
+For custom callable metrics: any parameters needed by the metric function.</p></li>
 </ul>
 </dd>
 </dl>
@@ -177,7 +179,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Distance metric used for k-nearest neighbor computations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a> or callable</p>
 </dd>
 </dl>
 </dd></dl>
@@ -185,7 +187,8 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">metric_kwargs</span></span></dt>
-<dd><p>Additional parameters for the distance metric (e.g., p for ‘lp’ metric).</p>
+<dd><p>Additional parameters for the distance metric (e.g., p for ‘lp’ metric,
+or custom parameters for callable metrics).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
@@ -716,11 +719,12 @@ for manifold learning.</p>
 </dd>
 </dl>
 </p></li>
-<li><p><strong>metric</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>) </em><em>Distance metric for k-nearest neighbor computation. Options:</em>) – <ul>
+<li><p><strong>metric</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>callable</em><em>) </em><em>Distance metric for k-nearest neighbor computation. Options:</em>) – <ul>
 <li><p>‘lp’: p-th power of Lp distance (default p=2 for squared L2)</p></li>
 <li><p>’l1’: Manhattan/L1 distance</p></li>
 <li><p>’linf’: Chebyshev/L-infinity distance</p></li>
 <li><p>’cosine’: Cosine distance</p></li>
+<li><p>callable: Custom metric function with signature my_metric(y_batch, x, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs)</p></li>
 </ul>
 <p>By default, ‘lp’.</p>
 </p></li>
@@ -736,7 +740,8 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <li><p><strong>my_logger</strong> ((logger.Logger or <cite>None</cite>)) – Custom logger for logging events; if None, a default logger is created, default <cite>None</cite>.</p></li>
 <li><p><strong>verbose</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>)</em>) – Flag to enable verbose output, default <cite>True</cite>.</p></li>
 <li><p><strong>random_state</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Random seed to make stochastic computations reproducible.</p></li>
-<li><p><strong>**metric_kwargs</strong> (<em>Additional keyword arguments for specific distance metrics.</em>) – For ‘lp’ metric: p (int) - power for Lp norm (default 2, must be &gt;= 2).</p></li>
+<li><p><strong>**metric_kwargs</strong> (<em>Additional keyword arguments for distance metrics.</em>) – For ‘lp’ metric: p (int) - power for Lp norm (default 2, must be &gt;= 2).
+For custom callable metrics: any parameters needed by the metric function.</p></li>
 </ul>
 </dd>
 </dl>
@@ -779,7 +784,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Distance metric used for k-nearest neighbor computations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a> or callable</p>
 </dd>
 </dl>
 </dd></dl>
@@ -787,7 +792,8 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">metric_kwargs</span></span></dt>
-<dd><p>Additional parameters for the distance metric (e.g., p for ‘lp’ metric).</p>
+<dd><p>Additional parameters for the distance metric (e.g., p for ‘lp’ metric,
+or custom parameters for callable metrics).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
@@ -1592,14 +1598,15 @@ and times the embedding process.</p>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A high-performance kNN index that uses batching/tiling to efficiently handle
 large datasets with limited memory usage. Supports multiple distance metrics
-including Lp norms, cosine distance, and more.</p>
+including Lp norms, cosine distance, and custom user-defined metrics.</p>
 <p>The index uses JAX for GPU acceleration and memory-efficient tiled computation
 to handle datasets that don’t fit in memory.</p>
 <p>Supported distance metrics:
 - ‘lp’: p-th power of Lp distance (default p=2 for squared L2)
 - ‘l1’: Manhattan/L1 distance
 - ‘linf’: Chebyshev/L-infinity distance
-- ‘cosine’: Cosine distance</p>
+- ‘cosine’: Cosine distance
+- Custom callable: User-defined metric function with signature my_metric(y_batch, x, <a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs)</p>
 <p class="rubric">Examples</p>
 <p># Default L2 squared distance
 indices, distances = HPIndex.knn_tiled(database, queries, k=10)</p>
@@ -1609,6 +1616,16 @@ indices, distances = HPIndex.knn_tiled(database, queries, k=10, metric=’l1’)
 indices, distances = HPIndex.knn_tiled(database, queries, k=10, metric=’lp’, p=3)</p>
 <p># Cosine distance
 indices, distances = HPIndex.knn_tiled(database, queries, k=10, metric=’cosine’)</p>
+<p># Custom metric with kwargs
+def my_metric(y_batch, x, scale=1.0):</p>
+<blockquote>
+<div><p>diff = y_batch[:, jnp.newaxis, :] - x[jnp.newaxis, :, :]
+return scale * jnp.sum(diff**2, axis=2)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>indices, distances = HPIndex.knn_tiled(database, queries, k=10,</dt><dd><p>metric=my_metric, scale=2.0)</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">knn_tiled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k=5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric='lp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_tile_size=8192</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_batch_size=1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'jax.numpy.float64'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**metric_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/hpindex.html#HPIndex.knn_tiled"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -1622,11 +1639,12 @@ multiple distance metrics.</p>
 <li><p><strong>x</strong> – (n, d) array of database points to search in</p></li>
 <li><p><strong>y</strong> – (m, d) array of query points to find neighbors for</p></li>
 <li><p><strong>k</strong> – number of nearest neighbors to find for each query point</p></li>
-<li><p><strong>metric</strong> – distance metric to use. Options:
+<li><p><strong>metric</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><em>Callable</em></a>) – distance metric to use. Options:
 - ‘lp’: p-th power of Lp distance (default p=2 for squared L2)
 - ‘l1’: Manhattan/L1 distance
 - ‘linf’: Chebyshev/L-infinity distance
-- ‘cosine’: Cosine distance</p></li>
+- ‘cosine’: Cosine distance
+- callable: custom metric function with signature my_metric(y_batch, x, <a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs)</p></li>
 <li><p><strong>x_tile_size</strong> – number of database points to process in each tile (default 8192)</p></li>
 <li><p><strong>y_batch_size</strong> – number of query points to process in each batch (default 1024)</p></li>
 <li><p><strong>dtype</strong> – floating-point precision (jnp.float32 or jnp.float64)</p></li>
@@ -1660,6 +1678,17 @@ indices, distances = HPIndex.knn_tiled(database, queries, k=5, metric=’l1’)<
 indices, distances = HPIndex.knn_tiled(database, queries, k=5, metric=’lp’, p=3)</p>
 <p># Use cosine distance
 indices, distances = HPIndex.knn_tiled(database, queries, k=5, metric=’cosine’)</p>
+<p># Use custom metric
+def weighted_euclidean(y_batch, x, weights):</p>
+<blockquote>
+<div><p>diff = y_batch[:, jnp.newaxis, :] - x[jnp.newaxis, :, :]
+return jnp.sum(weights * diff**2, axis=2)</p>
+</div></blockquote>
+<p>weights = jnp.array([1.0, 2.0, 0.5, …])  # feature weights
+indices, distances = HPIndex.knn_tiled(database, queries, k=5,</p>
+<blockquote>
+<div><p>metric=weighted_euclidean, weights=weights)</p>
+</div></blockquote>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For very large datasets, adjust x_tile_size and y_batch_size to fit

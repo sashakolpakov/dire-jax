@@ -48,6 +48,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#distance-metrics">Distance Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-metrics">Custom Metrics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#benchmarking">Benchmarking</a></li>
 </ul>
@@ -97,7 +98,7 @@
     <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>         <span class="c1"># Target dimension</span>
     <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>         <span class="c1"># Number of neighbors to consider</span>
     <span class="n">init</span><span class="o">=</span><span class="s1">&#39;pca&#39;</span><span class="p">,</span>             <span class="c1"># Initialization method</span>
-    <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;lp&#39;</span><span class="p">,</span>            <span class="c1"># Distance metric for kNN computation (&#39;lp&#39;, &#39;l1&#39;, &#39;linf&#39;, &#39;cosine&#39;)</span>
+    <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;lp&#39;</span><span class="p">,</span>            <span class="c1"># Distance metric (&#39;lp&#39;, &#39;l1&#39;, &#39;linf&#39;, &#39;cosine&#39;, or callable)</span>
     <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>                    <span class="c1"># For lp metric, p=2 gives squared L2 distance</span>
     <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>    <span class="c1"># Maximum number of layout iterations</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>            <span class="c1"># Show progress</span>
@@ -125,6 +126,16 @@
 
 <span class="c1"># Cosine distance</span>
 <span class="n">reducer_cosine</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span>
+
+<span class="c1"># Custom distance metric</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weighted_euclidean</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom weighted Euclidean distance.&quot;&quot;&quot;</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">y_batch</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="n">diff</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>  <span class="c1"># Feature importance weights</span>
+<span class="n">reducer_custom</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">weighted_euclidean</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Available metrics:</p>
@@ -133,6 +144,59 @@
 <li><p><cite>‘l1’</cite>: Manhattan/L1 distance</p></li>
 <li><p><cite>‘linf’</cite>: Chebyshev/L-infinity distance</p></li>
 <li><p><cite>‘cosine’</cite>: Cosine distance</p></li>
+<li><p>Custom callable: User-defined function with signature <cite>my_metric(y_batch, x, **kwargs)</cite></p></li>
+</ul>
+</section>
+<section id="custom-metrics">
+<h2>Custom Metrics<a class="headerlink" href="#custom-metrics" title="Link to this heading"></a></h2>
+<p>DiRe-JAX supports custom distance metrics through callable functions. This allows you to implement specialized
+distance measures tailored to your specific data and use case.</p>
+<p>Custom metric functions should have the signature:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">my_metric</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute distances between query points and database points.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y_batch: (batch_size, d) array of query points</span>
+<span class="sd">        x: (n, d) array of database points</span>
+<span class="sd">        **kwargs: Additional parameters passed to the metric</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (batch_size, n) array of distances</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Your distance computation here</span>
+    <span class="k">return</span> <span class="n">distances</span>
+</pre></div>
+</div>
+<p>Examples of custom metrics:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+
+<span class="c1"># Weighted Euclidean distance</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weighted_euclidean</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">y_batch</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="n">diff</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Mahalanobis distance</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mahalanobis</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">inv_cov</span><span class="p">):</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">y_batch</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">@</span> <span class="n">inv_cov</span> <span class="o">*</span> <span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Custom exponential distance</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">exponential_distance</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y_batch</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">diff</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Usage</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">])</span>  <span class="c1"># Feature weights</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">weighted_euclidean</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Important Notes:</strong></p>
+<ul class="simple">
+<li><p>Custom metrics are automatically JIT-compiled by JAX for optimal performance</p></li>
+<li><p>All parameters beyond <cite>y_batch</cite> and <cite>x</cite> should be passed as keyword arguments</p></li>
+<li><p>The function should be JAX-compatible (use <cite>jax.numpy</cite> instead of <cite>numpy</cite>)</p></li>
+<li><p>Distance values should be non-negative for proper k-NN behavior</p></li>
 </ul>
 </section>
 <section id="advanced-configuration">
@@ -142,7 +206,7 @@
 <li><p><cite>n_components</cite>: Target dimension for the embedding (typically 2 or 3)</p></li>
 <li><p><cite>n_neighbors</cite>: Number of neighbors to consider when constructing the graph</p></li>
 <li><p><cite>init</cite>: Method to initialize the embedding (‘pca’, ‘random’, ‘spectral’)</p></li>
-<li><p><cite>metric</cite>: Distance metric for k-nearest neighbor computation (‘lp’, ‘l1’, ‘linf’, ‘cosine’)</p></li>
+<li><p><cite>metric</cite>: Distance metric for k-nearest neighbor computation (‘lp’, ‘l1’, ‘linf’, ‘cosine’, or custom callable)</p></li>
 <li><p><cite>p</cite>: Power parameter for ‘lp’ metric (default 2, must be &gt;= 2)</p></li>
 <li><p><cite>max_iter_layout</cite>: Maximum number of iterations for the layout algorithm</p></li>
 <li><p><cite>min_dist</cite>: Minimum distance between points in the embedding</p></li>

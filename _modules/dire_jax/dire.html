@@ -146,11 +146,12 @@
 <span class="sd">         - &#39;pca&#39; for PCA embedding (classical, no kernel).</span>
 
 <span class="sd">         By default, &#39;random&#39;.</span>
-<span class="sd">    metric: (str) Distance metric for k-nearest neighbor computation. Options:</span>
+<span class="sd">    metric: (str or callable) Distance metric for k-nearest neighbor computation. Options:</span>
 <span class="sd">        - &#39;lp&#39;: p-th power of Lp distance (default p=2 for squared L2)</span>
 <span class="sd">        - &#39;l1&#39;: Manhattan/L1 distance</span>
 <span class="sd">        - &#39;linf&#39;: Chebyshev/L-infinity distance</span>
 <span class="sd">        - &#39;cosine&#39;: Cosine distance</span>
+<span class="sd">        - callable: Custom metric function with signature my_metric(y_batch, x, **kwargs)</span>
 <span class="sd">        </span>
 <span class="sd">        By default, &#39;lp&#39;.</span>
 <span class="sd">    sim_kernel: (callable)</span>
@@ -176,8 +177,9 @@
 <span class="sd">        Flag to enable verbose output, default `True`.</span>
 <span class="sd">    random_state: (int)</span>
 <span class="sd">        Random seed to make stochastic computations reproducible.</span>
-<span class="sd">    **metric_kwargs: Additional keyword arguments for specific distance metrics.</span>
+<span class="sd">    **metric_kwargs: Additional keyword arguments for distance metrics.</span>
 <span class="sd">        For &#39;lp&#39; metric: p (int) - power for Lp norm (default 2, must be &gt;= 2).</span>
+<span class="sd">        For custom callable metrics: any parameters needed by the metric function.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -187,10 +189,11 @@
 <span class="sd">        Number of neighbors to consider in the k-nearest neighbors graph.</span>
 <span class="sd">    init: str</span>
 <span class="sd">        Chosen method for initial embedding.</span>
-<span class="sd">    metric: str</span>
+<span class="sd">    metric: str or callable</span>
 <span class="sd">        Distance metric used for k-nearest neighbor computations.</span>
 <span class="sd">    metric_kwargs: dict</span>
-<span class="sd">        Additional parameters for the distance metric (e.g., p for &#39;lp&#39; metric).</span>
+<span class="sd">        Additional parameters for the distance metric (e.g., p for &#39;lp&#39; metric, </span>
+<span class="sd">        or custom parameters for callable metrics).</span>
 <span class="sd">    sim_kernel: callable</span>
 <span class="sd">        Similarity kernel function to be used if &#39;init&#39; is &#39;spectral&#39;, by default `None`.</span>
 <span class="sd">    pca_kernel: callable</span>
