@@ -1,0 +1,153 @@
+--- a/dire_jax/dire_pytorch.py
++++ b/dire_jax/dire_pytorch.py
+@@ -113,6 +113,8 @@ class DiRePyTorch(TransformerMixin):
+         self._a = None
+         self._b = None
+         
++        # k-NN graph data (REQUIRED for correct forces!)
++        self._knn_indices = None
+         # Device management
+         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+         if self.device.type == 'cuda':
+@@ -235,17 +237,115 @@ class DiRePyTorch(TransformerMixin):
+         
+         return embedding
+     
++    def _compute_knn(self, X):
++        """
++        Compute k-nearest neighbors graph.
++        CRITICAL: This is required for correct DIRE/UMAP-style force computation.
++        """
++        self.logger.info(f"Computing {self.n_neighbors}-NN graph...")
++        
++        X_torch = torch.tensor(X, dtype=torch.float32, device=self.device)
++        n_samples = X.shape[0]
++        
++        # For moderate datasets, compute all pairwise distances
++        if n_samples <= 50000:
++            dist_matrix = torch.cdist(X_torch, X_torch, p=2)
++            
++            # Get k+1 nearest neighbors (including self)
++            knn_dists, knn_indices = torch.topk(dist_matrix, k=self.n_neighbors + 1, 
++                                                dim=1, largest=False)
++            
++            # Remove self (first neighbor)
++            self._knn_indices = knn_indices[:, 1:].cpu().numpy()
++        else:
++            # For larger datasets, process in chunks
++            self.logger.info("Large dataset - using chunked k-NN computation")
++            batch_size = 5000
++            all_indices = []
++            
++            for i in range(0, n_samples, batch_size):
++                end_i = min(i + batch_size, n_samples)
++                batch = X_torch[i:end_i]
++                
++                # Compute distances from batch to all points
++                dist_batch = torch.cdist(batch, X_torch, p=2)
++                
++                # Get k+1 nearest
++                knn_dists, knn_indices = torch.topk(dist_batch, k=self.n_neighbors + 1,
++                                                    dim=1, largest=False)
++                
++                all_indices.append(knn_indices[:, 1:].cpu().numpy())
++            
++            self._knn_indices = np.vstack(all_indices)
++        
++        self.logger.info(f"k-NN graph computed: shape {self._knn_indices.shape}")
++    
+     def _compute_forces_pykeops(self, positions, alpha=1.0):
+         """
+-        Compute all-pairs forces using PyKeOps (for small datasets).
++        FIXED: Compute forces with k-NN attraction and all-pairs repulsion.
+         
+-        This is the key innovation - no k-NN graph needed!
++        Critical fix: Attraction forces should ONLY be applied between k-NN neighbors,
++        not all pairs. This matches the UMAP/DIRE algorithm correctly.
+         """
+         if not PYKEOPS_AVAILABLE:
+             raise RuntimeError("PyKeOps required for force computation")
+         
++        n_samples = positions.shape[0]
++        forces = torch.zeros_like(positions)
++        
++        # Parameters
++        a_val = float(self._a)
++        b_val = float(self._b)
++        b_exp = float(2 * b_val)
++        
++        # ============ ATTRACTION FORCES (k-NN only) ============
++        # This is the critical fix: only attract k-NN neighbors
++        if self._knn_indices is None:
++            raise ValueError("k-NN graph not computed! This is required for correct forces.")
++        
++        # Use simple PyTorch loop for k-NN attraction
++        for i in range(n_samples):
++            neighbor_ids = self._knn_indices[i]
++            pos_i = positions[i:i+1]  # Keep dimensions
++            pos_neighbors = positions[neighbor_ids]
++            
++            # Compute differences and distances
++            diff = pos_neighbors - pos_i
++            dist = torch.norm(diff, dim=1, keepdim=True) + 1e-10
++            
++            # Attraction kernel: 1 / (1 + a * (1/d)^(2b))
++            att_coeff = 1.0 / (1.0 + a_val * (1.0 / dist) ** b_exp)
++            
++            # Apply force
++            forces[i] += (att_coeff * diff / dist).sum(0)
++        
++        # ============ REPULSION FORCES (all-pairs via PyKeOps) ============
++        # Use PyKeOps for efficient all-pairs repulsion
+         # Convert to LazyTensors
+         X_i = LazyTensor(positions[:, None, :])  # (N, 1, D)
+         X_j = LazyTensor(positions[None, :, :])  # (1, N, D)
+@@ -258,23 +358,10 @@ class DiRePyTorch(TransformerMixin):
+         eps = 1e-10
+         D_ij_safe = D_ij + eps
+         
+-        # Distribution kernel for attraction and repulsion
+-        # PyKeOps needs scalar values for exponents
+-        a_val = float(self._a)
+-        b_val = float(self._b)
+-        b_exp = float(2 * b_val)  # Pre-compute the exponent as a scalar
+-        
+-        # Attraction: kernel(1/dist)
+-        # Using the formula: 1 / (1 + a * (1/dist)^(2b))
+-        inv_dist = 1.0 / D_ij_safe
+-        att_kernel = 1.0 / (1.0 + a_val * (inv_dist ** b_exp))
+-        
+-        # Repulsion: -kernel(dist)
+-        # Using the formula: -1 / (1 + a * dist^(2b))
++        # Repulsion kernel: -1 / (1 + a * d^(2b))
+         rep_kernel = -1.0 / (1.0 + a_val * (D_ij_safe ** b_exp))
+         
+-        # Combined force coefficient
+-        force_coeff = att_kernel + rep_kernel
++        force_coeff = rep_kernel  # Repulsion only from PyKeOps
+         
+         # Apply distance cutoff for efficiency (soft cutoff)
+         cutoff_val = float(self.cutoff)
+@@ -286,11 +373,11 @@ class DiRePyTorch(TransformerMixin):
+         force_dir = diff / D_ij_safe
+         
+         # Compute forces: F = coeff * direction
+-        forces = (force_coeff * force_dir).sum(1)
++        rep_forces = (force_coeff * force_dir).sum(1)
++        forces += rep_forces
+         
+         # Apply cooling and clipping
+         forces = alpha * forces
+-        forces = torch.clamp(forces, -cutoff_val, cutoff_val)
+         
+         return forces
+     
+@@ -391,6 +478,9 @@ class DiRePyTorch(TransformerMixin):
+         # Find distribution kernel parameters
+         self._find_ab_params()
+         
++        # CRITICAL: Compute k-NN graph for correct attraction forces
++        self._compute_knn(self._data)
++        
+         # Initialize embedding
+         initial_embedding = self._initialize_embedding(self._data)
