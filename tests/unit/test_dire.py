@@ -220,12 +220,26 @@ class TestDiRe(unittest.TestCase):
         # Verify metric was set correctly
         self.assertEqual(reducer.metric, "linf")
 
-    def test_cosine_metric(self):
-        """Test DiRe with cosine distance metric."""
+    def test_custom_metric(self):
+        """Test DiRe with a custom distance metric."""
+        import jax.numpy as jnp
+        
+        def weighted_euclidean(y_batch, x, weights):
+            """Custom weighted Euclidean distance metric."""
+            diff = y_batch[:, jnp.newaxis, :] - x[jnp.newaxis, :, :]
+            distances = jnp.sum(weights * diff**2, axis=2)
+            # Ensure we return the same dtype as the input arrays
+            return distances.astype(x.dtype)
+        
+        # Create feature weights - emphasize some features more than others
+        feature_weights = jnp.ones(self.n_features) * 0.1  # Base weight
+        feature_weights = feature_weights.at[:5].set(2.0)  # Higher weight for first 5 features
+        
         reducer = DiRe(
             n_components=self.n_components,
             n_neighbors=self.n_neighbors,
-            metric="cosine",
+            metric=weighted_euclidean,
+            weights=feature_weights,
             sample_size=self.sample_size,
             max_iter_layout=self.max_iter_layout,
         )
@@ -240,22 +254,25 @@ class TestDiRe(unittest.TestCase):
         # Check output is finite
         self.assertTrue(np.isfinite(layout).all())
 
-        # Verify metric was set correctly
-        self.assertEqual(reducer.metric, "cosine")
+        # Verify metric was set correctly (should be the function itself)
+        self.assertEqual(reducer.metric, weighted_euclidean)
+        
+        # Check that weights are in metric_kwargs
+        self.assertIn('weights', reducer.metric_kwargs)
+        np.testing.assert_array_equal(reducer.metric_kwargs['weights'], feature_weights)
 
-    def test_builtin_metrics_differences(self):
-        """Test that different builtin metrics give different results."""
-        # Test L1 vs L2 metrics
-        reducer_l1 = DiRe(
-            n_components=self.n_components,
-            n_neighbors=self.n_neighbors,
-            metric="l1",
-            sample_size=self.sample_size,
-            max_iter_layout=self.max_iter_layout,
-        )
-        layout_l1 = reducer_l1.fit_transform(self.X)
-
-        reducer_l2 = DiRe(
+    def test_custom_metric_vs_builtin(self):
+        """Test that custom metric gives different results from builtin metrics."""
+        import jax.numpy as jnp
+        
+        def weighted_euclidean_vs_builtin(y_batch, x, weights):
+            """Custom weighted Euclidean distance - different from uniform weighting."""
+            diff = y_batch[:, jnp.newaxis, :] - x[jnp.newaxis, :, :]
+            distances = jnp.sum(weights * diff**2, axis=2)
+            return distances.astype(x.dtype)
+        
+        # Test builtin lp metric (p=2, which gives L2 squared with uniform weighting)
+        reducer_builtin = DiRe(
             n_components=self.n_components,
             n_neighbors=self.n_neighbors,
             metric="lp",
@@ -263,32 +280,58 @@ class TestDiRe(unittest.TestCase):
             sample_size=self.sample_size,
             max_iter_layout=self.max_iter_layout,
         )
-        layout_l2 = reducer_l2.fit_transform(self.X)
+        layout_builtin = reducer_builtin.fit_transform(self.X)
+
+        # Test custom metric with non-uniform weights
+        feature_weights = jnp.ones(self.n_features)
+        feature_weights = feature_weights.at[:5].set(5.0)  # Much higher weight for first 5 features
+        
+        reducer_custom = DiRe(
+            n_components=self.n_components,
+            n_neighbors=self.n_neighbors,
+            metric=weighted_euclidean_vs_builtin,
+            weights=feature_weights,
+            sample_size=self.sample_size,
+            max_iter_layout=self.max_iter_layout,
+        )
+        layout_custom = reducer_custom.fit_transform(self.X)
 
         # Both should have correct shape and be finite
-        self.assertEqual(layout_l1.shape, (self.n_samples, self.n_components))
-        self.assertEqual(layout_l2.shape, (self.n_samples, self.n_components))
-        self.assertTrue(np.isfinite(layout_l1).all())
-        self.assertTrue(np.isfinite(layout_l2).all())
+        self.assertEqual(layout_builtin.shape, (self.n_samples, self.n_components))
+        self.assertEqual(layout_custom.shape, (self.n_samples, self.n_components))
+        self.assertTrue(np.isfinite(layout_builtin).all())
+        self.assertTrue(np.isfinite(layout_custom).all())
 
-        # Results should be different (L1 vs L2 distance metrics)
+        # Results should be different (non-uniform weighting changes the relative distances)
         # Normalize layouts to account for different scales/orientations
-        layout_l1_norm = layout_l1 - layout_l1.mean(axis=0)
-        layout_l1_norm = layout_l1_norm / (layout_l1_norm.std(axis=0) + 1e-8)
-        layout_l2_norm = layout_l2 - layout_l2.mean(axis=0)
-        layout_l2_norm = layout_l2_norm / (layout_l2_norm.std(axis=0) + 1e-8)
+        layout_builtin_norm = layout_builtin - layout_builtin.mean(axis=0)
+        layout_builtin_norm = layout_builtin_norm / (layout_builtin_norm.std(axis=0) + 1e-8)
+        layout_custom_norm = layout_custom - layout_custom.mean(axis=0)
+        layout_custom_norm = layout_custom_norm / (layout_custom_norm.std(axis=0) + 1e-8)
 
         # Check that they're not identical
-        diff = np.linalg.norm(layout_l1_norm - layout_l2_norm)
-        self.assertGreater(diff, 0.01, "L1 and L2 metrics should produce different results")
+        diff = np.linalg.norm(layout_builtin_norm - layout_custom_norm)
+        self.assertGreater(diff, 0.01, "Custom weighted metric should produce different results from builtin uniform weighting")
 
     def test_all_metrics_consistency(self):
-        """Test that all built-in metrics produce valid embeddings and maintain relative cluster structure."""
+        """Test that all metrics produce valid embeddings and maintain relative cluster structure."""
+        import jax.numpy as jnp
+        
+        def hinge_distance(y_batch, x, threshold=0.5, power=2.0):
+            """Custom hinge distance metric - applies penalty only beyond threshold."""
+            diff = y_batch[:, jnp.newaxis, :] - x[jnp.newaxis, :, :]
+            l2_dist = jnp.sqrt(jnp.sum(diff**2, axis=2))
+            # Hinge loss: max(0, distance - threshold)^power
+            hinged = jnp.maximum(0, l2_dist - threshold)
+            distances = hinged**power
+            return distances.astype(x.dtype)
+        
         metrics_configs = [
             {"metric": "l1"},
             {"metric": "lp", "p": 2},
             {"metric": "linf"},
             {"metric": "cosine"},
+            {"metric": hinge_distance, "threshold": 0.8, "power": 1.5},
         ]
         
         layouts = {}
@@ -296,9 +339,17 @@ class TestDiRe(unittest.TestCase):
         # Test each metric
         for config in metrics_configs:
             metric = config["metric"]
-            metric_name = metric
-            if "p" in config:
-                metric_name += f"_p{config['p']}"
+            if callable(metric):
+                metric_name = metric.__name__
+                # Add any additional params to name
+                extra_params = {k: v for k, v in config.items() if k != "metric"}
+                if extra_params:
+                    param_str = "_".join(f"{k}{v}" for k, v in extra_params.items())
+                    metric_name += f"_{param_str}"
+            else:
+                metric_name = metric
+                if "p" in config:
+                    metric_name += f"_p{config['p']}"
                 
             reducer = DiRe(
                 n_components=self.n_components,

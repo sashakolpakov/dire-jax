@@ -8,6 +8,8 @@ for improved performance on CUDA GPUs with small to medium datasets (<100K point
 """
 
 import numpy as np
+import torch
+import torch.nn.functional as F
 from sklearn.base import TransformerMixin
 from sklearn.decomposition import PCA
 from scipy.sparse import csr_matrix
@@ -19,24 +21,13 @@ import pandas as pd
 from loguru import logger
 import gc
 
-# PyTorch imports
-try:
-    import torch
-    import torch.nn.functional as F
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
-    raise ImportError(
-        "PyTorch not available. Install PyTorch backend with: pip install dire-jax[torch]"
-    )
-
 # PyKeOps for efficient force computations
 try:
     from pykeops.torch import LazyTensor
     PYKEOPS_AVAILABLE = True
 except ImportError:
     PYKEOPS_AVAILABLE = False
-    logger.warning("PyKeOps not available. Install PyTorch backend with: pip install dire-jax[torch]")
+    logger.warning("PyKeOps not available. Install with: pip install pykeops")
 
 # Optional cuVS for large-scale k-NN
 try:
@@ -191,8 +182,25 @@ class DiRePyTorch(TransformerMixin):
     
     def _spectral_embedding_sparse(self, X):
         """Spectral embedding using sparse matrix (fallback)."""
+        # Would need k-NN graph here - simplified for now
+        n_samples = X.shape[0]
         
-        raise NotImplementedError("Sparse embedding not yet implemented")
+        # Simple distance-based affinity
+        from sklearn.metrics.pairwise import pairwise_distances
+        distances = pairwise_distances(X, metric='euclidean')
+        
+        # Convert to affinity
+        gamma = 1.0 / (2.0 * np.median(distances) ** 2)
+        affinity = np.exp(-gamma * distances ** 2)
+        
+        # Compute Laplacian eigenmaps
+        L = laplacian(affinity, normed=True)
+        eigenvalues, eigenvectors = eigsh(L, k=self.n_components + 1, which='SM')
+        
+        # Skip the first eigenvector (constant)
+        embedding = eigenvectors[:, 1:self.n_components + 1]
+        
+        return embedding
     
     def _spectral_embedding_pykeops(self, X):
         """Spectral embedding using PyKeOps for efficiency."""
@@ -292,6 +300,8 @@ class DiRePyTorch(TransformerMixin):
         
         This would be the fallback for >100K points.
         """
+        # Simplified version - would need full implementation
+        forces = torch.zeros_like(positions)
         
         # Would implement k-NN based force computation here
         # Similar to JAX version but using PyTorch operations

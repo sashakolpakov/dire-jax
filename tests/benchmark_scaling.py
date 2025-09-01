@@ -7,6 +7,7 @@ Scaling benchmark to find the breaking point of PyKeOps all-pairs computation.
 import time
 import numpy as np
 from sklearn.datasets import make_blobs
+import torch
 import psutil
 import sys
 import os
@@ -22,16 +23,8 @@ except ImportError:
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import with error handling
-try:
-    import torch
-    from dire_jax import DiRe
-    from dire_jax.dire_pytorch import DiRePyTorch
-except ImportError as e:
-    print(f"Error: PyTorch backend dependencies not available.")
-    print("Install with: pip install dire-jax[torch]")
-    print(f"Specific error: {e}")
-    sys.exit(1)
+from dire_jax import DiRe
+from dire_jax.dire_pytorch import DiRePyTorch
 
 
 def get_memory_usage():

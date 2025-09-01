@@ -1,3 +1,4 @@
+
 <!-- Logo + Project title -->
 <p align="center">
   <img src="images/logo.png" alt="DiRe-JAX logo" width="280" style="margin-bottom:10px;">
@@ -31,152 +32,126 @@
   </a>
 </p>
 
-## DImensionality REduction with JAX and PyTorch Backends
 
-DiRe-JAX provides high-performance dimensionality reduction with support for both JAX and PyTorch backends. The PyTorch backend achieves strong performance improvements (100x+ speedup) through PyKeOps integration.
+### A new DImensionality REduction package written in JAX 
 
-## Installation
+We offer a new dimension reduction tool called DiRe - JAX that is benchmarked against the existing approaches: UMAP (original and Rapids.AI versions), and tSNE (Rapids.AI version)
 
-### Standard Installation (JAX Backend)
+### Quick start
+
+Do either
+
 ```bash    
 pip install dire-jax
 ```
 
-### With Utilities
+if you need to install the main DiRe class only, or
+
 ```bash
 pip install dire-jax[utils]
 ```
 
-### PyTorch Backend (High Performance)
-```bash
-pip install dire-jax[torch]
-```
+if you also need the benchmarking utilities.
 
-### All Features
-```bash
-pip install dire-jax[all]
-# or
-pip install dire-jax[utils,torch]
-```
+> **Note**: For GPU or TPU acceleration, JAX needs to be specifically installed with hardware support. See the [JAX documentation](https://github.com/google/jax#installation) for more details on enabling GPU/TPU support.
 
-This installs PyTorch and PyKeOps for GPU-accelerated performance.
 
-> **Note**: For GPU acceleration, JAX requires hardware-specific installation. See [JAX documentation](https://github.com/google/jax#installation) for GPU/TPU support.
+Then, do the imports
 
-## Quick Start
-
-### JAX Backend
 ```python
+# your imports here ...
+
+# ... DiRe JAX import ...
 from dire_jax import DiRe
+
+# ... test dataset 
 from sklearn.datasets import make_blobs
 
-# Generate test data
-X, y = make_blobs(n_samples=10000, n_features=100, centers=12, random_state=42)
-
-# Create reducer
-reducer = DiRe(
-    n_components=2,
-    n_neighbors=16,
-    init='pca',
-    metric='lp',
-    p=2,
-    max_iter_layout=32,
-    min_dist=1e-4,
-    spread=1.0
-)
-
-# Fit and transform
-embedding = reducer.fit_transform(X)
-reducer.visualize(labels=y, point_size=4)
 ```
 
-### PyTorch Backend (High Performance)
+and afterwards, for example, try this: 
+
 ```python
-from dire_jax import DiRePyTorch as DiRe
+n_samples  = 100_000
+n_features = 1_000
+n_centers  = 12
+features_blobs, labels_blobs = make_blobs(n_samples=n_samples, n_features=n_features, centers=n_centers, random_state=42)
 
-# Drop-in replacement with same API
-reducer = DiRe(
-    n_components=2,
-    n_neighbors=16,  # Ignored for datasets <2M points
-    init='pca',
-    max_iter_layout=32,
-    force_knn_threshold=50000
-)
+reducer_blobs = DiRe(n_components=2,
+                     n_neighbors=16,
+                     init='pca',
+                     metric='lp',  # Distance metric: 'lp', 'l1', 'linf', 'cosine', or custom callable
+                     p=2,          # For lp metric, p=2 gives squared L2 distance
+                     max_iter_layout=32,
+                     min_dist=1e-4,
+                     spread=1.0,
+                     cutoff=4.0,
+                     n_sample_dirs=8,
+                     sample_size=16,
+                     neg_ratio=32,
+                     verbose=False,)
 
-embedding = reducer.fit_transform(X)
+embedding = reducer_blobs.fit_transform(features_blobs)
+reducer_blobs.visualize(labels=labels_blobs, point_size=4)
+
 ```
 
-## Distances (JAX backend)
+The output should look similar to
 
-DiRe supports multiple distance metrics:
+![12 blobs with 100k points in 1k dimensions embedded in dimension 2](images/blobs_layout.png)
 
-- `'lp'`: $p$-th power of $L_p$ distance (defaults to $p=2$ for L2/Euclidean)
-- `'l1'`: Manhattan distance
-- `'linf'`: Chebyshev distance  
+### Distance Metrics
+
+DiRe supports multiple distance metrics for k-nearest neighbor computation:
+
+- `'lp'`: $p$-th power of $L_p$ distance (requires `p` parameter, must be $\geq 2$)
+- `'l1'`: Manhattan, or $L_1$, distance
+- `'linf'`: Chebyshev, or $L_\infty$, distance
 - `'cosine'`: Cosine similarity distance
+- `custom callable`: User-defined metric function (more details in the [documentation](https://sashakolpakov.github.io/dire-jax/) ) 
 
 ```python
-# Different metric examples
+# L1 Manhattan distance
 reducer_l1 = DiRe(metric='l1')
-reducer_l2 = DiRe(metric='lp', p=2)  # L2 squared (default)
+
+# L2 squared distance (default when p=2)
+reducer_l2 = DiRe(metric='lp', p=2)
+
+# L-infinity Chebyshev distance
+reducer_linf = DiRe(metric='linf')
+
+# Cosine distance
 reducer_cosine = DiRe(metric='cosine')
 ```
 
-## Distances (PyTorch backend)
+### Documentation 
 
-Only the squared $L_2$ distance is implemented at the moment. 
+Please refer to the DiRe API [documentation](https://sashakolpakov.github.io/dire-jax/) for more instructions. 
 
-## Backend Selection Guide
+### Working paper
 
-### JAX Backend
-**Best for**: Research, built-in metrics, TPU acceleration
-- Cross-platform compatibility (CPU/GPU/TPU)
-- Multiple built-in distance metrics (lp, l1, linf, cosine)
+Our working paper is available on the arXiv. [![Paper](https://img.shields.io/badge/arXiv-read%20PDF-b31b1b.svg)](https://arxiv.org/abs/2503.03156)
 
-### PyTorch Backend 
-**Best for**: Performance-critical applications, large datasets (<2M points)
-- Requires NVIDIA GPU with CUDA support
-- Uses PyKeOps for optimized force computations
-- Automatic GPU memory threshold detection
+ Also, check out the Jupyter notebook with benchmarking results. [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](
+  https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/tests/dire_benchmarks.ipynb
+)
 
 
-## Benchmarking
+### Benchmarking and utilities
 
-Run performance comparisons:
-
+In order to run the Jupyter notebook in the ./tests folder, you need to install some extras:
 ```bash
-# Backend comparison
-python tests/test_performance.py --backend-only
-
-# Comprehensive benchmarks
-python tests/test_performance.py --detailed
-
-# Quick performance test
-python tests/test_performance.py --quick
+pip install dire-jax[utils]
 ```
 
-See the [benchmarking documentation](tests/README.md) for detailed testing options.
+This installation will give you access to the utilities (metrics and benchmarking routines) that are 
+specifically implemented to be used together with DiRe. However, some of them rely on external packages (especially for
+persistent homology computations) that may have longer runtimes. 
 
-## Documentation
+### Contributing
 
-- [API Documentation](https://sashakolpakov.github.io/dire-jax/)
-- [Working Paper](https://arxiv.org/abs/2503.03156) [![Paper](https://img.shields.io/badge/arXiv-read%20PDF-b31b1b.svg)](https://arxiv.org/abs/2503.03156)
-- [Interactive Benchmark](https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/tests/dire_benchmarks.ipynb) [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/tests/dire_benchmarks.ipynb)
+Please follow the [contibuting guide](https://sashakolpakov.github.io/dire-jax/contributing.html). Thanks!
 
-## Contributing
-
-Please follow the [contributing guide](https://sashakolpakov.github.io/dire-jax/contributing.html).
-
-## Limitations
-
-### PyTorch Backend
-- Requires NVIDIA GPU with CUDA support
-- Datasets >2M points need k-NN fallback (in development)
-- Built-in metrics only (L2 distance)
-
-### JAX Backend  
-- Performance limitations for large datasets (GPU memory tiling and batching)
-
-## Acknowledgements
+### Acknowledgement 
 
 This work is supported by the Google Cloud Research Award number GCP19980904.
