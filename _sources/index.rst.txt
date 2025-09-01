@@ -23,11 +23,17 @@ Install the main DiRe class only:
 
     pip install dire-jax
 
-If you also need benchmarking utilities:
+For benchmarking utilities:
 
 .. code-block:: bash
 
     pip install dire-jax[utils]
+
+For high-performance PyTorch backend:
+
+.. code-block:: bash
+
+    pip install dire-jax[torch]
 
 Example Usage
 ~~~~~~~~~~~~~
