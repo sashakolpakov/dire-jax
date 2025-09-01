@@ -191,25 +191,8 @@ class DiRePyTorch(TransformerMixin):
     
     def _spectral_embedding_sparse(self, X):
         """Spectral embedding using sparse matrix (fallback)."""
-        # Would need k-NN graph here - simplified for now
-        n_samples = X.shape[0]
         
-        # Simple distance-based affinity
-        from sklearn.metrics.pairwise import pairwise_distances
-        distances = pairwise_distances(X, metric='euclidean')
-        
-        # Convert to affinity
-        gamma = 1.0 / (2.0 * np.median(distances) ** 2)
-        affinity = np.exp(-gamma * distances ** 2)
-        
-        # Compute Laplacian eigenmaps
-        L = laplacian(affinity, normed=True)
-        eigenvalues, eigenvectors = eigsh(L, k=self.n_components + 1, which='SM')
-        
-        # Skip the first eigenvector (constant)
-        embedding = eigenvectors[:, 1:self.n_components + 1]
-        
-        return embedding
+        raise NotImplementedError("Sparse embedding not yet implemented")
     
     def _spectral_embedding_pykeops(self, X):
         """Spectral embedding using PyKeOps for efficiency."""
@@ -309,8 +292,6 @@ class DiRePyTorch(TransformerMixin):
         
         This would be the fallback for >100K points.
         """
-        # Simplified version - would need full implementation
-        forces = torch.zeros_like(positions)
         
         # Would implement k-NN based force computation here
         # Similar to JAX version but using PyTorch operations
