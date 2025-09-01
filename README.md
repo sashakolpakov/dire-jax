@@ -92,10 +92,10 @@ reducer.visualize(labels=y, point_size=4)
 
 ### PyTorch Backend (High Performance)
 ```python
-from dire_jax import DiRePyTorch
+from dire_jax import DiRePyTorch as DiRe
 
 # Drop-in replacement with same API
-reducer = DiRePyTorch(
+reducer = DiRe(
     n_components=2,
     n_neighbors=16,  # Ignored for datasets <2M points
     init='pca',
@@ -106,21 +106,7 @@ reducer = DiRePyTorch(
 embedding = reducer.fit_transform(X)
 ```
 
-## Performance Comparison
-
-### PyTorch vs JAX Backend (NVIDIA H100 80GB)
-
-| Dataset Size | JAX Time | PyTorch Time | Speedup |
-|-------------|----------|--------------|---------|
-| 1K samples  | 165.5s   | 0.26s        | **626x** |
-| 10K samples | 10.0s    | 0.27s        | **37x** |
-| 100K samples| ~40s     | 3.2s         | **12x** |
-| 1M samples  | N/A      | 85.8s        | - |
-| 2M samples  | N/A      | 323.9s       | - |
-
-The PyTorch backend eliminates k-NN computation overhead for datasets up to 2M points by using exact all-pairs force computation via PyKeOps.
-
-## Distance Metrics
+## Distances (JAX backend)
 
 DiRe supports multiple distance metrics:
 
@@ -136,6 +122,10 @@ reducer_l1 = DiRe(metric='l1')
 reducer_l2 = DiRe(metric='lp', p=2)  # L2 squared (default)
 reducer_cosine = DiRe(metric='cosine')
 ```
+
+## Distances (PyTorch backend)
+
+Only the squared $L_2$ distance is implemented at the moment. 
 
 ## Backend Selection Guide
 
