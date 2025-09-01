@@ -49,8 +49,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#installation-options">Installation Options</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#standard-installation">Standard Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installation-with-utilities">Installation with Utilities</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pytorch-backend-high-performance">PyTorch Backend (High Performance)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#all-features">All Features</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#development-installation">Development Installation</a></li>
 </ul>
 </li>
@@ -90,11 +88,10 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
-<p>DiRe-JAX has three sets of dependencies:</p>
+<p>DiRe-JAX has two sets of dependencies:</p>
 <ul class="simple">
 <li><p><strong>Core dependencies</strong> (required): jax, numpy, scipy, tqdm, pandas, plotly, loguru, scikit-learn</p></li>
 <li><p><strong>Utilities dependencies</strong> (optional): ripser, persim, fastdtw, fast-twed, pot</p></li>
-<li><p><strong>PyTorch backend</strong> (optional): torch, pykeops</p></li>
 </ul>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -117,22 +114,6 @@
 <h3>Installation with Utilities<a class="headerlink" href="#installation-with-utilities" title="Link to this heading"></a></h3>
 <p>To install DiRe-JAX with additional utilities for benchmarking and metrics:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dire-jax<span class="o">[</span>utils<span class="o">]</span>
-</pre></div>
-</div>
-</section>
-<section id="pytorch-backend-high-performance">
-<h3>PyTorch Backend (High Performance)<a class="headerlink" href="#pytorch-backend-high-performance" title="Link to this heading"></a></h3>
-<p>To install DiRe-JAX with PyTorch backend and PyKeOps for GPU acceleration:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dire-jax<span class="o">[</span>torch<span class="o">]</span>
-</pre></div>
-</div>
-</section>
-<section id="all-features">
-<h3>All Features<a class="headerlink" href="#all-features" title="Link to this heading"></a></h3>
-<p>To install all optional dependencies:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dire-jax<span class="o">[</span>all<span class="o">]</span>
-<span class="c1"># or</span>
-pip<span class="w"> </span>install<span class="w"> </span>dire-jax<span class="o">[</span>utils,torch<span class="o">]</span>
 </pre></div>
 </div>
 </section>

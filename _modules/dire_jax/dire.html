@@ -439,6 +439,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">make_knn_adjacency</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_ab_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spread</span><span class="p">)</span>
+        
+        <span class="c1"># Create a specialized force computation function with constants bound</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">())</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_fast_compute_forces</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">compute_forces_kernel</span><span class="p">(</span>
+                <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cached_compute_forces</span> <span class="o">=</span> <span class="n">_fast_compute_forces</span>
         <span class="c1">#</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;fit done ...&quot;</span><span class="p">)</span>
         <span class="c1">#</span>
@@ -517,12 +525,27 @@
             <span class="sa">f</span><span class="s2">&quot;[KNN] Using precision: </span><span class="si">{</span><span class="s1">&#39;float32&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;float64&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">knn_tiled</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
-            <span class="n">n_neighbors</span><span class="p">,</span>
-            <span class="n">x_tile_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
-            <span class="n">y_batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">knn_tiled</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+                <span class="n">n_neighbors</span><span class="p">,</span>
+                <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
+                <span class="n">x_tile_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">y_batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">knn_tiled</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+                <span class="n">n_neighbors</span><span class="p">,</span>
+                <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
+                <span class="n">x_tile_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">y_batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Wait until ready</span>
@@ -884,8 +907,8 @@
                     <span class="n">chunk_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">chunk_start</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
                     <span class="n">chunk_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">chunk_start</span><span class="p">,</span> <span class="n">chunk_end</span><span class="p">)</span>
 
-                    <span class="c1"># Process this chunk using our kernelized function</span>
-                    <span class="n">chunk_force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_forces</span><span class="p">(</span>
+                    <span class="c1"># Process this chunk using cached kernelized function (no method call overhead)</span>
+                    <span class="n">chunk_force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_compute_forces</span><span class="p">(</span>
                         <span class="n">init_pos_jax</span><span class="p">,</span>
                         <span class="n">chunk_indices</span><span class="p">,</span>
                         <span class="n">neighbor_indices_jax</span><span class="p">[</span><span class="n">chunk_indices</span><span class="p">],</span>
@@ -902,8 +925,8 @@
                 <span class="n">net_force</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">all_forces</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Process all points at once for smaller datasets</span>
-                <span class="n">net_force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_forces</span><span class="p">(</span>
+                <span class="c1"># Process all points at once for smaller datasets using cached function</span>
+                <span class="n">net_force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_compute_forces</span><span class="p">(</span>
                     <span class="n">init_pos_jax</span><span class="p">,</span>
                     <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">),</span>
                     <span class="n">neighbor_indices_jax</span><span class="p">,</span>

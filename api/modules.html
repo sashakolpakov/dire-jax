@@ -1591,35 +1591,109 @@ and times the embedding process.</p>
 </section>
 <section id="kernalized-knn-index">
 <h3>Kernalized kNN index<a class="headerlink" href="#kernalized-knn-index" title="Link to this heading"></a></h3>
-<p>A JAX-based implementation of efficient k-nearest neighbors.</p>
+<p>A JAX-based implementation for efficient k-nearest neighbors.</p>
 <dl class="py class">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HPIndex</span></span><a class="reference internal" href="../_modules/dire_jax/hpindex.html#HPIndex"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>A kernelized kNN index that uses batching / tiling to efficiently handle
-large datasets with limited memory usage.</p>
+<p>A high-performance kNN index that uses batching/tiling to efficiently handle
+large datasets with limited memory usage. Supports multiple distance metrics
+including Lp norms, cosine distance, and custom user-defined metrics.</p>
+<p>The index uses JAX for GPU acceleration and memory-efficient tiled computation
+to handle datasets that don’t fit in memory.</p>
+<p>Supported distance metrics:
+- ‘lp’: p-th power of Lp distance (default p=2 for squared L2)
+- ‘l1’: Manhattan/L1 distance
+- ‘linf’: Chebyshev/L-infinity distance
+- ‘cosine’: Cosine distance
+- Custom callable: User-defined metric function with signature my_metric(y_batch, x, <a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs)</p>
+<p class="rubric">Examples</p>
+<p># Default L2 squared distance
+indices, distances = HPIndex.knn_tiled(database, queries, k=10)</p>
+<p># L1 Manhattan distance
+indices, distances = HPIndex.knn_tiled(database, queries, k=10, metric=’l1’)</p>
+<p># L3 distance (3rd power)
+indices, distances = HPIndex.knn_tiled(database, queries, k=10, metric=’lp’, p=3)</p>
+<p># Cosine distance
+indices, distances = HPIndex.knn_tiled(database, queries, k=10, metric=’cosine’)</p>
+<p># Custom metric with kwargs
+def my_metric(y_batch, x, scale=1.0):</p>
+<blockquote>
+<div><p>diff = y_batch[:, jnp.newaxis, :] - x[jnp.newaxis, :, :]
+return scale * jnp.sum(diff**2, axis=2)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>indices, distances = HPIndex.knn_tiled(database, queries, k=10,</dt><dd><p>metric=my_metric, scale=2.0)</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">knn_tiled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_tile_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8192</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lp'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">metric_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/hpindex.html#HPIndex.knn_tiled"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Advanced implementation that tiles both database and query points.
-This wrapper handles the dynamic aspects before calling the JIT-compiled
-function.</p>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">knn_tiled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k=5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric='lp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_tile_size=8192</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_batch_size=1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'jax.numpy.float64'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**metric_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/hpindex.html#HPIndex.knn_tiled"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Find k-nearest neighbors using tiled computation for memory efficiency.</p>
+<p>This method tiles both database and query points to handle large datasets
+that don’t fit in memory. It uses JAX for GPU acceleration and supports
+multiple distance metrics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> – (n, d) array of database points</p></li>
-<li><p><strong>y</strong> – (m, d) array of query points</p></li>
-<li><p><strong>k</strong> – number of nearest neighbors</p></li>
-<li><p><strong>x_tile_size</strong> – size of database tiles</p></li>
-<li><p><strong>y_batch_size</strong> – size of query batches</p></li>
-<li><p><strong>metric</strong> – distance metric (“lp” for L2/Euclidean, “l1” for Manhattan, “linf” for Chebyshev, “cosine” for cosine distance)</p></li>
-<li><p><strong>**metric_kwargs</strong> – additional parameters (e.g., p for Lp norm, currently unused as p=2 is hardcoded)</p></li>
+<li><p><strong>x</strong> – (n, d) array of database points to search in</p></li>
+<li><p><strong>y</strong> – (m, d) array of query points to find neighbors for</p></li>
+<li><p><strong>k</strong> – number of nearest neighbors to find for each query point</p></li>
+<li><p><strong>metric</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><em>Callable</em></a>) – distance metric to use. Options:
+- ‘lp’: p-th power of Lp distance (default p=2 for squared L2)
+- ‘l1’: Manhattan/L1 distance
+- ‘linf’: Chebyshev/L-infinity distance
+- ‘cosine’: Cosine distance
+- callable: custom metric function with signature my_metric(y_batch, x, <a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs)</p></li>
+<li><p><strong>x_tile_size</strong> – number of database points to process in each tile (default 8192)</p></li>
+<li><p><strong>y_batch_size</strong> – number of query points to process in each batch (default 1024)</p></li>
+<li><p><strong>dtype</strong> – floating-point precision (jnp.float32 or jnp.float64)</p></li>
+<li><p><strong>**metric_kwargs</strong> – additional metric parameters:
+- p: power for ‘lp’ metric (default 2, must be &gt;= 2)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>(m, k) array of indices of nearest neighbors</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>(indices, distances) where:</dt><dd><ul class="simple">
+<li><p>indices: (m, k) array of indices of k nearest neighbors for each query point</p></li>
+<li><p>distances: (m, k) array of distances to k nearest neighbors for each query point</p></li>
+</ul>
 </dd>
 </dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If metric is unknown or if p &lt; 2 for ‘lp’ metric</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p># Find 10 nearest neighbors using default L2 squared distance
+indices, distances = HPIndex.knn_tiled(database, queries, k=10)</p>
+<p># Use L1 Manhattan distance
+indices, distances = HPIndex.knn_tiled(database, queries, k=5, metric=’l1’)</p>
+<p># Use L3 distance (3rd power)
+indices, distances = HPIndex.knn_tiled(database, queries, k=5, metric=’lp’, p=3)</p>
+<p># Use cosine distance
+indices, distances = HPIndex.knn_tiled(database, queries, k=5, metric=’cosine’)</p>
+<p># Use custom metric
+def weighted_euclidean(y_batch, x, weights):</p>
+<blockquote>
+<div><p>diff = y_batch[:, jnp.newaxis, :] - x[jnp.newaxis, :, :]
+return jnp.sum(weights * diff**2, axis=2)</p>
+</div></blockquote>
+<p>weights = jnp.array([1.0, 2.0, 0.5, …])  # feature weights
+indices, distances = HPIndex.knn_tiled(database, queries, k=5,</p>
+<blockquote>
+<div><p>metric=weighted_euclidean, weights=weights)</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For very large datasets, adjust x_tile_size and y_batch_size to fit
+your available memory. Smaller values use less memory but may be slower.</p>
+</div>
 </dd></dl>
 
 </dd></dl>

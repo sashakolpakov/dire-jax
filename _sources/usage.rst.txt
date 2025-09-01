@@ -4,24 +4,11 @@ Usage Guide
 Basic Usage
 -----------
 
-DiRe-JAX provides high-performance dimensionality reduction with JAX and PyTorch backends. The API is identical - simply import `DiRePyTorch` instead of `DiRe` for GPU-accelerated performance.
-
-JAX Backend:
+DiRe-JAX provides a high-performance dimensionality reduction tool based on JAX. Here's a quick example of how to use it:
 
 .. code-block:: python
 
     from dire_jax import DiRe
-
-PyTorch Backend (High Performance):
-
-.. code-block:: python
-
-    from dire_jax import DiRePyTorch as DiRe
-
-Here's a quick example:
-
-.. code-block:: python
-
     import numpy as np
     
     # Create some sample data

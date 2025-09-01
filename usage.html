@@ -86,17 +86,9 @@
 <h1>Usage Guide<a class="headerlink" href="#usage-guide" title="Link to this heading"></a></h1>
 <section id="basic-usage">
 <h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h2>
-<p>DiRe-JAX provides high-performance dimensionality reduction with JAX and PyTorch backends. The API is identical - simply import <cite>DiRePyTorch</cite> instead of <cite>DiRe</cite> for GPU-accelerated performance.</p>
-<p>JAX Backend:</p>
+<p>DiRe-JAX provides a high-performance dimensionality reduction tool based on JAX. Here’s a quick example of how to use it:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
-</pre></div>
-</div>
-<p>PyTorch Backend (High Performance):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRePyTorch</span> <span class="k">as</span> <span class="n">DiRe</span>
-</pre></div>
-</div>
-<p>Here’s a quick example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="c1"># Create some sample data</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>  <span class="c1"># 1000 samples in 50 dimensions</span>
