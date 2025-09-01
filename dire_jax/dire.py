@@ -69,14 +69,6 @@ class DiRe(TransformerMixin):
          - 'pca' for PCA embedding (classical, no kernel).
 
          By default, 'random'.
-    metric: (str or callable) Distance metric for k-nearest neighbor computation. Options:
-        - 'lp': p-th power of Lp distance (default p=2 for squared L2)
-        - 'l1': Manhattan/L1 distance
-        - 'linf': Chebyshev/L-infinity distance
-        - 'cosine': Cosine distance
-        - callable: Custom metric function with signature my_metric(y_batch, x, **kwargs)
-        
-        By default, 'lp'.
     sim_kernel: (callable)
         A similarity kernel function that transforms a distance metric to a similarity score.
         The function should have the form `lambda distance: float -> similarity: float`; default `None`.
@@ -100,9 +92,6 @@ class DiRe(TransformerMixin):
         Flag to enable verbose output, default `True`.
     random_state: (int)
         Random seed to make stochastic computations reproducible.
-    **metric_kwargs: Additional keyword arguments for distance metrics.
-        For 'lp' metric: p (int) - power for Lp norm (default 2, must be >= 2).
-        For custom callable metrics: any parameters needed by the metric function.
 
     Attributes
     ----------
@@ -112,11 +101,6 @@ class DiRe(TransformerMixin):
         Number of neighbors to consider in the k-nearest neighbors graph.
     init: str
         Chosen method for initial embedding.
-    metric: str or callable
-        Distance metric used for k-nearest neighbor computations.
-    metric_kwargs: dict
-        Additional parameters for the distance metric (e.g., p for 'lp' metric, 
-        or custom parameters for callable metrics).
     sim_kernel: callable
         Similarity kernel function to be used if 'init' is 'spectral', by default `None`.
     pca_kernel: callable
@@ -164,7 +148,6 @@ class DiRe(TransformerMixin):
         n_components=2,
         n_neighbors=16,
         init="random",
-        metric="lp",
         sim_kernel=None,
         pca_kernel=None,
         max_iter_layout=128,
@@ -180,7 +163,6 @@ class DiRe(TransformerMixin):
         memm=None,
         mpa=True,
         random_state=None,
-        **metric_kwargs,
     ):
         """
         Class constructor
@@ -193,10 +175,6 @@ class DiRe(TransformerMixin):
         """ Number of neighbors for kNN computations"""
         self.init = init
         """ Type of the initial embedding (PCA, random, spectral) """
-        self.metric = metric
-        """ Distance metric for kNN computations """
-        self.metric_kwargs = metric_kwargs
-        """ Additional parameters for distance metrics """
         self.sim_kernel = sim_kernel
         """ Similarity kernel """
         self.pca_kernel = pca_kernel
@@ -243,7 +221,7 @@ class DiRe(TransformerMixin):
         """ Column indices for nearest neighbors """
         self._adjacency = None
         """ kNN adjacency matrix """
-        self.random_state = None
+        self.random_state = random_state
         self.batch_size = batch_size
         #
         if my_logger is None:
@@ -351,14 +329,6 @@ class DiRe(TransformerMixin):
         self.make_knn_adjacency(batch_size=self.batch_size)
 
         self._a, self._b = self.find_ab_params(self.min_dist, self.spread)
-        
-        # Create a specialized force computation function with constants bound
-        @functools.partial(jax.jit, static_argnums=())
-        def _fast_compute_forces(positions, chunk_indices, neighbor_indices, sample_indices, alpha):
-            return compute_forces_kernel(
-                positions, chunk_indices, neighbor_indices, sample_indices, alpha, self._a, self._b
-            )
-        self._cached_compute_forces = _fast_compute_forces
         #
         self.logger.info("fit done ...")
         #
@@ -414,9 +384,8 @@ class DiRe(TransformerMixin):
         """
         self.logger.info("make_knn_adjacency ...")
 
-        # Ensure data is in the right format for HPIndex with correct precision
-        target_dtype = np.float32 if self.mpa else np.float64
-        self._data = np.ascontiguousarray(self._data.astype(target_dtype))
+        # Ensure data is in the right format for HPIndex
+        self._data = np.ascontiguousarray(self._data.astype(np.float64))
         n_neighbors = self.n_neighbors + 1  # Including the point itself
 
         # Determine appropriate batch size for memory efficiency
@@ -439,32 +408,27 @@ class DiRe(TransformerMixin):
                 self._data,
                 self._data,
                 n_neighbors,
-                metric=self.metric,
-                x_tile_size=batch_size,
-                y_batch_size=batch_size,
+                batch_size,
+                batch_size,
                 dtype=jnp.float32,
-                **self.metric_kwargs,
             )
         else:
             self._indices_jax, self._distances_jax = HPIndex.knn_tiled(
                 self._data,
                 self._data,
                 n_neighbors,
-                metric=self.metric,
-                x_tile_size=batch_size,
-                y_batch_size=batch_size,
+                batch_size,
+                batch_size,
                 dtype=jnp.float64,
-                **self.metric_kwargs,
             )
 
         # Wait until ready
         self._indices_jax.block_until_ready()
         self._distances_jax.block_until_ready()
 
-        # Store results in numpy with consistent precision
+        # Store results in numpy
         self._indices_np = device_get(self._indices_jax).astype(np.int64)
-        result_dtype = np.float32 if self.mpa else np.float64
-        self._distances_np = device_get(self._distances_jax).astype(result_dtype)
+        self._distances_np = device_get(self._distances_jax).astype(np.float64)
 
         # Extract nearest neighbor distances (excluding self)
         self._nearest_neighbor_distances = self._distances_np[:, 1:]
@@ -512,10 +476,6 @@ class DiRe(TransformerMixin):
             self.logger.info("Using standard PCA embedding...")
             pca = PCA(n_components=self.n_components)
             self._init_embedding = pca.fit_transform(self._data)
-            
-        # Convert to correct precision for MPA
-        if self.mpa:
-            self._init_embedding = self._init_embedding.astype(np.float32)
 
         self.logger.info("do_pca_embedding done ...")
 
@@ -560,10 +520,6 @@ class DiRe(TransformerMixin):
 
         # Skip the first eigenvector (corresponds to constant function)
         self._init_embedding = eigenvectors[:, 1:k]
-        
-        # Convert to correct precision for MPA
-        if self.mpa:
-            self._init_embedding = self._init_embedding.astype(np.float32)
 
         self.logger.info("do_spectral_embedding done ...")
 
@@ -584,15 +540,14 @@ class DiRe(TransformerMixin):
         """
         self.logger.info("do_random_embedding ...")
 
-        # Create a random projection matrix with correct precision
+        # Create a random projection matrix
         if self.random_state is None:
             key = random.PRNGKey(randint(0, 1000))
         else:
             key = random.PRNGKey(self.random_state)
-        target_dtype = jnp.float32 if self.mpa else jnp.float64
-        rand_basis = random.normal(key, (self.n_components, self._data_dim), dtype=target_dtype)
+        rand_basis = random.normal(key, (self.n_components, self._data_dim))
 
-        # Move data and projection matrix to device memory (data already in correct precision)
+        # Move data and projection matrix to device memory
         data_matrix = device_put(self._data)
         rand_basis = device_put(rand_basis)
 
@@ -743,19 +698,14 @@ class DiRe(TransformerMixin):
         # we shall use force_cpu only as a flag passed to the routine
         # force_cpu = force_cpu or large_dataset_mode and (jax.devices()[0].platform == 'tpu')
 
-        # Initialize and normalize positions with correct precision
-        if self.mpa:
-            target_dtype = jnp.float32
-        else:
-            target_dtype = jnp.float64
-            
+        # Initialize and normalize positions
         if force_cpu:
             self.logger.info("Forcing computations on CPU")
             cpu_device = jax.devices("cpu")[0]
-            init_pos_jax = device_put(self._init_embedding.astype(target_dtype), device=cpu_device)
+            init_pos_jax = device_put(self._init_embedding, device=cpu_device)
             neighbor_indices_jax = device_put(self._indices_np, device=cpu_device)
         else:
-            init_pos_jax = device_put(self._init_embedding.astype(target_dtype))
+            init_pos_jax = device_put(self._init_embedding)
             neighbor_indices_jax = device_put(self._indices_jax)
 
         init_pos_jax -= init_pos_jax.mean(axis=0)  # Center positions
@@ -801,8 +751,8 @@ class DiRe(TransformerMixin):
                     chunk_end = min(chunk_start + chunk_size, self._n_samples)
                     chunk_indices = jnp.arange(chunk_start, chunk_end)
 
-                    # Process this chunk using cached kernelized function (no method call overhead)
-                    chunk_force = self._cached_compute_forces(
+                    # Process this chunk using our kernelized function
+                    chunk_force = self._compute_forces(
                         init_pos_jax,
                         chunk_indices,
                         neighbor_indices_jax[chunk_indices],
@@ -819,8 +769,8 @@ class DiRe(TransformerMixin):
                 net_force = jnp.concatenate(all_forces, axis=0)
 
             else:
-                # Process all points at once for smaller datasets using cached function
-                net_force = self._cached_compute_forces(
+                # Process all points at once for smaller datasets
+                net_force = self._compute_forces(
                     init_pos_jax,
                     jnp.arange(self._n_samples),
                     neighbor_indices_jax,
@@ -880,10 +830,16 @@ class DiRe(TransformerMixin):
         jax.numpy.ndarray
             Net force vectors for each point
         """
+
+        if self.mpa:
+            positions = positions.astype(jnp.float32)
+        else:
+            positions = positions.astype(jnp.float64)
+
         self.logger.debug(f"[FORCE] Computing forces on device: {positions.device}")
         self.logger.debug(f"[FORCE] Using precision: {positions.dtype}")
 
-        # Call the JAX-optimized kernel directly (positions already in correct precision)
+        # Call the JAX-optimized kernel
         return compute_forces_kernel(
             positions,
             chunk_indices,

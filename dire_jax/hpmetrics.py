@@ -919,15 +919,13 @@ def compute_quality_measures(data, layout, n_neighbors=None):
             violators = list(ld_neighbors - hd_neighbors)
             
             if violators:
-                # Compute distances only to violators in the original space
-                violator_dists = np.linalg.norm(data_np[violators] - data_np[i], axis=1)
-                
-                for idx, j in enumerate(violators):
-                    # Get distance to this violator
-                    dist_to_j = violator_dists[idx]
-                    
-                    # Count how many k-NN points are closer than this violator
-                    orig_rank = np.sum(hd_distances[i] < dist_to_j)
+                # Get the distances to violators in the original space
+                for j in violators:
+                    # Calculate rank based on distance
+                    orig_dists = hd_distances[i]
+                    dist_to_j = orig_dists[j]
+                    # Count how many points are closer than j to i
+                    orig_rank = np.sum(orig_dists < dist_to_j)
                     
                     # Penalty based on how far j is in original space
                     trust_sum += (orig_rank - n_neighbors)
@@ -956,15 +954,13 @@ def compute_quality_measures(data, layout, n_neighbors=None):
             violators = list(hd_neighbors - ld_neighbors)
             
             if violators:
-                # Compute distances only to violators in the embedding
-                violator_dists = np.linalg.norm(layout_np[violators] - layout_np[i], axis=1)
-                
-                for idx, j in enumerate(violators):
-                    # Get distance to this violator
-                    dist_to_j = violator_dists[idx]
-                    
-                    # Count how many k-NN points are closer than this violator
-                    embed_rank = np.sum(ld_distances[i] < dist_to_j)
+                # Get the distances to violators in the embedding
+                for j in violators:
+                    # Calculate rank based on distance
+                    embed_dists = ld_distances[i]
+                    dist_to_j = embed_dists[j]
+                    # Count how many points are closer than j to i
+                    embed_rank = np.sum(embed_dists < dist_to_j)
                     
                     # Penalty based on how far j is in the embedding
                     cont_sum += (embed_rank - n_neighbors)

@@ -7,13 +7,6 @@ A JAX-based dimensionality reducer.
 
 from .dire import DiRe  # core class import
 
-# Attempt to import PyTorch backend
-try:
-    from .dire_pytorch import DiRePyTorch
-    HAS_PYTORCH = True
-except ImportError:
-    HAS_PYTORCH = False
-
 # Attempt to import optional utilities, set a flag accordingly
 try:
     from . import dire_utils
@@ -30,9 +23,4 @@ if not HAS_UTILS:
         UserWarning
     )
 
-# Build __all__ based on available modules
-__all__ = ['DiRe']
-if HAS_PYTORCH:
-    __all__.append('DiRePyTorch')
-if HAS_UTILS:
-    __all__.append('dire_utils')
+__all__ = ['DiRe', 'dire_utils'] if HAS_UTILS else ['DiRe']

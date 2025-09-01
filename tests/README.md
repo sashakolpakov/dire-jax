@@ -38,51 +38,33 @@ from dire_jax import DiRe
 
 # Initialize with memory-efficient options
 reducer = DiRe(
-    n_components=2,
+    dimension=2,
     n_neighbors=16,
-    init='pca',
-    metric='lp',     # Distance metric: 'lp', 'l1', 'linf', 'cosine', or custom callable
-    p=2,             # For lp metric, p=2 gives squared L2 distance
-    max_iter_layout=32,
-    batch_size=5000
+    init_embedding_type='pca',
+    max_iter_layout=32
 )
 
-# Use fit_transform with automatic memory-efficient mode for large datasets
-layout = reducer.fit_transform(data)
+# Use batch processing for kNN computation
+reducer.make_knn_adjacency(batch_size=5000)
+
+# Use memory-efficient layout optimization
+reducer.fit(data)
+layout = reducer.transform()  # This will use memory-efficient mode for large datasets
 ```
 
-Or configure batch processing explicitly:
+Or combine everything in a single call with memory-efficient options:
 
 ```python
 # Create a reducer for large datasets
 reducer = DiRe(
-    n_components=2,
+    dimension=2,
     n_neighbors=16,
-    init='pca',
-    metric='lp',     # Distance metric: 'lp', 'l1', 'linf', 'cosine', or custom callable  
-    p=2,             # For lp metric, p=2 gives squared L2 distance
-    max_iter_layout=32,
-    batch_size=5000
+    init_embedding_type='pca',
+    max_iter_layout=32
 )
 
 # Apply fit_transform with memory-efficient options
 layout = reducer.fit_transform(data)
-
-# Custom distance metrics can also be used:
-import jax.numpy as jnp
-
-def weighted_euclidean(y_batch, x, weights):
-    """Custom weighted Euclidean distance."""
-    diff = y_batch[:, jnp.newaxis, :] - x[jnp.newaxis, :, :]
-    return jnp.sum(weights * diff**2, axis=2)
-
-# Use custom metric
-feature_weights = jnp.ones(data.shape[1])  # Example weights
-reducer_custom = DiRe(
-    n_components=2,
-    metric=weighted_euclidean,
-    weights=feature_weights
-)
 
 # Compute metrics with memory-efficient option
 from dire_jax.hpmetrics import compute_local_metrics
