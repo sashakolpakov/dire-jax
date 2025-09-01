@@ -351,14 +351,6 @@ class DiRe(TransformerMixin):
         self.make_knn_adjacency(batch_size=self.batch_size)
 
         self._a, self._b = self.find_ab_params(self.min_dist, self.spread)
-        
-        # Create a specialized force computation function with constants bound
-        @functools.partial(jax.jit, static_argnums=())
-        def _fast_compute_forces(positions, chunk_indices, neighbor_indices, sample_indices, alpha):
-            return compute_forces_kernel(
-                positions, chunk_indices, neighbor_indices, sample_indices, alpha, self._a, self._b
-            )
-        self._cached_compute_forces = _fast_compute_forces
         #
         self.logger.info("fit done ...")
         #
@@ -801,8 +793,8 @@ class DiRe(TransformerMixin):
                     chunk_end = min(chunk_start + chunk_size, self._n_samples)
                     chunk_indices = jnp.arange(chunk_start, chunk_end)
 
-                    # Process this chunk using cached kernelized function (no method call overhead)
-                    chunk_force = self._cached_compute_forces(
+                    # Process this chunk using our kernelized function
+                    chunk_force = self._compute_forces(
                         init_pos_jax,
                         chunk_indices,
                         neighbor_indices_jax[chunk_indices],
@@ -819,8 +811,8 @@ class DiRe(TransformerMixin):
                 net_force = jnp.concatenate(all_forces, axis=0)
 
             else:
-                # Process all points at once for smaller datasets using cached function
-                net_force = self._cached_compute_forces(
+                # Process all points at once for smaller datasets
+                net_force = self._compute_forces(
                     init_pos_jax,
                     jnp.arange(self._n_samples),
                     neighbor_indices_jax,
