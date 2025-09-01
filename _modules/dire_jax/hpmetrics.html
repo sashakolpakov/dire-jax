@@ -1,0 +1,1219 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dire_jax.hpmetrics &mdash; dire-jax 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            dire-jax
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../benchmarking.html">Benchmarking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">dire-jax</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">dire_jax.hpmetrics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dire_jax.hpmetrics</h1><div class="highlight"><pre>
+<span></span><span class="c1"># hpmetrics.py</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Auxiliary functions for high-performance benchmarking metrics</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1"># Imports</span>
+<span class="c1">#</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span><span class="p">,</span> <span class="n">lax</span><span class="p">,</span> <span class="n">random</span><span class="p">,</span> <span class="n">device_get</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ripser</span><span class="w"> </span><span class="kn">import</span> <span class="n">ripser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastdtw</span><span class="w"> </span><span class="kn">import</span> <span class="n">fastdtw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">twed</span><span class="w"> </span><span class="kn">import</span> <span class="n">twed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persim</span><span class="w"> </span><span class="kn">import</span> <span class="n">wasserstein</span><span class="p">,</span> <span class="n">bottleneck</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.svm</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearSVC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">accuracy_score</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.hpindex</span><span class="w"> </span><span class="kn">import</span> <span class="n">HPIndex</span>
+
+<span class="c1">#</span>
+<span class="c1"># Auxiliary functions</span>
+<span class="c1">#</span>
+
+
+<div class="viewcode-block" id="welford_update">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.welford_update">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">welford_update</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">new_value</span><span class="p">,</span> <span class="n">finite_threshold</span><span class="o">=</span><span class="mf">1e12</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update running mean and variance using Welford&#39;s algorithm,</span>
+<span class="sd">    ignoring values beyond the given finite_threshold.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    carry : tuple(int, float, float)</span>
+<span class="sd">        (count, mean, M2) — intermediate stats.</span>
+<span class="sd">    new_value : float</span>
+<span class="sd">        Incoming value to incorporate.</span>
+<span class="sd">    finite_threshold : float</span>
+<span class="sd">        Max magnitude allowed for inclusion.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    (carry, None): Updated carry and dummy output for lax.scan.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">M2</span><span class="p">)</span> <span class="o">=</span> <span class="n">carry</span>
+    <span class="n">is_finite</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">finite_threshold</span><span class="p">)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="n">is_finite</span>  <span class="c1"># Only increment count if new_value is not too large</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">new_value</span> <span class="o">-</span> <span class="n">mean</span>
+    <span class="n">mean</span> <span class="o">+=</span> <span class="n">delta</span> <span class="o">*</span> <span class="n">is_finite</span> <span class="o">/</span> <span class="n">count</span>
+    <span class="n">delta2</span> <span class="o">=</span> <span class="n">new_value</span> <span class="o">-</span> <span class="n">mean</span>
+    <span class="n">M2</span> <span class="o">+=</span> <span class="n">delta</span> <span class="o">*</span> <span class="n">delta2</span> <span class="o">*</span> <span class="n">is_finite</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">M2</span><span class="p">),</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="welford_finalize">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.welford_finalize">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">welford_finalize</span><span class="p">(</span><span class="n">agg</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finalize the computation of mean and variance from the aggregate statistics.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    agg: (tuple) A tuple containing the aggregated statistics:</span>
+<span class="sd">                 - count: (int) The total count of valid (non-NaN) entries.</span>
+<span class="sd">                 - mean: (float) The computed mean of the dataset.</span>
+<span class="sd">                 - M2: (float) The computed sum of squares of differences from the mean.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple: A tuple containing the final mean and standard deviation of the dataset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">count</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">M2</span> <span class="o">=</span> <span class="n">agg</span>
+    <span class="n">variance</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">M2</span> <span class="o">/</span> <span class="p">(</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="welford">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.welford">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">welford</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the mean and standard deviation of a dataset using Welford&#39;s algorithm.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: (jax.numpy.ndarray) An array of data points, potentially containing NaNs which are ignored.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple: A tuple containing the mean and standard deviation of the valid entries in the dataset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">init_agg</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>  <span class="c1"># initial aggregate: count, mean, M2</span>
+    <span class="n">agg</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="n">welford_update</span><span class="p">,</span> <span class="n">init_agg</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">welford_finalize</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Local metrics (based on the kNN graph) </span>
+<span class="c1">#</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Make the kNN graph of given data with k=n_neighbors</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="make_knn_graph">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.make_knn_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_knn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the distances to nearest neighbors and their indices in the kNN graph of data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : numpy.ndarray</span>
+<span class="sd">        High-dimensional data points.</span>
+<span class="sd">    n_neighbors : int</span>
+<span class="sd">        Number of nearest neighbors to find for each point.</span>
+<span class="sd">    batch_size : int or None, optional</span>
+<span class="sd">        Number of samples to process at once. If None, a suitable value</span>
+<span class="sd">        will be automatically determined based on dataset size.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray, numpy.ndarray</span>
+<span class="sd">        Tuple containing:</span>
+<span class="sd">        - distances: Array of shape (n_samples, n_neighbors+1) with distances to nearest neighbors</span>
+<span class="sd">        - indices: Array of shape (n_samples, n_neighbors+1) with indices of nearest neighbors</span>
+<span class="sd">        </span>
+<span class="sd">        The first column contains each point&#39;s self-reference (distance 0.0 and own index).</span>
+<span class="sd">        The remaining columns contain the n_neighbors nearest neighbors in ascending order of distance.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get data size</span>
+    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Determine appropriate batch size for memory efficiency</span>
+    <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Process in chunks to reduce peak memory usage</span>
+        <span class="k">if</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;tpu&#39;</span><span class="p">:</span>
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">8192</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;gpu&#39;</span><span class="p">:</span>
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">16384</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">8192</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
+
+    <span class="c1"># Convert data to the required format for kNN search</span>
+    <span class="n">data_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+
+    <span class="n">jax_indices</span><span class="p">,</span> <span class="n">jax_distances</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">knn_tiled</span><span class="p">(</span>
+        <span class="n">data_np</span><span class="p">,</span> <span class="n">data_np</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
+
+    <span class="n">jax_indices</span> <span class="o">=</span> <span class="n">jax_indices</span><span class="o">.</span><span class="n">block_until_ready</span><span class="p">()</span>
+    <span class="n">jax_distances</span> <span class="o">=</span> <span class="n">jax_distances</span><span class="o">.</span><span class="n">block_until_ready</span><span class="p">()</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">device_get</span><span class="p">(</span><span class="n">jax_indices</span><span class="p">)</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">device_get</span><span class="p">(</span><span class="n">jax_distances</span><span class="p">)</span>
+
+    <span class="c1"># Clean up resources</span>
+    <span class="k">del</span> <span class="n">jax_indices</span><span class="p">,</span> <span class="n">jax_distances</span>
+    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">distances</span><span class="p">,</span> <span class="n">indices</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Embedding stress</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_stress">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_stress">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_stress</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the stress of an embedding based on the distances in the original high-dimensional</span>
+<span class="sd">    space and the embedded space, using a ratio of distances.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: (numpy.ndarray) High-dimensional data points.</span>
+<span class="sd">    layout: (numpy.ndarray) Embedded data points.</span>
+<span class="sd">    n_neighbors: (int) Number of nearest neighbors to consider for each point.</span>
+<span class="sd">    eps: (float) Parameter to prevent zero division if mean distortion is near zero, default 1e-6.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float: The normalized stress value indicating the quality of the embedding.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Computing kNN distances and indices for higher-dimensional data</span>
+    <span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+
+    <span class="c1"># HPIndex returns L2 distances squared (sic!)</span>
+    <span class="c1"># Higher-dimensional distances</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
+
+    <span class="c1"># Lower-dimensional distances</span>
+    <span class="n">distances_emb</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">layout</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">layout</span><span class="p">[</span><span class="n">indices</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Removing zero distance to self</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">distances</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+    <span class="n">distances_emb</span> <span class="o">=</span> <span class="n">distances_emb</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># Computing normalized (= scaling adjusted) stress</span>
+    <span class="n">ratios</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">distances</span> <span class="o">/</span> <span class="n">distances_emb</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">stress_mean</span><span class="p">,</span> <span class="n">stress_std</span> <span class="o">=</span> <span class="n">welford</span><span class="p">(</span><span class="n">ratios</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+
+    <span class="c1"># Avoiding division by 0 if stress is small</span>
+    <span class="n">stress_normalized</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="k">if</span> <span class="n">stress_mean</span> <span class="o">&lt;</span> <span class="n">eps</span> <span class="k">else</span> <span class="n">stress_std</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="n">stress_mean</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">stress_normalized</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Neighborhood preservation score</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_neighbor_score">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_neighbor_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_neighbor_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the neighborhood preservation score between high-dimensional data and its corresponding low-dimensional</span>
+<span class="sd">    layout.</span>
+<span class="sd">    </span>
+<span class="sd">    The function evaluates how well the neighborhood relationships are preserved when data is projected from</span>
+<span class="sd">    a high-dimensional space to a lower-dimensional space using the K-nearest neighbors approach. This involves</span>
+<span class="sd">    comparing the nearest neighbors in the original space with those in the reduced space.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: (numpy.ndarray) A NumPy array of shape (n_samples, data_dim) containing</span>
+<span class="sd">                        the original high-dimensional data.</span>
+<span class="sd">    layout: (numpy.ndarray) A NumPy array of shape (n_samples, embed_dim) containing</span>
+<span class="sd">                        the lower-dimensional embedding of the data.</span>
+<span class="sd">    n_neighbors: (int) The number of nearest neighbors to consider for each data point.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list: A list containing two floats:</span>
+<span class="sd">          - neighbor_mean: (float) The mean of the neighborhood preservation scores.</span>
+<span class="sd">          - neighbor_std: (float) The standard deviation of the neighborhood preservation scores.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Computing kNN indices for higher-dimensional data</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">indices_data</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+    <span class="c1"># Removing self from the set of indices</span>
+    <span class="n">indices_data</span> <span class="o">=</span> <span class="n">indices_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># Computing kNN indices for the layout</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">indices_embed</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+    <span class="c1"># Removing self from the set of indices</span>
+    <span class="n">indices_embed</span> <span class="o">=</span> <span class="n">indices_embed</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># Sorting indices for efficient search</span>
+    <span class="n">indices_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">indices_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">indices_embed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">indices_embed</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Compute preservation scores for each point neighborhood</span>
+    <span class="n">preservation_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">indices_data</span> <span class="o">==</span> <span class="n">indices_embed</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Mean and std over all points</span>
+    <span class="n">neighbor_mean</span><span class="p">,</span> <span class="n">neighbor_std</span> <span class="o">=</span> <span class="n">welford</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">preservation_scores</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">neighbor_mean</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">neighbor_std</span><span class="o">.</span><span class="n">item</span><span class="p">()]</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Computing local metrics based on the kNN graph:</span>
+<span class="c1">#</span>
+<span class="c1"># 1. Embedding stress (scaling adjusted);</span>
+<span class="c1"># 2. Neighborhood preservation score (mean, std).</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_local_metrics">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_local_metrics">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_local_metrics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">memory_efficient</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute local metrics of the (data, layout) pair.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: (numpy.ndarray) High-dimensional data points.</span>
+<span class="sd">    layout: (numpy.ndarray) Low-dimensional data points corresponding to the high-dimensional data.</span>
+<span class="sd">    n_neighbors: (int) Number of closest neighbors for the kNN graph.</span>
+<span class="sd">    memory_efficient: (bool or None) If True, use memory-efficient algorithms for large datasets.</span>
+<span class="sd">                     If None, automatically determine based on dataset size.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict: A dictionary containing computed scores of each type (stress, neighborhood preservation).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Determine if we should use memory-efficient mode for large datasets</span>
+    <span class="k">if</span> <span class="n">memory_efficient</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">memory_efficient</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">32768</span>
+
+    <span class="c1"># For very large datasets, subsample before computing metrics</span>
+    <span class="k">if</span> <span class="n">memory_efficient</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">131072</span><span class="p">:</span>
+        <span class="c1"># Use a reasonable sample size that maintains statistical validity</span>
+        <span class="n">sample_size</span> <span class="o">=</span> <span class="mi">32768</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sample_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">data_sample</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+        <span class="n">layout_sample</span> <span class="o">=</span> <span class="n">layout</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stress&#39;</span><span class="p">:</span> <span class="n">compute_stress</span><span class="p">(</span><span class="n">data_sample</span><span class="p">,</span> <span class="n">layout_sample</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">),</span>
+                   <span class="s1">&#39;neighbor&#39;</span><span class="p">:</span> <span class="n">compute_neighbor_score</span><span class="p">(</span><span class="n">data_sample</span><span class="p">,</span> <span class="n">layout_sample</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">),</span>
+                   <span class="s1">&#39;note&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Metrics computed on </span><span class="si">{</span><span class="n">sample_size</span><span class="si">}</span><span class="s2"> randomly sampled points due to large dataset size&quot;</span><span class="p">}</span>
+
+        <span class="c1"># Add note about subsampling</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;stress&#39;</span><span class="p">:</span> <span class="n">compute_stress</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">),</span>
+            <span class="s1">&#39;neighbor&#39;</span><span class="p">:</span> <span class="n">compute_neighbor_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+        <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">metrics</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Global metrics based on persistence (co)homology</span>
+<span class="c1">#</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Auxiliary functions</span>
+<span class="c1">#</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Bernoulli trial subsampling</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="threshold_subsample">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.threshold_subsample">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">threshold_subsample</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Subsample multiple arrays based on a specified threshold.</span>
+<span class="sd">    The function generates random numbers and selects the samples where the random number is less than the threshold.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    *arrays: (tuple of numpy.ndarray)</span>
+<span class="sd">        The input data arrays to be subsampled. Each array should have the same number of samples (rows).</span>
+<span class="sd">    threshold: (float)</span>
+<span class="sd">        Probability threshold for subsampling; only samples with generated random numbers below this value are kept.</span>
+<span class="sd">    rng_key: Random key or random generator used for generating random numbers, ensuring reproducibility.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple: A tuple containing the subsampled arrays in the same order as the input arrays.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check that all arrays have the same number of samples</span>
+    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">arrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">n_samples</span><span class="p">,</span> <span class="s2">&quot;All input arrays must have the same number of rows.&quot;</span>
+
+    <span class="n">random_numbers</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">rng_key</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,))</span>
+    <span class="n">selected_indices</span> <span class="o">=</span> <span class="n">random_numbers</span> <span class="o">&lt;</span> <span class="n">threshold</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">selected_indices</span><span class="p">]</span> <span class="k">for</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Producing diagrams in dimensions up to dim (inclusive) for data and layout</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="diagrams">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.diagrams">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">diagrams</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">max_dim</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate persistence diagrams for high-dimensional and low-dimensional data up to a specified dimension,</span>
+<span class="sd">    after subsampling both datasets based on a threshold. The subsampling is performed to reduce the dataset size</span>
+<span class="sd">    and potentially highlight more relevant features when computing topological summaries.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: (numpy.ndarray) High-dimensional data points.</span>
+<span class="sd">    layout: (numpy.ndarray) Low-dimensional data points corresponding to the high-dimensional data.</span>
+<span class="sd">    max_dim: (int) Maximum dimension of homology groups to compute.</span>
+<span class="sd">    subsample_threshold: (float) Threshold used for subsampling the data points.</span>
+<span class="sd">    rng_key: Random key used for generating random numbers for subsampling, ensuring reproducibility.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict: A dictionary containing two keys, &#39;data&#39; and &#39;layout&#39;, each associated with arrays of persistence diagrams</span>
+<span class="sd">          for the respective high-dimensional and low-dimensional datasets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data_hd</span><span class="p">,</span> <span class="n">data_ld</span> <span class="o">=</span> <span class="n">threshold_subsample</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span>
+                                           <span class="n">threshold</span><span class="o">=</span><span class="n">subsample_threshold</span><span class="p">,</span>
+                                           <span class="n">rng_key</span><span class="o">=</span><span class="n">rng_key</span><span class="p">)</span>
+
+    <span class="n">diags_hd</span> <span class="o">=</span> <span class="n">ripser</span><span class="p">(</span><span class="n">data_hd</span><span class="p">,</span> <span class="n">maxdim</span><span class="o">=</span><span class="n">max_dim</span><span class="p">)[</span><span class="s1">&#39;dgms&#39;</span><span class="p">]</span>
+    <span class="n">diags_ld</span> <span class="o">=</span> <span class="n">ripser</span><span class="p">(</span><span class="n">data_ld</span><span class="p">,</span> <span class="n">maxdim</span><span class="o">=</span><span class="n">max_dim</span><span class="p">)[</span><span class="s1">&#39;dgms&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">diags_hd</span><span class="p">,</span> <span class="s1">&#39;layout&#39;</span><span class="p">:</span> <span class="n">diags_ld</span><span class="p">}</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Betti curve of a diagram (in a single given dimension)</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="betti_curve">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.betti_curve">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">betti_curve</span><span class="p">(</span><span class="n">diagram</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the Betti curve from a persistence diagram, which is a function of the number of features</span>
+<span class="sd">    that persist at different filtration levels. This curve provides a summary of topological features</span>
+<span class="sd">    across scales.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    diagram: (list of tuples) A persistence diagram represented as a list of tuples (birth, death) indicating</span>
+<span class="sd">                              the range over which each topological feature persists.</span>
+<span class="sd">    n_steps: (int, optional) The number of steps or points in the filtration range at which to evaluate the Betti number.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple: A tuple of two numpy arrays:</span>
+<span class="sd">        - The first array represents the evenly spaced filtration values.</span>
+<span class="sd">        - The second array represents the Betti numbers at each filtration value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">diagram</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
+    <span class="n">max_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">diagram</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">])</span>
+    <span class="n">axis_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_dist</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">)</span>
+    <span class="n">axis_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axis_x</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">diagram</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">axis_y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">axis_x</span><span class="p">,</span> <span class="n">axis_y</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Metrics (DTW, TWED, Wasserstein, etc) on Betti curves and persistence diagrams</span>
+<span class="c1">#</span>
+
+<span class="c1">#</span>
+<span class="c1"># Compute normalized Dynamic Time Warp (DTW) distance (using Euclidean metric)</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_dtw">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_dtw">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_dtw</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute normalized Dynamic Time Warp (DTW) distance (using Euclidean metric)</span>
+<span class="sd">    between two Betti curves represented as time series with time dimension x and values y.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    axis_x_hd: (numpy.ndarray) Time axis of the high-dimensional Betti curve.</span>
+<span class="sd">    axis_y_hd: (numpy.ndarray) Values of the high-dimensional Betti curve.</span>
+<span class="sd">    axis_x_ld: (numpy.ndarray) Time axis of the low-dimensional Betti curve.</span>
+<span class="sd">    axis_y_ld: (numpy.ndarray) Values of the low-dimensional Betti curve.</span>
+<span class="sd">    norm_factor: (float) Normalization factor, default 1.0.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float: Normalized DTW distance between two Betti curves.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">seq0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">)))</span>
+    <span class="n">seq1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">)))</span>
+    <span class="n">dist_dtw</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">fastdtw</span><span class="p">(</span><span class="n">seq0</span><span class="p">,</span> <span class="n">seq1</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># dist_dtw recorded, path unused</span>
+    <span class="n">dist_dtw</span> <span class="o">*=</span> <span class="n">norm_factor</span>
+
+    <span class="k">return</span> <span class="n">dist_dtw</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Compute normalized Time Warp Edit Distance (TWED) using Euclidean metric</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_twed">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_twed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_twed</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute normalized Time Warp Edit Distance (TWED) distance using Euclidean metric</span>
+<span class="sd">    between two Betti curves represented as time series with time dimension x and values y.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    axis_x_hd: (numpy.ndarray) Time axis of the high-dimensional Betti curve.</span>
+<span class="sd">    axis_y_hd: (numpy.ndarray) Values of the high-dimensional Betti curve.</span>
+<span class="sd">    axis_x_ld: (numpy.ndarray) Time axis of the low-dimensional Betti curve.</span>
+<span class="sd">    axis_y_ld: (numpy.ndarray) Values of the low-dimensional Betti curve.</span>
+<span class="sd">    norm_factor: (float) Normalization factor, default 1.0.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float: Normalized TWED distance between two Betti curves.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dist_twed</span> <span class="o">=</span> <span class="n">twed</span><span class="p">(</span><span class="n">axis_y_hd</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                     <span class="n">axis_y_ld</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                     <span class="n">axis_x_hd</span><span class="p">,</span>
+                     <span class="n">axis_x_ld</span><span class="p">,</span>
+                     <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                     <span class="p">)</span>
+    <span class="n">dist_twed</span> <span class="o">*=</span> <span class="n">norm_factor</span>
+
+    <span class="k">return</span> <span class="n">dist_twed</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Compute normalized Earth Mover Distance (EMD) distance (using Euclidean metric)</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_emd">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_emd">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_emd</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">adjust_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute normalized Earth Mover Distance (EMD) distance (using Euclidean metric)</span>
+<span class="sd">    between two Betti curves represented as time series with time dimension x and values y.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    axis_x_hd: (numpy.ndarray) Time axis of the high-dimensional Betti curve.</span>
+<span class="sd">    axis_y_hd: (numpy.ndarray) Values of the high-dimensional Betti curve.</span>
+<span class="sd">    axis_x_ld: (numpy.ndarray) Time axis of the low-dimensional Betti curve.</span>
+<span class="sd">    axis_y_ld: (numpy.ndarray) Values of the low-dimensional Betti curve.</span>
+<span class="sd">    adjust_mass: (bool) Use to adjust mass (by default, EMD is computed for unit mass curves);</span>
+<span class="sd">                default `False`.</span>
+<span class="sd">    norm_factor: (float) Normalization factor, default 1.0.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float: Normalized EMD distance between two Betti curves.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sum_hd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis_y_hd</span><span class="p">)</span>
+    <span class="n">sum_ld</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis_y_ld</span><span class="p">)</span>
+    <span class="n">axis_y_hd_</span> <span class="o">=</span> <span class="n">axis_y_hd</span> <span class="o">/</span> <span class="n">sum_hd</span>
+    <span class="n">axis_y_ld_</span> <span class="o">=</span> <span class="n">axis_y_ld</span> <span class="o">/</span> <span class="n">sum_ld</span>
+    <span class="n">dist_emd</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">emd2_1d</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_hd_</span><span class="p">,</span> <span class="n">axis_y_ld_</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">adjust_mass</span><span class="p">:</span>
+        <span class="n">dist_emd</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">sum_hd</span> <span class="o">/</span> <span class="n">sum_ld</span><span class="p">,</span> <span class="n">sum_ld</span> <span class="o">/</span> <span class="n">sum_hd</span><span class="p">])</span>
+    <span class="n">dist_emd</span> <span class="o">*=</span> <span class="n">norm_factor</span>
+
+    <span class="k">return</span> <span class="n">dist_emd</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Compute normalized Wasserstein distance</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_wasserstein">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_wasserstein">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_wasserstein</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute normalized Wasserstein distance between two persistence diagrams</span>
+<span class="sd">    (usually one of high-dimensional data and one of low-dimensional data).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    diag_hd: (list of tuples) Persistence diagram for the high-dimensional data.</span>
+<span class="sd">    diag_ld: (list of tuples) Persistence diagram for the low-dimensional data.</span>
+<span class="sd">    norm_factor: (float) Normalization factor, default 1.0.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float: Normalized Wasserstein distance between persistence diagrams.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dist_wass</span> <span class="o">=</span> <span class="n">wasserstein</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">)</span>
+    <span class="n">dist_wass</span> <span class="o">*=</span> <span class="n">norm_factor</span>
+
+    <span class="k">return</span> <span class="n">dist_wass</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Compute normalized bottleneck distance</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_bottleneck">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_bottleneck">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_bottleneck</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute normalized bottleneck distance between two persistence diagrams</span>
+<span class="sd">    (usually one of high-dimensional data and one of low-dimensional data).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    diag_hd: (list of tuples) Persistence diagram for the high-dimensional data.</span>
+<span class="sd">    diag_ld: (list of tuples) Persistence diagram for the low-dimensional data.</span>
+<span class="sd">    norm_factor: (float) Normalization factor, default 1.0.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float: Normalized bottleneck distance between persistence diagrams.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dist_bott</span> <span class="o">=</span> <span class="n">bottleneck</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">)</span>
+    <span class="n">dist_bott</span> <span class="o">*=</span> <span class="n">norm_factor</span>
+
+    <span class="k">return</span> <span class="n">dist_bott</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Computing global metrics based on persistence homology:</span>
+<span class="c1">#</span>
+<span class="c1"># 1. DTW, TWED, EMD for Betti curves;</span>
+<span class="c1"># 2. Wasserstein, bottleneck for diagrams.</span>
+<span class="c1">#</span>
+<span class="c1"># together with diagrams and Betti curves, if necessary.</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_global_metrics">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_global_metrics">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_global_metrics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">metrics_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute and compare persistence metrics between high-dimensional and low-dimensional data representations.</span>
+<span class="sd">    The function calculates the Dynamic Time Warp (DTW), Time Warp Edit Distance (TWED), and Earth Mover Distance</span>
+<span class="sd">    based on Betti curves derived from persistence diagrams. The function also calculate the Wasserstein distance</span>
+<span class="sd">    and the bottleneck distance based on persistence diagrams. This evaluation helps quantify the topological</span>
+<span class="sd">    fidelity of dimensionality reduction.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: (numpy.ndarray) High-dimensional data points.</span>
+<span class="sd">    layout: (numpy.ndarray) Low-dimensional data points corresponding to the high-dimensional data.</span>
+<span class="sd">    dimension: (int) The maximum dimension for which to compute persistence diagrams.</span>
+<span class="sd">    subsample_threshold: (float) Threshold used for subsampling the data.</span>
+<span class="sd">    rng_key: Random key used for generating random numbers for subsampling, ensuring reproducibility.</span>
+<span class="sd">    n_steps: (int, optional) The number of steps or points in the filtration range for computing Betti curves.</span>
+<span class="sd">    metrics_only: (bool) If True, return metrics only; otherwise diagrams and Betti curves are also returned;</span>
+<span class="sd">                default `True`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    If metrics_only is True:</span>
+<span class="sd">        dict(dict): A dictionary containing one item &#39;metrics&#39; that is a dictionary of lists of computed distances for</span>
+<span class="sd">        each of the metrics (DTW, TWED, EMD, Wasserstein, and bottleneck). Each list is populated according to the</span>
+<span class="sd">        dimensions in which the distances were computed.</span>
+<span class="sd">    If metrics_only is False:</span>
+<span class="sd">        dict(dict, dict, dict): A dictionary containing three items:</span>
+<span class="sd">        - &#39;metrics&#39;: A dictionary of metrics, as described above;</span>
+<span class="sd">        - &#39;diags&#39;: A dictionary of diagrams for the initial data and for the layout;</span>
+<span class="sd">        - &#39;bettis&#39;: A dictionary of Betti curves for the initial data and for the layout.</span>
+<span class="sd">        Each dictionary is a dictionary of lists. Each list is populated according to the dimensions in which</span>
+<span class="sd">        the distances, diagrams, or curves were computed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dtw&#39;</span><span class="p">:</span> <span class="p">[],</span>
+               <span class="s1">&#39;twed&#39;</span><span class="p">:</span> <span class="p">[],</span>
+               <span class="s1">&#39;emd&#39;</span><span class="p">:</span> <span class="p">[],</span>
+               <span class="s1">&#39;wass&#39;</span><span class="p">:</span> <span class="p">[],</span>
+               <span class="s1">&#39;bott&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+
+    <span class="n">betti_curves</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s1">&#39;layout&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+
+    <span class="n">data_hd</span><span class="p">,</span> <span class="n">data_ld</span> <span class="o">=</span> <span class="n">threshold_subsample</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span>
+                                           <span class="n">threshold</span><span class="o">=</span><span class="n">subsample_threshold</span><span class="p">,</span>
+                                           <span class="n">rng_key</span><span class="o">=</span><span class="n">rng_key</span><span class="p">)</span>
+    <span class="n">n_points</span> <span class="o">=</span> <span class="n">data_hd</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">n_points</span> <span class="o">==</span> <span class="n">data_ld</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">diags</span> <span class="o">=</span> <span class="n">diagrams</span><span class="p">(</span><span class="n">data_hd</span><span class="p">,</span> <span class="n">data_ld</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">diags</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">diags</span><span class="p">[</span><span class="s1">&#39;layout&#39;</span><span class="p">]):</span>
+        <span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span> <span class="o">=</span> <span class="n">betti_curve</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">)</span>
+        <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span> <span class="o">=</span> <span class="n">betti_curve</span><span class="p">(</span><span class="n">diag_ld</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">)</span>
+
+        <span class="n">betti_curves</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">))</span>
+        <span class="n">betti_curves</span><span class="p">[</span><span class="s1">&#39;layout&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">))</span>
+
+        <span class="c1"># Computing DTW distance (normalized)</span>
+        <span class="n">dist_dtw</span> <span class="o">=</span> <span class="n">compute_dtw</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n_points</span><span class="p">)</span>
+
+        <span class="c1"># Computing TWED distance (normalized)</span>
+        <span class="n">dist_twed</span> <span class="o">=</span> <span class="n">compute_twed</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n_points</span><span class="p">)</span>
+
+        <span class="c1"># Computing EMD distance (normalized)</span>
+        <span class="n">dist_emd</span> <span class="o">=</span> <span class="n">compute_emd</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">adjust_mass</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n_points</span><span class="p">)</span>
+
+        <span class="c1"># Computing Wasserstein distance (normalized)</span>
+        <span class="n">dist_wass</span> <span class="o">=</span> <span class="n">compute_wasserstein</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n_points</span><span class="p">)</span>
+
+        <span class="c1"># Computing bottleneck distance (without normalization)</span>
+        <span class="n">dist_bott</span> <span class="o">=</span> <span class="n">compute_bottleneck</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="c1"># Adding metrics to dictionary </span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;dtw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_dtw</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;twed&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_twed</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;emd&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_emd</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;wass&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_wass</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;bott&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_bott</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">metrics_only</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;metrics&#39;</span><span class="p">:</span> <span class="n">metrics</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;metrics&#39;</span><span class="p">:</span> <span class="n">metrics</span><span class="p">,</span> <span class="s1">&#39;diags&#39;</span><span class="p">:</span> <span class="n">diags</span><span class="p">,</span> <span class="s1">&#39;bettis&#39;</span><span class="p">:</span> <span class="n">betti_curves</span><span class="p">}</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Metrics for quality and context</span>
+<span class="c1">#</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Compute linear SVM accuracy of given labelled data X with labels y</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_svm_accuracy">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_svm_accuracy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_svm_accuracy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">reg_param</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute linear SVM classifier accuracy for given labelled data X with labels y.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X: (numpy.ndarray) Data.</span>
+<span class="sd">    y: (numpy.ndarray) Data labels.</span>
+<span class="sd">    test_size: (float) Test size (between 0.0 and 1.0) for the train / test split, default 0.3.</span>
+<span class="sd">    reg_param: (float) Regularization parameter for SVM, default 1.0.</span>
+<span class="sd">    max_iter: (int) Maximal number of iterations for SVM training, default 100.</span>
+<span class="sd">    random_state: (int) Random state for reproducibility, default 42.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float: Accuracy of the linear SVM model on the test set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Split the data into training and testing sets</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+
+    <span class="c1"># Standardize the data</span>
+    <span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+    <span class="n">X_train</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+    <span class="n">X_test</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+    <span class="c1"># Initialize and train the Linear SVM model using liblinear</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">LinearSVC</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="n">reg_param</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="n">max_iter</span><span class="p">)</span>  
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+    <span class="c1"># Predict on the test set</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+    <span class="c1"># Calculate accuracy</span>
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">accuracy</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Compute SVM score (context preservation measure) by comparing</span>
+<span class="c1"># linear SVM classifier accuracies on the high-dimensional data</span>
+<span class="c1"># and on the low-dimensional embedding</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_svm_score">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_svm_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_svm_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute SVM score (context preservation measure) by comparing linear SVM classifier accuracies</span>
+<span class="sd">    on the high-dimensional data and on the low-dimensional embedding.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: (numpy.ndarray)  High-dimensional data.</span>
+<span class="sd">    layout: (numpy.ndarray) Low-dimensional embedding.</span>
+<span class="sd">    labels: (numpy.ndarray) Data labels.</span>
+<span class="sd">    subsample_threshold: (float) Threshold used for subsampling the data.</span>
+<span class="sd">    rng_key: Random key used for generating random numbers for subsampling, ensuring reproducibility.</span>
+<span class="sd">    kwargs: Other keyword arguments used by the various scores above.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float: SVM context preservation score.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">X_hd</span><span class="p">,</span> <span class="n">X_ld</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">threshold_subsample</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span>
+                                        <span class="n">threshold</span><span class="o">=</span><span class="n">subsample_threshold</span><span class="p">,</span>
+                                        <span class="n">rng_key</span><span class="o">=</span><span class="n">rng_key</span><span class="p">)</span>
+
+    <span class="n">svm_test_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;test_size&#39;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">svm_reg_param</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;reg_param&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">svm_max_iter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;max_iter&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">svm_random_state</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;random_state&#39;</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+
+    <span class="n">svm_acc_hd</span> <span class="o">=</span> <span class="n">compute_svm_accuracy</span><span class="p">(</span><span class="n">X_hd</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
+                                      <span class="n">test_size</span><span class="o">=</span><span class="n">svm_test_size</span><span class="p">,</span>
+                                      <span class="n">reg_param</span><span class="o">=</span><span class="n">svm_reg_param</span><span class="p">,</span>
+                                      <span class="n">max_iter</span><span class="o">=</span><span class="n">svm_max_iter</span><span class="p">,</span>
+                                      <span class="n">random_state</span><span class="o">=</span><span class="n">svm_random_state</span><span class="p">)</span>
+
+    <span class="n">svm_acc_ld</span> <span class="o">=</span> <span class="n">compute_svm_accuracy</span><span class="p">(</span><span class="n">X_ld</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
+                                      <span class="n">test_size</span><span class="o">=</span><span class="n">svm_test_size</span><span class="p">,</span>
+                                      <span class="n">reg_param</span><span class="o">=</span><span class="n">svm_reg_param</span><span class="p">,</span>
+                                      <span class="n">max_iter</span><span class="o">=</span><span class="n">svm_max_iter</span><span class="p">,</span>
+                                      <span class="n">random_state</span><span class="o">=</span><span class="n">svm_random_state</span><span class="p">)</span>
+
+    <span class="n">svm_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">svm_acc_hd</span><span class="o">/</span><span class="n">svm_acc_ld</span><span class="p">,</span> <span class="n">svm_acc_ld</span><span class="o">/</span><span class="n">svm_acc_hd</span><span class="p">])</span>
+    <span class="n">svm_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">svm_score</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">svm_acc_hd</span><span class="p">,</span> <span class="n">svm_acc_ld</span><span class="p">,</span> <span class="n">svm_score</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Compute kNN classifier accuracy</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_knn_accuracy">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_knn_accuracy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_knn_accuracy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute kNN classifier accuracy for given labelled data X with labels y.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X: (numpy.ndarray) Data.</span>
+<span class="sd">    y: (numpy.ndarray) Data labels.</span>
+<span class="sd">    test_size: (float) Test size (between 0.0 and 1.0) for the train / test split, default 0.3.</span>
+<span class="sd">    n_neighbors: (int) Number of neighbors for kNN classification, default 16.</span>
+<span class="sd">    random_state: (int) Random state for reproducibility, default 42.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    accuracy: (float) Accuracy of the KNN model on the test set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Split the data into training and testing sets</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+
+    <span class="c1"># Standardize the data (KNN can be sensitive to the scale of the data)</span>
+    <span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+    <span class="n">X_train</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+    <span class="n">X_test</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+    <span class="c1"># Initialize and train the KNN model</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">n_neighbors</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+    <span class="c1"># Predict on the test set</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+    <span class="c1"># Calculate accuracy</span>
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">accuracy</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Compute kNN context preservation score</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_knn_score">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_knn_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_knn_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute kNN score (context preservation measure) by comparing kNN classifier accuracies</span>
+<span class="sd">    on the high-dimensional data and on the low-dimensional embedding.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: (numpy.ndarray)  High-dimensional data.</span>
+<span class="sd">    layout: (numpy.ndarray) Low-dimensional embedding.</span>
+<span class="sd">    labels: (numpy.ndarray) Data labels.</span>
+<span class="sd">    n_neighbors: (int) Number of nearest neighbors for kNN classifier, default 16.</span>
+<span class="sd">    kwargs: Other keyword arguments used by the various scores above.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float: kNN context preservation score.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">test_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;test_size&#39;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">random_state</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;random_state&#39;</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+
+    <span class="n">knn_acc_hd</span> <span class="o">=</span> <span class="n">compute_knn_accuracy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span>
+                                      <span class="n">n_neighbors</span><span class="o">=</span><span class="n">n_neighbors</span><span class="p">,</span>
+                                      <span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span>
+                                      <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+    <span class="n">knn_acc_ld</span> <span class="o">=</span> <span class="n">compute_knn_accuracy</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span>
+                                      <span class="n">n_neighbors</span><span class="o">=</span><span class="n">n_neighbors</span><span class="p">,</span>
+                                      <span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span>
+                                      <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+
+    <span class="n">knn_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">knn_acc_ld</span><span class="o">/</span><span class="n">knn_acc_hd</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">knn_acc_hd</span><span class="p">,</span> <span class="n">knn_acc_ld</span><span class="p">,</span> <span class="n">knn_score</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Compute quality measures for dimensionality reduction</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_quality_measures">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_quality_measures">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_quality_measures</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute quality measures for assessing the quality of dimensionality reduction.</span>
+<span class="sd">    </span>
+<span class="sd">    This function calculates quality measures that evaluate how well the low-dimensional</span>
+<span class="sd">    representation preserves important properties of the high-dimensional data.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : numpy.ndarray</span>
+<span class="sd">        High-dimensional data points.</span>
+<span class="sd">    layout : numpy.ndarray</span>
+<span class="sd">        Low-dimensional embedding of the data.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary of quality measures including:</span>
+<span class="sd">        - trustworthiness: Measures if points that are close in the embedding are also close in original space</span>
+<span class="sd">        - continuity: Measures if points that are close in original space are also close in the embedding</span>
+<span class="sd">        - shepard_correlation: Correlation between pairwise distances in original and embedded spaces</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Calculate pairwise distances in original space</span>
+    <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">16384</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># Limit computation for very large datasets</span>
+
+    <span class="c1"># this has to be removed as sampling is already defined ...</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">n_samples</span><span class="p">:</span>
+        <span class="c1"># Random sampling for large datasets</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">data_subset</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+        <span class="n">layout_subset</span> <span class="o">=</span> <span class="n">layout</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_subset</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="n">layout_subset</span> <span class="o">=</span> <span class="n">layout</span>
+    
+    <span class="c1"># Use contiguous arrays for efficient distance computation</span>
+    <span class="n">data_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">data_subset</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+    <span class="n">layout_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">layout_subset</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+
+    <span class="c1"># Compute all pairwise distances (excluding self-distances)</span>
+    <span class="k">if</span> <span class="n">n_neighbors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Number of neighbors to consider</span>
+        <span class="n">n_neighbors</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)))</span>
+    
+    <span class="c1"># High-dimensional distances and indices</span>
+    <span class="n">hd_indices</span><span class="p">,</span> <span class="n">hd_distances</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">data_np</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+    <span class="n">hd_indices</span> <span class="o">=</span> <span class="n">hd_indices</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>  <span class="c1"># Skip the first column (self)</span>
+    <span class="n">hd_distances</span> <span class="o">=</span> <span class="n">hd_distances</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>  <span class="c1"># Skip the first column (self)</span>
+    <span class="n">hd_distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">hd_distances</span><span class="p">)</span>
+
+    <span class="c1"># Low-dimensional distances</span>
+    <span class="n">ld_indices</span><span class="p">,</span> <span class="n">ld_distances</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">layout_np</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+    <span class="n">ld_indices</span> <span class="o">=</span> <span class="n">ld_indices</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>  <span class="c1"># Skip the first column (self)</span>
+    <span class="n">ld_distances</span> <span class="o">=</span> <span class="n">ld_distances</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>  <span class="c1"># Skip the first column (self)</span>
+    <span class="n">ld_distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ld_distances</span><span class="p">)</span>
+    
+    <span class="c1"># Calculate trustworthiness (are neighbors in embedding also neighbors in original space?)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_trustworthiness</span><span class="p">():</span>
+        <span class="c1"># Vectorized implementation for better performance</span>
+        <span class="n">trust_sum</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+            <span class="c1"># Get neighbors in the embedding</span>
+            <span class="n">ld_neighbor_indices</span> <span class="o">=</span> <span class="n">ld_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            
+            <span class="c1"># Get neighbors in the original space</span>
+            <span class="n">hd_neighbor_indices</span> <span class="o">=</span> <span class="n">hd_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            
+            <span class="c1"># Find points that are neighbors in the embedding but not in the original space</span>
+            <span class="n">ld_neighbors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ld_neighbor_indices</span><span class="p">)</span>
+            <span class="n">hd_neighbors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">hd_neighbor_indices</span><span class="p">)</span>
+            <span class="n">violators</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ld_neighbors</span> <span class="o">-</span> <span class="n">hd_neighbors</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">violators</span><span class="p">:</span>
+                <span class="c1"># Get the distances to violators in the original space</span>
+                <span class="n">orig_dists</span> <span class="o">=</span> <span class="n">hd_distances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># distances to k nearest neighbors only</span>
+                
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">violators</span><span class="p">:</span>
+                    <span class="c1"># j is a global point index, compute distance to it specifically</span>
+                    <span class="n">dist_to_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">data_np</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">data_np</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                    
+                    <span class="c1"># Count how many of the k nearest neighbors are closer than j to i</span>
+                    <span class="n">orig_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">orig_dists</span> <span class="o">&lt;</span> <span class="n">dist_to_j</span><span class="p">)</span>
+                    
+                    <span class="c1"># Penalty based on how far j is in original space</span>
+                    <span class="n">trust_sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">orig_rank</span> <span class="o">-</span> <span class="n">n_neighbors</span><span class="p">)</span>
+        
+        <span class="c1"># Normalize the trustworthiness score</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_samples</span> <span class="o">*</span> <span class="n">n_neighbors</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_samples</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">n_neighbors</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">trust_score</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">norm</span> <span class="o">*</span> <span class="n">trust_sum</span>
+        
+        <span class="k">return</span> <span class="n">trust_score</span>
+    
+    <span class="c1"># Calculate continuity (are neighbors in original space also neighbors in embedding?)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_continuity</span><span class="p">():</span>
+        <span class="c1"># Vectorized implementation for better performance</span>
+        <span class="n">cont_sum</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+            <span class="c1"># Get neighbors in the original space</span>
+            <span class="n">hd_neighbor_indices</span> <span class="o">=</span> <span class="n">hd_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            
+            <span class="c1"># Get neighbors in the embedding</span>
+            <span class="n">ld_neighbor_indices</span> <span class="o">=</span> <span class="n">ld_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            
+            <span class="c1"># Find points that are neighbors in the original space but not in the embedding</span>
+            <span class="n">hd_neighbors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">hd_neighbor_indices</span><span class="p">)</span>
+            <span class="n">ld_neighbors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ld_neighbor_indices</span><span class="p">)</span>
+            <span class="n">violators</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hd_neighbors</span> <span class="o">-</span> <span class="n">ld_neighbors</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">violators</span><span class="p">:</span>
+                <span class="c1"># Get the distances to violators in the embedding</span>
+                <span class="n">embed_dists</span> <span class="o">=</span> <span class="n">ld_distances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># distances to k nearest neighbors only</span>
+                
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">violators</span><span class="p">:</span>
+                    <span class="c1"># j is a global point index, compute distance to it specifically</span>
+                    <span class="n">dist_to_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">layout_np</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">layout_np</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                    
+                    <span class="c1"># Count how many of the k nearest neighbors are closer than j to i</span>
+                    <span class="n">embed_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">embed_dists</span> <span class="o">&lt;</span> <span class="n">dist_to_j</span><span class="p">)</span>
+                    
+                    <span class="c1"># Penalty based on how far j is in the embedding</span>
+                    <span class="n">cont_sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">embed_rank</span> <span class="o">-</span> <span class="n">n_neighbors</span><span class="p">)</span>
+        
+        <span class="c1"># Normalize the continuity score</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_samples</span> <span class="o">*</span> <span class="n">n_neighbors</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_samples</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">n_neighbors</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">cont_score</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">norm</span> <span class="o">*</span> <span class="n">cont_sum</span>
+        
+        <span class="k">return</span> <span class="n">cont_score</span>
+    
+    <span class="c1"># Calculate Shepard diagram correlation</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_shepard_correlation</span><span class="p">():</span>
+        <span class="c1"># Sample pairs for correlation</span>
+        <span class="n">n_pairs</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">131072</span><span class="p">,</span> <span class="n">n_samples</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_samples</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+        
+        <span class="c1"># Generate random pairs</span>
+        <span class="n">i_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">n_pairs</span><span class="p">)</span>
+        <span class="n">j_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">n_pairs</span><span class="p">)</span>
+        
+        <span class="c1"># Ensure i != j</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">i_indices</span> <span class="o">!=</span> <span class="n">j_indices</span>
+        <span class="n">i_indices</span> <span class="o">=</span> <span class="n">i_indices</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">j_indices</span> <span class="o">=</span> <span class="n">j_indices</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        
+        <span class="c1"># Calculate distances</span>
+        <span class="n">hd_dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">data_subset</span><span class="p">[</span><span class="n">i_indices</span><span class="p">]</span> <span class="o">-</span> <span class="n">data_subset</span><span class="p">[</span><span class="n">j_indices</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ld_dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">layout_subset</span><span class="p">[</span><span class="n">i_indices</span><span class="p">]</span> <span class="o">-</span> <span class="n">layout_subset</span><span class="p">[</span><span class="n">j_indices</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate correlation</span>
+        <span class="n">correlation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">hd_dists</span><span class="p">,</span> <span class="n">ld_dists</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">correlation</span>
+    
+    <span class="c1"># Compute and return metrics</span>
+    <span class="n">trustworthiness</span> <span class="o">=</span> <span class="n">calculate_trustworthiness</span><span class="p">()</span>
+    <span class="n">continuity</span> <span class="o">=</span> <span class="n">calculate_continuity</span><span class="p">()</span>
+    <span class="n">shepard_correlation</span> <span class="o">=</span> <span class="n">calculate_shepard_correlation</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;trustworthiness&#39;</span><span class="p">:</span> <span class="n">trustworthiness</span><span class="p">,</span>
+        <span class="s1">&#39;continuity&#39;</span><span class="p">:</span> <span class="n">continuity</span><span class="p">,</span>
+        <span class="s1">&#39;shepard_correlation&#39;</span><span class="p">:</span> <span class="n">shepard_correlation</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># Compute context measures (context preservation)</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="compute_context_measures">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_context_measures">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_context_measures</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute measures of how well the embedding preserves the context of the data.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : numpy.ndarray</span>
+<span class="sd">        High-dimensional data points.</span>
+<span class="sd">    layout : numpy.ndarray</span>
+<span class="sd">        Low-dimensional embedding of the data.</span>
+<span class="sd">    labels : numpy.ndarray</span>
+<span class="sd">        Data labels needed for context preservation analysis.</span>
+<span class="sd">    subsample_threshold : float</span>
+<span class="sd">        Threshold used for subsampling the data.</span>
+<span class="sd">    n_neighbors : int</span>
+<span class="sd">        Number of neighbors for the kNN graph.</span>
+<span class="sd">    rng_key : jax.random.PRNGKey</span>
+<span class="sd">        Random key for reproducible subsampling.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments for the scoring functions.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary of context preservation measures, including</span>
+<span class="sd">        SVM and kNN classification performance comparisons.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">measures</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;svm&#39;</span><span class="p">:</span> <span class="n">compute_svm_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+        <span class="s1">&#39;knn&#39;</span><span class="p">:</span> <span class="n">compute_knn_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">measures</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alexander Kolpakov, Igor Rivin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
