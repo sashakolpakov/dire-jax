@@ -890,13 +890,13 @@ def compute_quality_measures(data, layout, n_neighbors=None):
         n_neighbors = min(13, int(np.log(n_samples)))
     
     # High-dimensional distances and indices
-    hd_indices, hd_distances = make_knn_graph(data_np, n_neighbors)
+    hd_distances, hd_indices = make_knn_graph(data_np, n_neighbors)
     hd_indices = hd_indices[:, 1:]  # Skip the first column (self)
     hd_distances = hd_distances[:, 1:]  # Skip the first column (self)
     hd_distances = np.sqrt(hd_distances)
 
     # Low-dimensional distances
-    ld_indices, ld_distances = make_knn_graph(layout_np, n_neighbors)
+    ld_distances, ld_indices = make_knn_graph(layout_np, n_neighbors)
     ld_indices = ld_indices[:, 1:]  # Skip the first column (self)
     ld_distances = ld_distances[:, 1:]  # Skip the first column (self)
     ld_distances = np.sqrt(ld_distances)
