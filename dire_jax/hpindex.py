@@ -63,7 +63,7 @@ class HPIndex:
         )
 
     @staticmethod
-    @partial(jax.jit, static_argnums=(2, 3, 4, 5, 6, 7, 8, 9, 10))
+    @partial(jax.jit, static_argnums=(2, 3, 4, 5, 6, 7, 8, 9))
     def _knn_tiled_jit(x, y, k, x_tile_size, y_batch_size,
                        num_y_batches, y_remainder, num_x_tiles, n_x, dtype=jnp.float64):
         """
