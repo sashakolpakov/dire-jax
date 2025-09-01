@@ -1027,13 +1027,13 @@
         <span class="n">n_neighbors</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)))</span>
     
     <span class="c1"># High-dimensional distances and indices</span>
-    <span class="n">hd_indices</span><span class="p">,</span> <span class="n">hd_distances</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">data_np</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+    <span class="n">hd_distances</span><span class="p">,</span> <span class="n">hd_indices</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">data_np</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
     <span class="n">hd_indices</span> <span class="o">=</span> <span class="n">hd_indices</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>  <span class="c1"># Skip the first column (self)</span>
     <span class="n">hd_distances</span> <span class="o">=</span> <span class="n">hd_distances</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>  <span class="c1"># Skip the first column (self)</span>
     <span class="n">hd_distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">hd_distances</span><span class="p">)</span>
 
     <span class="c1"># Low-dimensional distances</span>
-    <span class="n">ld_indices</span><span class="p">,</span> <span class="n">ld_distances</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">layout_np</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+    <span class="n">ld_distances</span><span class="p">,</span> <span class="n">ld_indices</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">layout_np</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
     <span class="n">ld_indices</span> <span class="o">=</span> <span class="n">ld_indices</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>  <span class="c1"># Skip the first column (self)</span>
     <span class="n">ld_distances</span> <span class="o">=</span> <span class="n">ld_distances</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>  <span class="c1"># Skip the first column (self)</span>
     <span class="n">ld_distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ld_distances</span><span class="p">)</span>
