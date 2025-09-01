@@ -46,7 +46,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#jax-backend-default">JAX Backend (default)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytorch-backend-faster-on-cuda-gpus">PyTorch Backend (faster on CUDA GPUs)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-performance-comparison">Backend Performance Comparison</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#benchmarking">Benchmarking</a></li>
 </ul>
@@ -84,7 +89,9 @@
 <h1>Usage Guide<a class="headerlink" href="#usage-guide" title="Link to this heading"></a></h1>
 <section id="basic-usage">
 <h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h2>
-<p>DiRe-JAX provides a high-performance dimensionality reduction tool based on JAX. Here’s a quick example of how to use it:</p>
+<p>DiRe offers fast dimensionality reduction with both JAX and PyTorch backends.</p>
+<section id="jax-backend-default">
+<h3>JAX Backend (default)<a class="headerlink" href="#jax-backend-default" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -107,6 +114,39 @@
 <span class="n">reducer</span><span class="o">.</span><span class="n">visualize</span><span class="p">()</span>
 </pre></div>
 </div>
+</section>
+<section id="pytorch-backend-faster-on-cuda-gpus">
+<h3>PyTorch Backend (faster on CUDA GPUs)<a class="headerlink" href="#pytorch-backend-faster-on-cuda-gpus" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRePyTorch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># Create some sample data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>  <span class="c1"># 1000 samples in 50 dimensions</span>
+
+<span class="c1"># Initialize DiRe with desired parameters</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRePyTorch</span><span class="p">(</span>
+    <span class="n">dimension</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>            <span class="c1"># Target dimension</span>
+    <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>         <span class="c1"># Number of neighbors to consider</span>
+    <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>    <span class="c1"># Maximum number of layout iterations</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>            <span class="c1"># Show progress</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit and transform the data</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Visualize the results</span>
+<span class="n">reducer</span><span class="o">.</span><span class="n">visualize</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="backend-performance-comparison">
+<h2>Backend Performance Comparison<a class="headerlink" href="#backend-performance-comparison" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>JAX backend</strong>: Best for TPUs, good CPU performance, moderate GPU performance</p></li>
+<li><p><strong>PyTorch/PyKeOps backend</strong>: 100x+ faster on CUDA GPUs for datasets &lt;2M points, uses all-pairs force computation without k-NN graphs</p></li>
+</ul>
+<p>Both backends are API-compatible - simply replace <code class="docutils literal notranslate"><span class="pre">DiRe</span></code> with <code class="docutils literal notranslate"><span class="pre">DiRePyTorch</span></code> as a drop-in replacement.</p>
 </section>
 <section id="advanced-configuration">
 <h2>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading"></a></h2>

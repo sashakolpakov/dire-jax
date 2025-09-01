@@ -48,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">API Reference</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Benchmarking</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#metrics">Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quality-assessment">Quality Assessment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#benchmarking-functions">Benchmarking Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#jupyter-notebook">Jupyter Notebook</a></li>
 </ul>
@@ -83,15 +83,9 @@
   <section id="benchmarking">
 <h1>Benchmarking<a class="headerlink" href="#benchmarking" title="Link to this heading"></a></h1>
 <p>DiRe-JAX includes comprehensive benchmarking utilities to compare its performance against other dimensionality reduction methods.</p>
-<section id="metrics">
-<h2>Metrics<a class="headerlink" href="#metrics" title="Link to this heading"></a></h2>
-<p>The package includes various metrics for evaluating dimensionality reduction quality:</p>
-<ul class="simple">
-<li><p><strong>Local Metrics</strong>: Measure how well local structures are preserved</p></li>
-<li><p><strong>Global Metrics</strong>: Measure how well global structures are preserved</p></li>
-<li><p><strong>Context Measures</strong>: Measure contextual preservation</p></li>
-<li><p><strong>Quality Measures</strong>: Overall quality metrics</p></li>
-</ul>
+<section id="quality-assessment">
+<h2>Quality Assessment<a class="headerlink" href="#quality-assessment" title="Link to this heading"></a></h2>
+<p>The benchmarking utilities provide comprehensive quality assessment for dimensionality reduction results, including structure preservation analysis and comparative evaluations.</p>
 </section>
 <section id="benchmarking-functions">
 <h2>Benchmarking Functions<a class="headerlink" href="#benchmarking-functions" title="Link to this heading"></a></h2>
@@ -112,9 +106,8 @@
 <span class="c1"># and print the results ...</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 
-<span class="c1"># You can also visualize the benchmark, check how the persistence homology</span>
-<span class="c1"># changes between the original data and the embedding, and compute several</span>
-<span class="c1"># goodness-of-fit metrics for comparison</span>
+<span class="c1"># You can also visualize the benchmark and check how the persistence homology</span>
+<span class="c1"># changes between the original data and the embedding</span>
 <span class="n">viz_benchmark</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span>
               <span class="n">features</span><span class="p">,</span>
               <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>

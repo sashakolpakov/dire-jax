@@ -45,10 +45,15 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#backend-options">Backend Options</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#installation-options">Installation Options</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#standard-installation">Standard Installation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#installation-with-utilities">Installation with Utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#basic-installation-jax-backend-only">Basic Installation (JAX backend only)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#with-utilities-for-benchmarking">With Utilities for Benchmarking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#with-pytorch-pykeops-backend-recommended-for-cuda-gpus">With PyTorch/PyKeOps Backend (recommended for CUDA GPUs)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#complete-installation-all-backends-and-utilities">Complete Installation (all backends and utilities)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#development-installation">Development Installation</a></li>
 </ul>
 </li>
@@ -88,44 +93,68 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
-<p>DiRe-JAX has two sets of dependencies:</p>
+<p>DiRe-JAX has multiple dependency sets for different backends:</p>
 <ul class="simple">
 <li><p><strong>Core dependencies</strong> (required): jax, numpy, scipy, tqdm, pandas, plotly, loguru, scikit-learn</p></li>
 <li><p><strong>Utilities dependencies</strong> (optional): ripser, persim, fastdtw, fast-twed, pot</p></li>
+<li><p><strong>PyTorch backend dependencies</strong> (optional): torch&gt;=1.13.0, pykeops&gt;=2.1.0</p></li>
 </ul>
+<section id="backend-options">
+<h3>Backend Options<a class="headerlink" href="#backend-options" title="Link to this heading"></a></h3>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p><strong>JAX GPU/TPU Support</strong></p>
-<p>For GPU or TPU acceleration, JAX needs to be specifically installed with hardware support. The default JAX installation through pip doesn’t include GPU/TPU support.</p>
-<p>To enable GPU/TPU acceleration follow the <cite>JAX installation instructions &lt;https://github.com/google/jax#installation&gt;</cite></p>
-<p>Installing JAX with hardware acceleration can significantly improve the performance of DiRe-JAX, especially for larger datasets.</p>
+<p><strong>JAX Backend (default)</strong></p>
+<ul class="simple">
+<li><p>Best for TPUs and CPU processing</p></li>
+<li><p>For GPU acceleration, JAX needs specific installation: <cite>JAX GPU instructions &lt;https://github.com/google/jax#installation&gt;</cite></p></li>
+<li><p>Moderate GPU performance</p></li>
+</ul>
 </div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>PyTorch/PyKeOps Backend</strong></p>
+<ul class="simple">
+<li><p>100x+ faster on CUDA GPUs for datasets &lt;2M points</p></li>
+<li><p>Uses all-pairs force computation without k-NN graphs</p></li>
+<li><p>Requires CUDA-compatible GPU</p></li>
+</ul>
+</div>
+</section>
 </section>
 <section id="installation-options">
 <h2>Installation Options<a class="headerlink" href="#installation-options" title="Link to this heading"></a></h2>
-<section id="standard-installation">
-<h3>Standard Installation<a class="headerlink" href="#standard-installation" title="Link to this heading"></a></h3>
-<p>To install the main DiRe class only:</p>
+<section id="basic-installation-jax-backend-only">
+<h3>Basic Installation (JAX backend only)<a class="headerlink" href="#basic-installation-jax-backend-only" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dire-jax
 </pre></div>
 </div>
 </section>
-<section id="installation-with-utilities">
-<h3>Installation with Utilities<a class="headerlink" href="#installation-with-utilities" title="Link to this heading"></a></h3>
-<p>To install DiRe-JAX with additional utilities for benchmarking and metrics:</p>
+<section id="with-utilities-for-benchmarking">
+<h3>With Utilities for Benchmarking<a class="headerlink" href="#with-utilities-for-benchmarking" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dire-jax<span class="o">[</span>utils<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="with-pytorch-pykeops-backend-recommended-for-cuda-gpus">
+<h3>With PyTorch/PyKeOps Backend (recommended for CUDA GPUs)<a class="headerlink" href="#with-pytorch-pykeops-backend-recommended-for-cuda-gpus" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dire-jax<span class="o">[</span>pytorch<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="complete-installation-all-backends-and-utilities">
+<h3>Complete Installation (all backends and utilities)<a class="headerlink" href="#complete-installation-all-backends-and-utilities" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dire-jax<span class="o">[</span>all<span class="o">]</span>
 </pre></div>
 </div>
 </section>
 <section id="development-installation">
 <h3>Development Installation<a class="headerlink" href="#development-installation" title="Link to this heading"></a></h3>
-<p>To install for development:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/sashakolpakov/dire-jax.git
 <span class="nb">cd</span><span class="w"> </span>dire-jax
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>utils<span class="o">]</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>all<span class="o">]</span>
 </pre></div>
 </div>
-<p>After installation, you may need to install JAX with GPU/TPU support separately as described above.</p>
+<p>After installation, you may need to install JAX with GPU/TPU support separately for the JAX backend.</p>
 </section>
 </section>
 </section>

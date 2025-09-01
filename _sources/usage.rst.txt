@@ -4,7 +4,10 @@ Usage Guide
 Basic Usage
 -----------
 
-DiRe-JAX provides a high-performance dimensionality reduction tool based on JAX. Here's a quick example of how to use it:
+DiRe offers fast dimensionality reduction with both JAX and PyTorch backends.
+
+JAX Backend (default)
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -28,6 +31,39 @@ DiRe-JAX provides a high-performance dimensionality reduction tool based on JAX.
     
     # Visualize the results
     reducer.visualize()
+
+PyTorch Backend (faster on CUDA GPUs)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    from dire_jax import DiRePyTorch
+    import numpy as np
+    
+    # Create some sample data
+    data = np.random.random((1000, 50))  # 1000 samples in 50 dimensions
+    
+    # Initialize DiRe with desired parameters
+    reducer = DiRePyTorch(
+        dimension=2,            # Target dimension
+        n_neighbors=15,         # Number of neighbors to consider
+        max_iter_layout=128,    # Maximum number of layout iterations
+        verbose=True            # Show progress
+    )
+    
+    # Fit and transform the data
+    embedding = reducer.fit_transform(data)
+    
+    # Visualize the results
+    reducer.visualize()
+
+Backend Performance Comparison
+-------------------------------
+
+* **JAX backend**: Best for TPUs, good CPU performance, moderate GPU performance
+* **PyTorch/PyKeOps backend**: 100x+ faster on CUDA GPUs for datasets <2M points, uses all-pairs force computation without k-NN graphs
+
+Both backends are API-compatible - simply replace ``DiRe`` with ``DiRePyTorch`` as a drop-in replacement.
 
 Advanced Configuration
 ----------------------
