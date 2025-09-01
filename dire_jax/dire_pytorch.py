@@ -8,8 +8,6 @@ for improved performance on CUDA GPUs with small to medium datasets (<100K point
 """
 
 import numpy as np
-import torch
-import torch.nn.functional as F
 from sklearn.base import TransformerMixin
 from sklearn.decomposition import PCA
 from scipy.sparse import csr_matrix
@@ -21,13 +19,24 @@ import pandas as pd
 from loguru import logger
 import gc
 
+# PyTorch imports
+try:
+    import torch
+    import torch.nn.functional as F
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    raise ImportError(
+        "PyTorch not available. Install PyTorch backend with: pip install dire-jax[torch]"
+    )
+
 # PyKeOps for efficient force computations
 try:
     from pykeops.torch import LazyTensor
     PYKEOPS_AVAILABLE = True
 except ImportError:
     PYKEOPS_AVAILABLE = False
-    logger.warning("PyKeOps not available. Install with: pip install pykeops")
+    logger.warning("PyKeOps not available. Install PyTorch backend with: pip install dire-jax[torch]")
 
 # Optional cuVS for large-scale k-NN
 try:

@@ -1,90 +1,93 @@
 # DiRe-JAX Testing
 
-This directory contains tests for the DiRe-JAX package.
+This directory contains testing and benchmarking tools for the DiRe-JAX package.
 
 ## Unit Tests
 
-Unit tests are located in the `unit/` subdirectory and can be run using the `run_tests.py` script.
-
+Run unit tests from the project root:
 ```bash
-# From the root directory of the project
 python tests/run_tests.py
 ```
 
-## Benchmarks
-
-The `dire_benchmarks.ipynb` notebook contains benchmarking code that compares DiRe-JAX to other dimensionality reduction methods like UMAP and t-SNE on various datasets.
-
-## Running Tests
-
-To run the unit tests, make sure you have the required dependencies installed:
-
+Or with pytest:
 ```bash
 pip install pytest pytest-cov
-```
-
-You can run the tests with coverage reporting:
-
-```bash
 pytest tests/unit/ --cov=dire_jax
 ```
 
+## Performance Benchmarking
+
+### test_performance.py
+Comprehensive benchmarking suite supporting JAX and PyTorch backends.
+
+```bash
+# Default benchmark (includes backend comparison if PyTorch available)
+python tests/test_performance.py
+
+# Quick benchmark for CI
+python tests/test_performance.py --quick --no-save
+
+# Backend comparison only
+python tests/test_performance.py --backend-only
+
+# MPA performance comparison
+python tests/test_performance.py --mpa-only
+
+# Scaling performance analysis
+python tests/test_performance.py --scaling
+
+# Comprehensive benchmark
+python tests/test_performance.py --detailed
+```
+
+**Options:**
+- `--quick`: Fast benchmark with smaller datasets
+- `--detailed`: Comprehensive benchmark including all tests
+- `--backend-only`: JAX vs PyTorch backend comparison
+- `--mpa-only`: Mixed Precision Arithmetic performance test
+- `--scaling`: Dataset size and feature scaling tests
+- `--large-scale`: Tests with 10k-100k samples
+- `--no-save`: Don't save results to JSON
+- `--verbose`: Enable JAX compilation logging
+
+## Specialized Benchmarks
+
+### benchmark_pytorch.py
+Direct JAX vs PyTorch backend comparison across multiple dataset sizes.
+*Requires: `pip install dire-jax[torch]`*
+
+### benchmark_scaling.py
+PyKeOps scaling benchmark to find computational limits.
+*Requires: `pip install dire-jax[torch]`*
+
+### benchmark_memory.py
+Memory efficiency testing for large datasets.
+
+### check_memory_methods.py
+Validation of memory-efficient method implementations.
+
 ## Testing Large Datasets
 
-For testing with large datasets, you can use the memory-efficient options in the DiRe class:
-
+Example usage for memory-efficient processing:
 ```python
 from dire_jax import DiRe
 
-# Initialize with memory-efficient options
+# Memory-efficient configuration
 reducer = DiRe(
     n_components=2,
     n_neighbors=16,
-    init='pca',
-    metric='lp',     # Distance metric: 'lp', 'l1', 'linf', 'cosine', or custom callable
-    p=2,             # For lp metric, p=2 gives squared L2 distance
-    max_iter_layout=32,
-    batch_size=5000
+    batch_size=5000,
+    max_iter_layout=32
 )
 
-# Use fit_transform with automatic memory-efficient mode for large datasets
-layout = reducer.fit_transform(data)
+# Process large dataset
+layout = reducer.fit_transform(large_data)
 ```
 
-Or configure batch processing explicitly:
+## Results
 
-```python
-# Create a reducer for large datasets
-reducer = DiRe(
-    n_components=2,
-    n_neighbors=16,
-    init='pca',
-    metric='lp',     # Distance metric: 'lp', 'l1', 'linf', 'cosine', or custom callable  
-    p=2,             # For lp metric, p=2 gives squared L2 distance
-    max_iter_layout=32,
-    batch_size=5000
-)
-
-# Apply fit_transform with memory-efficient options
-layout = reducer.fit_transform(data)
-
-# Custom distance metrics can also be used:
-import jax.numpy as jnp
-
-def weighted_euclidean(y_batch, x, weights):
-    """Custom weighted Euclidean distance."""
-    diff = y_batch[:, jnp.newaxis, :] - x[jnp.newaxis, :, :]
-    return jnp.sum(weights * diff**2, axis=2)
-
-# Use custom metric
-feature_weights = jnp.ones(data.shape[1])  # Example weights
-reducer_custom = DiRe(
-    n_components=2,
-    metric=weighted_euclidean,
-    weights=feature_weights
-)
-
-# Compute metrics with memory-efficient option
-from dire_jax.hpmetrics import compute_local_metrics
-metrics = compute_local_metrics(data, layout, n_neighbors=16, memory_efficient=True)
-```
+Benchmark results are saved to `performance_results/` with timestamps and include:
+- Device information and software versions
+- Detailed timing metrics
+- Performance comparisons and analysis
+- Historical tracking capability

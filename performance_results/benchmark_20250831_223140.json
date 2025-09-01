@@ -1,0 +1,9 @@
+{
+  "timestamp": "2025-08-31T22:31:40.408514",
+  "jax_version": "0.4.13",
+  "pytorch_available": false,
+  "devices": [
+    "TFRT_CPU_0"
+  ],
+  "benchmarks": {}
+}

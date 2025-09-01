@@ -4,10 +4,11 @@ Installation
 Requirements
 ------------
 
-DiRe-JAX has two sets of dependencies:
+DiRe-JAX has three sets of dependencies:
 
 * **Core dependencies** (required): jax, numpy, scipy, tqdm, pandas, plotly, loguru, scikit-learn
 * **Utilities dependencies** (optional): ripser, persim, fastdtw, fast-twed, pot
+* **PyTorch backend** (optional): torch, pykeops
 
 .. important::
    **JAX GPU/TPU Support**
@@ -38,6 +39,26 @@ To install DiRe-JAX with additional utilities for benchmarking and metrics:
 .. code-block:: bash
 
     pip install dire-jax[utils]
+
+PyTorch Backend (High Performance)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To install DiRe-JAX with PyTorch backend and PyKeOps for GPU acceleration:
+
+.. code-block:: bash
+
+    pip install dire-jax[torch]
+
+All Features
+~~~~~~~~~~~~
+
+To install all optional dependencies:
+
+.. code-block:: bash
+
+    pip install dire-jax[all]
+    # or
+    pip install dire-jax[utils,torch]
 
 Development Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~

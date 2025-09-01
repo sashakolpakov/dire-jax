@@ -3,17 +3,19 @@
 Performance benchmarking and scaling tests for DiRe layout algorithm.
 
 This test suite can be used to:
-1. Benchmark performance across different configurations
-2. Test scaling behavior with dataset size
-3. Validate optimization effectiveness
-4. Track performance regression
+1. Benchmark performance across different backends (JAX vs PyTorch)
+2. Test scaling behavior with dataset size and dimensionality
+3. Validate optimization effectiveness (MPA, etc.)
+4. Track performance regression across versions
 
 Usage:
-    python test_performance.py                    # Run default benchmarks
+    python test_performance.py                    # Run default benchmarks (includes backend comparison)
     python test_performance.py --quick           # Quick test mode
-    python test_performance.py --detailed        # Detailed benchmarks
+    python test_performance.py --detailed        # Detailed benchmarks (all tests)
+    python test_performance.py --backend-only    # Test only backend comparison (JAX vs PyTorch)
     python test_performance.py --mpa-only        # Test only MPA configurations
     python test_performance.py --scaling         # Focus on scaling tests
+    python test_performance.py --large-scale     # Large-scale tests (10k-100k samples)
 """
 
 import argparse
@@ -27,17 +29,27 @@ import jax.numpy as jnp
 from jax import device_put, random
 import functools
 
-# Import DiRe
+# Import DiRe backends
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from dire_jax.dire import DiRe
+
+# PyTorch backend (optional)
+try:
+    from dire_jax import DiRePyTorch
+    import torch
+    PYTORCH_AVAILABLE = True
+except ImportError:
+    PYTORCH_AVAILABLE = False
+    DiRePyTorch = None
+    print("Warning: PyTorch backend not available. Install with: pip install dire-jax[torch]")
 
 # Disable compilation logging for cleaner output by default
 jax.config.update("jax_log_compiles", False)
 
 
 class PerformanceBenchmark:
-    """Performance benchmarking suite for DiRe."""
+    """Performance benchmarking suite for DiRe with multi-backend support."""
     
     def __init__(self, save_results=True, results_dir="performance_results"):
         self.save_results = save_results
@@ -45,9 +57,16 @@ class PerformanceBenchmark:
         self.results = {
             'timestamp': datetime.now().isoformat(),
             'jax_version': jax.__version__,
+            'pytorch_available': PYTORCH_AVAILABLE,
             'devices': [str(device) for device in jax.devices()],
             'benchmarks': {}
         }
+        
+        if PYTORCH_AVAILABLE:
+            self.results['pytorch_version'] = torch.__version__
+            self.results['cuda_available'] = torch.cuda.is_available()
+            if torch.cuda.is_available():
+                self.results['cuda_device'] = torch.cuda.get_device_name()
         
         if save_results:
             os.makedirs(results_dir, exist_ok=True)
@@ -74,9 +93,10 @@ class PerformanceBenchmark:
         
         return np.vstack(data)
     
-    def benchmark_configuration(self, data, config_name, **dire_params):
-        """Benchmark a specific DiRe configuration."""
+    def benchmark_configuration(self, data, config_name, backend='jax', **dire_params):
+        """Benchmark a specific DiRe configuration with specified backend."""
         print(f"\n--- Benchmarking: {config_name} ---")
+        print(f"Backend: {backend.upper()}")
         print(f"Parameters: {dire_params}")
         
         # Default parameters
@@ -90,8 +110,14 @@ class PerformanceBenchmark:
         }
         default_params.update(dire_params)
         
-        # Create DiRe instance
-        dire = DiRe(**default_params)
+        # Create DiRe instance based on backend
+        if backend.lower() == 'pytorch':
+            if not PYTORCH_AVAILABLE:
+                print("PyTorch backend not available. Skipping...")
+                return None
+            dire = DiRePyTorch(**default_params)
+        else:
+            dire = DiRe(**default_params)
         
         # Warm-up run (smaller dataset to compile functions)
         if data.shape[0] > 500:
@@ -109,6 +135,7 @@ class PerformanceBenchmark:
         max_iter = default_params['max_iter_layout']
         
         result = {
+            'backend': backend,
             'total_time': total_time,
             'time_per_iteration': total_time / max_iter,
             'time_per_sample': total_time / n_samples,
@@ -163,6 +190,55 @@ class PerformanceBenchmark:
             }
             
             print(f"\n  MPA Speedup: {speedup:.2f}x")
+        
+        return results
+    
+    def test_backend_comparison(self, test_sizes=None):
+        """Compare performance between JAX and PyTorch backends."""
+        if not PYTORCH_AVAILABLE:
+            print("PyTorch backend not available. Skipping backend comparison.")
+            return {}
+            
+        if test_sizes is None:
+            test_sizes = [5000, 10000]
+        
+        print("\n" + "="*60)
+        print("BACKEND COMPARISON (JAX vs PyTorch)")
+        print("="*60)
+        
+        results = {}
+        
+        for size in test_sizes:
+            print(f"\n=== Dataset size: {size} samples ===")
+            data = self.create_test_dataset(n_samples=size, n_features=50)
+            
+            # Test JAX backend
+            jax_result = self.benchmark_configuration(
+                data, f"JAX Backend (size={size})", 
+                backend='jax', max_iter_layout=15
+            )
+            
+            # Test PyTorch backend
+            pytorch_result = self.benchmark_configuration(
+                data, f"PyTorch Backend (size={size})", 
+                backend='pytorch', max_iter_layout=15
+            )
+            
+            if jax_result and pytorch_result:
+                # Calculate speedup (PyTorch vs JAX)
+                speedup = jax_result['total_time'] / pytorch_result['total_time']
+                
+                results[size] = {
+                    'jax': jax_result,
+                    'pytorch': pytorch_result,
+                    'pytorch_speedup': speedup
+                }
+                
+                print(f"\n  PyTorch vs JAX Speedup: {speedup:.2f}x")
+                if speedup > 1:
+                    print(f"  PyTorch is {speedup:.2f}x FASTER")
+                else:
+                    print(f"  JAX is {1/speedup:.2f}x FASTER")
         
         return results
     
@@ -243,6 +319,20 @@ class PerformanceBenchmark:
         print("PERFORMANCE ANALYSIS SUMMARY")
         print("="*60)
         
+        # Backend Comparison Analysis
+        if 'backend_comparison' in all_results:
+            print(f"\n🔄 Backend Performance Comparison:")
+            backend_results = all_results['backend_comparison']
+            if backend_results:
+                speedups = [result['pytorch_speedup'] for result in backend_results.values()]
+                avg_speedup = np.mean(speedups)
+                print(f"  Average PyTorch vs JAX speedup: {avg_speedup:.2f}x")
+                print(f"  Speedup range: {min(speedups):.2f}x - {max(speedups):.2f}x")
+                if avg_speedup > 1:
+                    print(f"  PyTorch backend is {avg_speedup:.2f}x faster on average")
+                else:
+                    print(f"  JAX backend is {1/avg_speedup:.2f}x faster on average")
+
         # MPA Analysis
         if 'mpa_comparison' in all_results:
             print(f"\n📊 MPA Performance Impact:")
@@ -334,8 +424,27 @@ class PerformanceBenchmark:
         print(f"JAX version: {jax.__version__}")
         print(f"Available devices: {jax.devices()}")
         
+        if PYTORCH_AVAILABLE:
+            print(f"PyTorch version: {torch.__version__}")
+            print(f"CUDA available: {torch.cuda.is_available()}")
+            if torch.cuda.is_available():
+                print(f"CUDA device: {torch.cuda.get_device_name()}")
+        else:
+            print("PyTorch backend: Not available")
+        
         all_results = {}
         
+        if mode in ['default', 'detailed', 'backend-only']:
+            # Backend comparison (if PyTorch available)
+            if PYTORCH_AVAILABLE:
+                if mode == 'quick':
+                    test_sizes = [1000]
+                elif mode == 'large-scale':
+                    test_sizes = [10000, 50000]
+                else:
+                    test_sizes = [5000, 10000]
+                all_results['backend_comparison'] = self.test_backend_comparison(test_sizes)
+
         if mode in ['default', 'detailed', 'mpa-only']:
             # MPA comparison
             if mode == 'quick':
@@ -383,6 +492,8 @@ def main():
                        help='Run detailed benchmark including all initialization methods')
     parser.add_argument('--mpa-only', action='store_true',
                        help='Test only MPA performance comparison')
+    parser.add_argument('--backend-only', action='store_true',
+                       help='Test only backend performance comparison (JAX vs PyTorch)')
     parser.add_argument('--scaling', action='store_true',
                        help='Focus on scaling performance tests')
     parser.add_argument('--large-scale', action='store_true',
@@ -399,6 +510,8 @@ def main():
         mode = 'detailed'
     elif args.mpa_only:
         mode = 'mpa-only'
+    elif args.backend_only:
+        mode = 'backend-only'
     elif args.scaling:
         mode = 'scaling'
     elif args.large_scale:

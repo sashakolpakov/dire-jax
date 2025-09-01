@@ -21,12 +21,20 @@ try:
 except ImportError:
     HAS_UTILS = False
 
-# Optionally inform users that utilities aren't available unless explicitly installed
+# Optionally inform users that optional modules aren't available unless explicitly installed
 if not HAS_UTILS:
     import warnings
     warnings.warn(
         "Optional module 'dire_utils' not found. "
         "If you need utility functions, install dire-jax with extras: pip install dire-jax[utils]",
+        UserWarning
+    )
+
+if not HAS_PYTORCH:
+    import warnings
+    warnings.warn(
+        "PyTorch backend not available. "
+        "For high-performance PyTorch backend with PyKeOps, install: pip install dire-jax[torch]",
         UserWarning
     )
 

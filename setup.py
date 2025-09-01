@@ -5,8 +5,9 @@ from setuptools import setup, find_packages
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
-# Comment on utils extra
+# Comment on extras
 print("For benchmarking, metrics and utilities, use the [utils] extra.")
+print("For PyTorch backend with PyKeOps, use the [torch] extra.")
 
 # Core dependencies (dire.py and hpindex.py)
 core_deps = [
@@ -27,6 +28,12 @@ utils_deps = [
     "fastdtw",
     "fast-twed",
     "pot"
+]
+
+# Dependencies for PyTorch backend with PyKeOps
+torch_deps = [
+    "torch>=1.9.0",
+    "pykeops>=2.1.0"
 ]
 
 setup(
@@ -50,5 +57,7 @@ setup(
     install_requires=core_deps,
     extras_require={
         "utils": utils_deps,
+        "torch": torch_deps,
+        "all": utils_deps + torch_deps,
     },
 )
