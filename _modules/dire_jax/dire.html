@@ -439,6 +439,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">make_knn_adjacency</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_ab_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spread</span><span class="p">)</span>
+        
+        <span class="c1"># Create a specialized force computation function with constants bound</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">())</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_fast_compute_forces</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">compute_forces_kernel</span><span class="p">(</span>
+                <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cached_compute_forces</span> <span class="o">=</span> <span class="n">_fast_compute_forces</span>
         <span class="c1">#</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;fit done ...&quot;</span><span class="p">)</span>
         <span class="c1">#</span>
@@ -497,8 +505,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;make_knn_adjacency ...&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Ensure data is in the right format for HPIndex</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+        <span class="c1"># Ensure data is in the right format for HPIndex with correct precision</span>
+        <span class="n">target_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">target_dtype</span><span class="p">))</span>
         <span class="n">n_neighbors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># Including the point itself</span>
 
         <span class="c1"># Determine appropriate batch size for memory efficiency</span>
@@ -543,9 +552,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="o">.</span><span class="n">block_until_ready</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span><span class="o">.</span><span class="n">block_until_ready</span><span class="p">()</span>
 
-        <span class="c1"># Store results in numpy</span>
+        <span class="c1"># Store results in numpy with consistent precision</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_indices_np</span> <span class="o">=</span> <span class="n">device_get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_distances_np</span> <span class="o">=</span> <span class="n">device_get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">result_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distances_np</span> <span class="o">=</span> <span class="n">device_get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">result_dtype</span><span class="p">)</span>
 
         <span class="c1"># Extract nearest neighbor distances (excluding self)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nearest_neighbor_distances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_np</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
@@ -596,6 +606,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using standard PCA embedding...&quot;</span><span class="p">)</span>
             <span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+            
+        <span class="c1"># Convert to correct precision for MPA</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_pca_embedding done ...&quot;</span><span class="p">)</span></div>
 
@@ -643,6 +657,10 @@
 
         <span class="c1"># Skip the first eigenvector (corresponds to constant function)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span> <span class="o">=</span> <span class="n">eigenvectors</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="p">]</span>
+        
+        <span class="c1"># Convert to correct precision for MPA</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_spectral_embedding done ...&quot;</span><span class="p">)</span></div>
 
@@ -666,14 +684,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_random_embedding ...&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Create a random projection matrix</span>
+        <span class="c1"># Create a random projection matrix with correct precision</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
-        <span class="n">rand_basis</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_dim</span><span class="p">))</span>
+        <span class="n">target_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
+        <span class="n">rand_basis</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_dim</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">target_dtype</span><span class="p">)</span>
 
-        <span class="c1"># Move data and projection matrix to device memory</span>
+        <span class="c1"># Move data and projection matrix to device memory (data already in correct precision)</span>
         <span class="n">data_matrix</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
         <span class="n">rand_basis</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="n">rand_basis</span><span class="p">)</span>
 
@@ -830,14 +849,19 @@
         <span class="c1"># we shall use force_cpu only as a flag passed to the routine</span>
         <span class="c1"># force_cpu = force_cpu or large_dataset_mode and (jax.devices()[0].platform == &#39;tpu&#39;)</span>
 
-        <span class="c1"># Initialize and normalize positions</span>
+        <span class="c1"># Initialize and normalize positions with correct precision</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="p">:</span>
+            <span class="n">target_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">target_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
+            
         <span class="k">if</span> <span class="n">force_cpu</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Forcing computations on CPU&quot;</span><span class="p">)</span>
             <span class="n">cpu_device</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cpu_device</span><span class="p">)</span>
+            <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">target_dtype</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">cpu_device</span><span class="p">)</span>
             <span class="n">neighbor_indices_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indices_np</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cpu_device</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="p">)</span>
+            <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">target_dtype</span><span class="p">))</span>
             <span class="n">neighbor_indices_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">)</span>
 
         <span class="n">init_pos_jax</span> <span class="o">-=</span> <span class="n">init_pos_jax</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Center positions</span>
@@ -883,8 +907,8 @@
                     <span class="n">chunk_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">chunk_start</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">)</span>
                     <span class="n">chunk_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">chunk_start</span><span class="p">,</span> <span class="n">chunk_end</span><span class="p">)</span>
 
-                    <span class="c1"># Process this chunk using our kernelized function</span>
-                    <span class="n">chunk_force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_forces</span><span class="p">(</span>
+                    <span class="c1"># Process this chunk using cached kernelized function (no method call overhead)</span>
+                    <span class="n">chunk_force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_compute_forces</span><span class="p">(</span>
                         <span class="n">init_pos_jax</span><span class="p">,</span>
                         <span class="n">chunk_indices</span><span class="p">,</span>
                         <span class="n">neighbor_indices_jax</span><span class="p">[</span><span class="n">chunk_indices</span><span class="p">],</span>
@@ -901,8 +925,8 @@
                 <span class="n">net_force</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">all_forces</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Process all points at once for smaller datasets</span>
-                <span class="n">net_force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_forces</span><span class="p">(</span>
+                <span class="c1"># Process all points at once for smaller datasets using cached function</span>
+                <span class="n">net_force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_compute_forces</span><span class="p">(</span>
                     <span class="n">init_pos_jax</span><span class="p">,</span>
                     <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">),</span>
                     <span class="n">neighbor_indices_jax</span><span class="p">,</span>
@@ -963,16 +987,10 @@
 <span class="sd">        jax.numpy.ndarray</span>
 <span class="sd">            Net force vectors for each point</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="p">:</span>
-            <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[FORCE] Computing forces on device: </span><span class="si">{</span><span class="n">positions</span><span class="o">.</span><span class="n">device</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[FORCE] Using precision: </span><span class="si">{</span><span class="n">positions</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Call the JAX-optimized kernel</span>
+        <span class="c1"># Call the JAX-optimized kernel directly (positions already in correct precision)</span>
         <span class="k">return</span> <span class="n">compute_forces_kernel</span><span class="p">(</span>
             <span class="n">positions</span><span class="p">,</span>
             <span class="n">chunk_indices</span><span class="p">,</span>

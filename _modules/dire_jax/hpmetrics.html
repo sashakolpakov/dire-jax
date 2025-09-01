@@ -1056,13 +1056,15 @@
             <span class="n">violators</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ld_neighbors</span> <span class="o">-</span> <span class="n">hd_neighbors</span><span class="p">)</span>
             
             <span class="k">if</span> <span class="n">violators</span><span class="p">:</span>
-                <span class="c1"># Get the distances to violators in the original space</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">violators</span><span class="p">:</span>
-                    <span class="c1"># Calculate rank based on distance</span>
-                    <span class="n">orig_dists</span> <span class="o">=</span> <span class="n">hd_distances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                    <span class="n">dist_to_j</span> <span class="o">=</span> <span class="n">orig_dists</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-                    <span class="c1"># Count how many points are closer than j to i</span>
-                    <span class="n">orig_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">orig_dists</span> <span class="o">&lt;</span> <span class="n">dist_to_j</span><span class="p">)</span>
+                <span class="c1"># Compute distances only to violators in the original space</span>
+                <span class="n">violator_dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">data_np</span><span class="p">[</span><span class="n">violators</span><span class="p">]</span> <span class="o">-</span> <span class="n">data_np</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">violators</span><span class="p">):</span>
+                    <span class="c1"># Get distance to this violator</span>
+                    <span class="n">dist_to_j</span> <span class="o">=</span> <span class="n">violator_dists</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                    
+                    <span class="c1"># Count how many k-NN points are closer than this violator</span>
+                    <span class="n">orig_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">hd_distances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">dist_to_j</span><span class="p">)</span>
                     
                     <span class="c1"># Penalty based on how far j is in original space</span>
                     <span class="n">trust_sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">orig_rank</span> <span class="o">-</span> <span class="n">n_neighbors</span><span class="p">)</span>
@@ -1091,13 +1093,15 @@
             <span class="n">violators</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hd_neighbors</span> <span class="o">-</span> <span class="n">ld_neighbors</span><span class="p">)</span>
             
             <span class="k">if</span> <span class="n">violators</span><span class="p">:</span>
-                <span class="c1"># Get the distances to violators in the embedding</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">violators</span><span class="p">:</span>
-                    <span class="c1"># Calculate rank based on distance</span>
-                    <span class="n">embed_dists</span> <span class="o">=</span> <span class="n">ld_distances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                    <span class="n">dist_to_j</span> <span class="o">=</span> <span class="n">embed_dists</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-                    <span class="c1"># Count how many points are closer than j to i</span>
-                    <span class="n">embed_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">embed_dists</span> <span class="o">&lt;</span> <span class="n">dist_to_j</span><span class="p">)</span>
+                <span class="c1"># Compute distances only to violators in the embedding</span>
+                <span class="n">violator_dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">layout_np</span><span class="p">[</span><span class="n">violators</span><span class="p">]</span> <span class="o">-</span> <span class="n">layout_np</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">violators</span><span class="p">):</span>
+                    <span class="c1"># Get distance to this violator</span>
+                    <span class="n">dist_to_j</span> <span class="o">=</span> <span class="n">violator_dists</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                    
+                    <span class="c1"># Count how many k-NN points are closer than this violator</span>
+                    <span class="n">embed_rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ld_distances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">dist_to_j</span><span class="p">)</span>
                     
                     <span class="c1"># Penalty based on how far j is in the embedding</span>
                     <span class="n">cont_sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">embed_rank</span> <span class="o">-</span> <span class="n">n_neighbors</span><span class="p">)</span>
