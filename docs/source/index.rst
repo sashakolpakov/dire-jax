@@ -9,7 +9,7 @@ Welcome to DiRe-JAX's documentation!
    :target: https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/tests/dire_benchmarks.ipynb
    :alt: Open in Colab
 
-**DiRe-JAX** is a new dimensionality reduction package written in JAX, offering high-performance dimensionality reduction with efficient computation.
+**DiRe** is a high-performance dimensionality reduction package available with both JAX and PyTorch/PyKeOps backends for different use cases.
 
 Quick Start
 -----------
@@ -17,45 +17,52 @@ Quick Start
 Installation
 ~~~~~~~~~~~~
 
-Install the main DiRe class only:
+Basic installation (JAX backend only):
 
 .. code-block:: bash
 
     pip install dire-jax
 
-If you also need benchmarking utilities:
+With PyTorch/PyKeOps backend (recommended for CUDA GPUs):
 
 .. code-block:: bash
 
-    pip install dire-jax[utils]
+    pip install dire-jax[pytorch]
+
+Complete installation (all backends and utilities):
+
+.. code-block:: bash
+
+    pip install dire-jax[all]
 
 Example Usage
 ~~~~~~~~~~~~~
+
+**JAX backend:**
 
 .. code-block:: python
 
     from dire_jax import DiRe
     from sklearn.datasets import make_blobs
     
-    n_samples  = 100_000
-    n_features = 1_000
-    n_centers  = 12
-    features_blobs, labels_blobs = make_blobs(n_samples=n_samples, n_features=n_features, centers=n_centers, random_state=42)
+    features, labels = make_blobs(n_samples=10000, n_features=100, centers=5, random_state=42)
     
-    reducer_blobs = DiRe(dimension=2,
-                         n_neighbors=16,
-                         init_embedding_type='pca',
-                         max_iter_layout=32,
-                         min_dist=1e-4,
-                         spread=1.0,
-                         cutoff=4.0,
-                         n_sample_dirs=8,
-                         sample_size=16,
-                         neg_ratio=32,
-                         verbose=False,)
+    reducer = DiRe(dimension=2, n_neighbors=16, max_iter_layout=32)
+    embedding = reducer.fit_transform(features)
+    reducer.visualize(labels=labels, point_size=4)
+
+**PyTorch backend (faster on CUDA):**
+
+.. code-block:: python
+
+    from dire_jax import DiRePyTorch as DiRe  # Drop-in replacement
+    from sklearn.datasets import make_blobs
     
-    _ = reducer_blobs.fit_transform(features_blobs)
-    reducer_blobs.visualize(labels=labels_blobs, point_size=4)
+    features, labels = make_blobs(n_samples=10000, n_features=100, centers=5, random_state=42)
+    
+    reducer = DiRe(dimension=2, n_neighbors=16, max_iter_layout=32)
+    embedding = reducer.fit_transform(features)
+    reducer.visualize(labels=labels, point_size=4)
 
 .. toctree::
    :maxdepth: 2

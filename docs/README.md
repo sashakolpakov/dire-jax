@@ -2,16 +2,19 @@
 
 This directory contains the Sphinx documentation for the DiRe-JAX package.
 
-## Important Information about JAX GPU/TPU Support
+## Backend Options
 
-For GPU or TPU acceleration, JAX needs to be specifically installed with hardware support. The default JAX installation through pip doesn't include GPU/TPU support.
+DiRe-JAX supports multiple backends:
 
-To enable GPU/TPU acceleration:
+### JAX Backend (default)
+- Best for TPUs and CPU processing
+- For GPU acceleration, JAX needs specific installation: [JAX GPU instructions](https://github.com/google/jax#installation)
+- For TPU support: [JAX TPU instructions](https://github.com/google/jax#tpu-tpu-vm)
 
-* For **GPU** support, follow the [JAX GPU installation instructions](https://github.com/google/jax#installation)
-* For **TPU** support, follow the [JAX TPU installation instructions](https://github.com/google/jax#tpu-tpu-vm)
-
-Installing JAX with hardware acceleration can significantly improve the performance of DiRe-JAX, especially for larger datasets.
+### PyTorch/PyKeOps Backend
+- 100x+ faster on CUDA GPUs for datasets <2M points
+- Install with: `pip install dire-jax[pytorch]`
+- Uses all-pairs force computation without k-NN graphs
 
 ## Building the Documentation
 

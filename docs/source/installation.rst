@@ -4,50 +4,67 @@ Installation
 Requirements
 ------------
 
-DiRe-JAX has two sets of dependencies:
+DiRe-JAX has multiple dependency sets for different backends:
 
 * **Core dependencies** (required): jax, numpy, scipy, tqdm, pandas, plotly, loguru, scikit-learn
 * **Utilities dependencies** (optional): ripser, persim, fastdtw, fast-twed, pot
+* **PyTorch backend dependencies** (optional): torch>=1.13.0, pykeops>=2.1.0
+
+Backend Options
+~~~~~~~~~~~~~~~
 
 .. important::
-   **JAX GPU/TPU Support**
+   **JAX Backend (default)**
    
-   For GPU or TPU acceleration, JAX needs to be specifically installed with hardware support. The default JAX installation through pip doesn't include GPU/TPU support.
+   - Best for TPUs and CPU processing
+   - For GPU acceleration, JAX needs specific installation: `JAX GPU instructions <https://github.com/google/jax#installation>`
+   - Moderate GPU performance
+
+.. important::
+   **PyTorch/PyKeOps Backend**
    
-   To enable GPU/TPU acceleration follow the `JAX installation instructions <https://github.com/google/jax#installation>`
-   
-   Installing JAX with hardware acceleration can significantly improve the performance of DiRe-JAX, especially for larger datasets.
+   - 100x+ faster on CUDA GPUs for datasets <2M points
+   - Uses all-pairs force computation without k-NN graphs
+   - Requires CUDA-compatible GPU
 
 Installation Options
 --------------------
 
-Standard Installation
-~~~~~~~~~~~~~~~~~~~~~
-
-To install the main DiRe class only:
+Basic Installation (JAX backend only)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
     pip install dire-jax
 
-Installation with Utilities
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To install DiRe-JAX with additional utilities for benchmarking and metrics:
+With Utilities for Benchmarking
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
     pip install dire-jax[utils]
 
+With PyTorch/PyKeOps Backend (recommended for CUDA GPUs)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    pip install dire-jax[pytorch]
+
+Complete Installation (all backends and utilities)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    pip install dire-jax[all]
+
 Development Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~
-
-To install for development:
 
 .. code-block:: bash
 
     git clone https://github.com/sashakolpakov/dire-jax.git
     cd dire-jax
-    pip install -e .[utils]
+    pip install -e .[all]
 
-After installation, you may need to install JAX with GPU/TPU support separately as described above.
+After installation, you may need to install JAX with GPU/TPU support separately for the JAX backend.

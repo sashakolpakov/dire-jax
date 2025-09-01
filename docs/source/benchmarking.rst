@@ -3,15 +3,10 @@ Benchmarking
 
 DiRe-JAX includes comprehensive benchmarking utilities to compare its performance against other dimensionality reduction methods.
 
-Metrics
--------
+Quality Assessment
+------------------
 
-The package includes various metrics for evaluating dimensionality reduction quality:
-
-* **Local Metrics**: Measure how well local structures are preserved
-* **Global Metrics**: Measure how well global structures are preserved
-* **Context Measures**: Measure contextual preservation
-* **Quality Measures**: Overall quality metrics
+The benchmarking utilities provide comprehensive quality assessment for dimensionality reduction results, including structure preservation analysis and comparative evaluations.
 
 Benchmarking Functions
 ----------------------
@@ -36,9 +31,8 @@ The `dire_utils` module provides functions for benchmarking:
     # and print the results ... 
     print(results)
 
-    # You can also visualize the benchmark, check how the persistence homology 
-    # changes between the original data and the embedding, and compute several 
-    # goodness-of-fit metrics for comparison
+    # You can also visualize the benchmark and check how the persistence homology 
+    # changes between the original data and the embedding
     viz_benchmark(reducer,
                   features,
                   labels=labels,

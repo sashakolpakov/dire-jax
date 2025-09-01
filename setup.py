@@ -29,6 +29,12 @@ utils_deps = [
     "pot"
 ]
 
+# Dependencies for PyTorch backend (dire_pytorch.py)
+pytorch_deps = [
+    "torch>=1.13.0",
+    "pykeops>=2.1.0"
+]
+
 setup(
     name="dire-jax",
     version="0.2.0",
@@ -50,5 +56,7 @@ setup(
     install_requires=core_deps,
     extras_require={
         "utils": utils_deps,
+        "pytorch": pytorch_deps,
+        "all": utils_deps + pytorch_deps,
     },
 )

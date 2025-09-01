@@ -850,7 +850,7 @@ def compute_quality_measures(data, layout, n_neighbors=None):
     """
     Compute quality measures for assessing the quality of dimensionality reduction.
     
-    This function calculates various metrics that evaluate how well the low-dimensional
+    This function calculates quality measures that evaluate how well the low-dimensional
     representation preserves important properties of the high-dimensional data.
     
     Parameters
@@ -920,11 +920,13 @@ def compute_quality_measures(data, layout, n_neighbors=None):
             
             if violators:
                 # Get the distances to violators in the original space
+                orig_dists = hd_distances[i]  # distances to k nearest neighbors only
+                
                 for j in violators:
-                    # Calculate rank based on distance
-                    orig_dists = hd_distances[i]
-                    dist_to_j = orig_dists[j]
-                    # Count how many points are closer than j to i
+                    # j is a global point index, compute distance to it specifically
+                    dist_to_j = np.linalg.norm(data_np[i] - data_np[j])
+                    
+                    # Count how many of the k nearest neighbors are closer than j to i
                     orig_rank = np.sum(orig_dists < dist_to_j)
                     
                     # Penalty based on how far j is in original space
@@ -955,11 +957,13 @@ def compute_quality_measures(data, layout, n_neighbors=None):
             
             if violators:
                 # Get the distances to violators in the embedding
+                embed_dists = ld_distances[i]  # distances to k nearest neighbors only
+                
                 for j in violators:
-                    # Calculate rank based on distance
-                    embed_dists = ld_distances[i]
-                    dist_to_j = embed_dists[j]
-                    # Count how many points are closer than j to i
+                    # j is a global point index, compute distance to it specifically
+                    dist_to_j = np.linalg.norm(layout_np[i] - layout_np[j])
+                    
+                    # Count how many of the k nearest neighbors are closer than j to i
                     embed_rank = np.sum(embed_dists < dist_to_j)
                     
                     # Penalty based on how far j is in the embedding

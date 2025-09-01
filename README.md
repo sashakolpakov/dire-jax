@@ -33,43 +33,48 @@
 </p>
 
 
-### A new DImensionality REduction package written in JAX 
+### A high-performance DImensionality REduction package with JAX and PyTorch backends
 
-We offer a new dimension reduction tool called DiRe - JAX that is benchmarked against the existing approaches: UMAP (original and Rapids.AI versions), and tSNE (Rapids.AI version)
+DiRe offers fast dimensionality reduction preserving the global dataset structure, with benchmarks showing competitive performance against UMAP and t-SNE. Available with both JAX and PyTorch/PyKeOps backends for different use cases.
 
 ### Quick start
 
-Do either
-
+**Basic installation (JAX backend only):**
 ```bash    
 pip install dire-jax
 ```
 
-if you need to install the main DiRe class only, or
-
+**With utilities for benchmarking:**
 ```bash
 pip install dire-jax[utils]
 ```
 
-if you also need the benchmarking utilities.
+**With PyTorch/PyKeOps backend (recommended for CUDA GPUs):**
+```bash
+pip install dire-jax[pytorch]
+```
+
+**Complete installation:**
+```bash
+pip install dire-jax[all]
+```
 
 > **Note**: For GPU or TPU acceleration, JAX needs to be specifically installed with hardware support. See the [JAX documentation](https://github.com/google/jax#installation) for more details on enabling GPU/TPU support.
 
 
-Then, do the imports
-
+**JAX backend (default):**
 ```python
-# your imports here ...
-
-# ... DiRe JAX import ...
 from dire_jax import DiRe
-
-# ... test dataset 
 from sklearn.datasets import make_blobs
-
 ```
 
-and afterwards, for example, try this: 
+**PyTorch backend (faster on CUDA):**
+```python
+from dire_jax import DiRePyTorch as DiRe  # Drop-in replacement
+from sklearn.datasets import make_blobs
+```
+
+**Example usage:** 
 
 ```python
 n_samples  = 100_000
@@ -111,16 +116,19 @@ Our working paper is available on the arXiv. [![Paper](https://img.shields.io/ba
 )
 
 
+### Backend Performance Comparison
+
+- **JAX backend**: Best for TPUs, good CPU performance, moderate GPU performance
+- **PyTorch/PyKeOps backend**: 100x+ faster on CUDA GPUs for datasets <2M points
+
 ### Benchmarking and utilities
 
-In order to run the Jupyter notebook in the ./tests folder, you need to install some extras:
+For benchmarking utilities and quality metrics:
 ```bash
 pip install dire-jax[utils]
 ```
 
-This installation will give you access to the utilities (metrics and benchmarking routines) that are 
-specifically implemented to be used together with DiRe. However, some of them rely on external packages (especially for
-persistent homology computations) that may have longer runtimes. 
+This provides access to dimensionality reduction quality metrics and benchmarking routines. Some utilities use external packages for persistent homology computations which may increase runtime. 
 
 ### Contributing
 
