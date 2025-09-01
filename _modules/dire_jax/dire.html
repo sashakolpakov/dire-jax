@@ -517,27 +517,12 @@
             <span class="sa">f</span><span class="s2">&quot;[KNN] Using precision: </span><span class="si">{</span><span class="s1">&#39;float32&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;float64&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">knn_tiled</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
-                <span class="n">n_neighbors</span><span class="p">,</span>
-                <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
-                <span class="n">x_tile_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
-                <span class="n">y_batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
-                <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">knn_tiled</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
-                <span class="n">n_neighbors</span><span class="p">,</span>
-                <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
-                <span class="n">x_tile_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
-                <span class="n">y_batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
-                <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
-                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_kwargs</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distances_jax</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">knn_tiled</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span>
+            <span class="n">n_neighbors</span><span class="p">,</span>
+            <span class="n">x_tile_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">y_batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Wait until ready</span>
