@@ -110,11 +110,10 @@ embedding = reducer.fit_transform(X)
 
 DiRe supports multiple distance metrics:
 
-- `'lp'`: $p$-th power of $L_p$ distance (requires `p` parameter, $p \geq 2$)
+- `'lp'`: $p$-th power of $L_p$ distance (defaults to $p=2$ for L2/Euclidean)
 - `'l1'`: Manhattan distance
 - `'linf'`: Chebyshev distance  
 - `'cosine'`: Cosine similarity distance
-- Custom callable functions (see [documentation](https://sashakolpakov.github.io/dire-jax/))
 
 ```python
 # Different metric examples
@@ -130,9 +129,9 @@ Only the squared $L_2$ distance is implemented at the moment.
 ## Backend Selection Guide
 
 ### JAX Backend
-**Best for**: Research, custom metrics, TPU acceleration
+**Best for**: Research, built-in metrics, TPU acceleration
 - Cross-platform compatibility (CPU/GPU/TPU)
-- Full support for custom distance metrics
+- Multiple built-in distance metrics (lp, l1, linf, cosine)
 
 ### PyTorch Backend 
 **Best for**: Performance-critical applications, large datasets (<2M points)
@@ -173,7 +172,7 @@ Please follow the [contributing guide](https://sashakolpakov.github.io/dire-jax/
 ### PyTorch Backend
 - Requires NVIDIA GPU with CUDA support
 - Datasets >2M points need k-NN fallback (in development)
-- Limited custom metric support for force computations
+- Built-in metrics only (L2 distance)
 
 ### JAX Backend  
 - Performance limitations for large datasets (GPU memory tiling and batching)

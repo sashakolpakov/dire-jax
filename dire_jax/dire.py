@@ -426,27 +426,12 @@ class DiRe(TransformerMixin):
             f"[KNN] Using precision: {'float32' if self.mpa else 'float64'}"
         )
 
-        if self.mpa:
-            self._indices_jax, self._distances_jax = HPIndex.knn_tiled(
-                self._data,
-                self._data,
-                n_neighbors,
-                metric=self.metric,
-                x_tile_size=batch_size,
-                y_batch_size=batch_size,
-                dtype=jnp.float32,
-                **self.metric_kwargs,
-            )
-        else:
-            self._indices_jax, self._distances_jax = HPIndex.knn_tiled(
-                self._data,
-                self._data,
-                n_neighbors,
-                metric=self.metric,
-                x_tile_size=batch_size,
-                y_batch_size=batch_size,
-                dtype=jnp.float64,
-                **self.metric_kwargs,
+        self._indices_jax, self._distances_jax = HPIndex.knn_tiled(
+            self._data,
+            self._data,
+            n_neighbors,
+            x_tile_size=batch_size,
+            y_batch_size=batch_size,
             )
 
         # Wait until ready
