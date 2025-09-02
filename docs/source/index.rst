@@ -47,7 +47,7 @@ Example Usage
     
     features, labels = make_blobs(n_samples=10000, n_features=100, centers=5, random_state=42)
     
-    reducer = DiRe(dimension=2, n_neighbors=16, max_iter_layout=32)
+    reducer = DiRe(n_components=2, n_neighbors=16, max_iter_layout=32)
     embedding = reducer.fit_transform(features)
     reducer.visualize(labels=labels, point_size=4)
 
@@ -60,7 +60,7 @@ Example Usage
     
     features, labels = make_blobs(n_samples=10000, n_features=100, centers=5, random_state=42)
     
-    reducer = DiRe(dimension=2, n_neighbors=16, max_iter_layout=32)
+    reducer = DiRe(n_components=2, n_neighbors=16, max_iter_layout=32)
     embedding = reducer.fit_transform(features)
     reducer.visualize(labels=labels, point_size=4)
 

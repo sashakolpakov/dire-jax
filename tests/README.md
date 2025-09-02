@@ -35,7 +35,7 @@ pytest tests/unit/ --cov=dire_jax
 ```python
 from dire_jax import DiRe
 
-reducer = DiRe(dimension=2, n_neighbors=16)
+reducer = DiRe(n_components=2, n_neighbors=16)
 layout = reducer.fit_transform(data)
 ```
 
@@ -43,7 +43,7 @@ layout = reducer.fit_transform(data)
 ```python
 from dire_jax import DiRePyTorch
 
-reducer = DiRePyTorch(dimension=2, n_neighbors=16)
+reducer = DiRePyTorch(n_components=2, n_neighbors=16)
 layout = reducer.fit_transform(data)
 ```
 
@@ -55,12 +55,12 @@ For JAX backend with large datasets, use memory-efficient options:
 from dire_jax import DiRe
 
 reducer = DiRe(
-    dimension=2,
+    n_components=2,
     n_neighbors=16,
-    init_embedding_type='pca',
+    init='pca',
     max_iter_layout=32
 )
 layout = reducer.fit_transform(data)
 ```
 
-The PyTorch backend handles large datasets (up to 2M points) automatically with all-pairs force computation.
+The PyTorch backend handles large datasets efficiently with memory-aware chunked processing and k-NN + random sampling for forces.

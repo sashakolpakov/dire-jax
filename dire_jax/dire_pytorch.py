@@ -324,7 +324,7 @@ class DiRePyTorch(TransformerMixin):
             return None
 
         if title is None:
-            title = f"PyTorch {self.n_components}D Embedding (Fixed)"
+            title = f"PyTorch {self.n_components}D Embedding"
 
         # Create dataframe
         if self.n_components == 2:
@@ -352,6 +352,5 @@ class DiRePyTorch(TransformerMixin):
             fig = px.scatter_3d(df, x='x', y='y', z='z', **vis_params)
 
         fig.update_traces(marker=dict(size=point_size))
-        fig.show()
 
         return fig

@@ -82,9 +82,9 @@ n_features = 1_000
 n_centers  = 12
 features_blobs, labels_blobs = make_blobs(n_samples=n_samples, n_features=n_features, centers=n_centers, random_state=42)
 
-reducer_blobs = DiRe(dimension=2,
+reducer_blobs = DiRe(n_components=2,
                      n_neighbors=16,
-                     init_embedding_type='pca',
+                     init='pca',
                      max_iter_layout=32,
                      min_dist=1e-4,
                      spread=1.0,
