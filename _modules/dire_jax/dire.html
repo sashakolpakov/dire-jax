@@ -789,11 +789,11 @@
 
         <span class="c1"># Setup parameters with appropriate dtype</span>
         <span class="n">compute_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
-        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span>
-        <span class="n">num_iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iter_layout</span>
 
         <span class="c1"># Handle automatic batch size calculation if needed</span>
         <span class="n">sample_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_size</span>
+        <span class="n">num_iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iter_layout</span>
+
         <span class="k">if</span> <span class="n">sample_size</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
             <span class="c1"># Scale batch size based on dataset size and neighborhood size</span>
             <span class="n">sample_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_samples</span><span class="p">))</span>
@@ -809,18 +809,13 @@
         <span class="c1"># Other parameters</span>
         <span class="n">n_dirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sample_dirs</span>
         <span class="n">neg_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neg_ratio</span>
-        <span class="n">compute_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
 
         <span class="c1"># Debug initial embedding precision</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;[LAYOUT] Initial embedding precision: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
-        <span class="c1"># we shall use force_cpu only as a flag passed to the routine</span>
-        <span class="c1"># force_cpu = force_cpu or large_dataset_mode and (jax.devices()[0].platform == &#39;tpu&#39;)</span>
-
         <span class="c1"># Initialize and normalize positions with appropriate dtype</span>
-        <span class="n">compute_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
         <span class="k">if</span> <span class="n">force_cpu</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Forcing computations on CPU&quot;</span><span class="p">)</span>
             <span class="n">cpu_device</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
