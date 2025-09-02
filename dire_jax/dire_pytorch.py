@@ -265,8 +265,9 @@ class DiRePyTorch(TransformerMixin):
         - Attraction: only between k-NN neighbors
         - Repulsion: random sampling
         """
-        if not PYKEOPS_AVAILABLE:
-            raise RuntimeError("PyKeOps required for efficient force computation")
+        # PyKeOps is optional - we can use pure PyTorch
+        # if not PYKEOPS_AVAILABLE:
+        #     raise RuntimeError("PyKeOps required for efficient force computation")
 
         n_samples = positions.shape[0]
         forces = torch.zeros_like(positions)

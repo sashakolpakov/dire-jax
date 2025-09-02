@@ -14,6 +14,13 @@ try:
 except ImportError:
     HAS_PYTORCH = False
 
+# Attempt to import cuVS backend
+try:
+    from .dire_cuvs import DiReCuVS, create_dire
+    HAS_CUVS = True
+except ImportError:
+    HAS_CUVS = False
+
 # Attempt to import optional utilities, set a flag accordingly
 try:
     from . import dire_utils
@@ -34,5 +41,7 @@ if not HAS_UTILS:
 __all__ = ['DiRe']
 if HAS_PYTORCH:
     __all__.append('DiRePyTorch')
+if HAS_CUVS:
+    __all__.extend(['DiReCuVS', 'create_dire'])
 if HAS_UTILS:
     __all__.append('dire_utils')
