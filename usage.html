@@ -100,9 +100,9 @@
 
 <span class="c1"># Initialize DiRe with desired parameters</span>
 <span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span>
-    <span class="n">dimension</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>            <span class="c1"># Target dimension</span>
+    <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>         <span class="c1"># Target dimension</span>
     <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>         <span class="c1"># Number of neighbors to consider</span>
-    <span class="n">init_embedding_type</span><span class="o">=</span><span class="s1">&#39;pca&#39;</span><span class="p">,</span>  <span class="c1"># Initialization method</span>
+    <span class="n">init</span><span class="o">=</span><span class="s1">&#39;pca&#39;</span><span class="p">,</span>             <span class="c1"># Initialization method</span>
     <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>    <span class="c1"># Maximum number of layout iterations</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>            <span class="c1"># Show progress</span>
 <span class="p">)</span>
@@ -125,7 +125,7 @@
 
 <span class="c1"># Initialize DiRe with desired parameters</span>
 <span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRePyTorch</span><span class="p">(</span>
-    <span class="n">dimension</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>            <span class="c1"># Target dimension</span>
+    <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>         <span class="c1"># Target dimension</span>
     <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>         <span class="c1"># Number of neighbors to consider</span>
     <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>    <span class="c1"># Maximum number of layout iterations</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>            <span class="c1"># Show progress</span>
@@ -152,9 +152,9 @@
 <h2>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading"></a></h2>
 <p>DiRe offers several parameters that can be tuned to optimize the dimensionality reduction process:</p>
 <ul class="simple">
-<li><p><cite>dimension</cite>: Target dimension for the embedding (typically 2 or 3)</p></li>
+<li><p><cite>n_components</cite>: Target dimension for the embedding (typically 2 or 3)</p></li>
 <li><p><cite>n_neighbors</cite>: Number of neighbors to consider when constructing the graph</p></li>
-<li><p><cite>init_embedding_type</cite>: Method to initialize the embedding (‘pca’, ‘random’)</p></li>
+<li><p><cite>init</cite>: Method to initialize the embedding (‘pca’, ‘random’, ‘spectral’)</p></li>
 <li><p><cite>max_iter_layout</cite>: Maximum number of iterations for the layout algorithm</p></li>
 <li><p><cite>min_dist</cite>: Minimum distance between points in the embedding</p></li>
 <li><p><cite>spread</cite>: Controls how spread out the embedding is</p></li>
@@ -176,7 +176,7 @@
 <span class="n">features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">make_blobs</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">centers</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 
 <span class="c1"># Initialize reducer</span>
-<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span><span class="n">dimension</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
 
 <span class="c1"># Then either run the benchmark ...</span>
 <span class="n">benchmark_results</span> <span class="o">=</span> <span class="n">run_benchmark</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span>
