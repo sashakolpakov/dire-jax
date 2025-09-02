@@ -143,8 +143,8 @@
 <section id="backend-performance-comparison">
 <h2>Backend Performance Comparison<a class="headerlink" href="#backend-performance-comparison" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p><strong>JAX backend</strong>: Best for TPUs, good CPU performance, moderate GPU performance</p></li>
-<li><p><strong>PyTorch/PyKeOps backend</strong>: 100x+ faster on CUDA GPUs for datasets &lt;2M points, uses all-pairs force computation without k-NN graphs</p></li>
+<li><p><strong>JAX backend</strong>: Optimized for small-medium datasets (&lt;50K points). Features fully vectorized computation with JIT compilation. Excellent CPU performance, good for research and development workflows.</p></li>
+<li><p><strong>PyTorch/PyKeOps backend</strong>: Designed for large datasets (&gt;50K points) on CUDA GPUs. Uses memory-efficient chunked processing with k-NN graphs and random sampling. Handles millions of points with adaptive GPU memory management.</p></li>
 </ul>
 <p>Both backends are API-compatible - simply replace <code class="docutils literal notranslate"><span class="pre">DiRe</span></code> with <code class="docutils literal notranslate"><span class="pre">DiRePyTorch</span></code> as a drop-in replacement.</p>
 </section>

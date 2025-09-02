@@ -105,18 +105,20 @@
 <p class="admonition-title">Important</p>
 <p><strong>JAX Backend (default)</strong></p>
 <ul class="simple">
-<li><p>Best for TPUs and CPU processing</p></li>
+<li><p>Best for small-medium datasets (&lt;50K points)</p></li>
+<li><p>Excellent CPU performance with JIT compilation</p></li>
 <li><p>For GPU acceleration, JAX needs specific installation: <cite>JAX GPU instructions &lt;https://github.com/google/jax#installation&gt;</cite></p></li>
-<li><p>Moderate GPU performance</p></li>
+<li><p>Ideal for research and development workflows</p></li>
 </ul>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p><strong>PyTorch/PyKeOps Backend</strong></p>
 <ul class="simple">
-<li><p>100x+ faster on CUDA GPUs for datasets &lt;2M points</p></li>
-<li><p>Uses all-pairs force computation without k-NN graphs</p></li>
-<li><p>Requires CUDA-compatible GPU</p></li>
+<li><p>Optimized for large datasets (&gt;50K points) on CUDA GPUs</p></li>
+<li><p>Memory-efficient chunked processing with adaptive GPU memory management</p></li>
+<li><p>Uses k-NN graphs with random sampling for scalability</p></li>
+<li><p>Handles millions of points reliably</p></li>
 </ul>
 </div>
 </section>

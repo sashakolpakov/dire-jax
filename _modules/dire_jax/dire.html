@@ -76,13 +76,19 @@
 <span></span><span class="c1"># dire.py</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Provides the main class for dimensionality reduction.</span>
+<span class="sd">Provides the main JAX-based class for dimensionality reduction.</span>
 
 <span class="sd">The DiRe (Dimensionality Reduction) class implements a modern approach to</span>
 <span class="sd">dimensionality reduction, leveraging JAX for efficient computation. It uses </span>
 <span class="sd">force-directed layout techniques combined with k-nearest neighbor graph </span>
 <span class="sd">construction to generate meaningful low-dimensional embeddings of </span>
 <span class="sd">high-dimensional data.</span>
+
+<span class="sd">This JAX implementation features:</span>
+<span class="sd">- Fully vectorized force computation (no chunking for optimal performance)</span>
+<span class="sd">- JIT compilation for mathematical operations</span>
+<span class="sd">- Optimized for small to medium datasets (&lt;50K points)</span>
+<span class="sd">- Excellent CPU performance and research-friendly design</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1">#</span>
