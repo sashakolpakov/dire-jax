@@ -3,6 +3,10 @@
 Simple check of memory-efficient methods.
 """
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import inspect
 
 from dire_jax import DiRe

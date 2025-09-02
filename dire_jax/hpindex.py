@@ -63,14 +63,17 @@ class HPIndex:
         )
 
     @staticmethod
-    @partial(jax.jit, static_argnums=(2, 3, 4, 5, 6, 7, 8, 9))
+    @partial(jax.jit, static_argnums=(2, 3, 4, 5, 6, 7, 8))
     def _knn_tiled_jit(x, y, k, x_tile_size, y_batch_size,
-                       num_y_batches, y_remainder, num_x_tiles, n_x, dtype=jnp.float64):
+                       num_y_batches, y_remainder, num_x_tiles, n_x):
         """
         JIT-compiled implementation of tiled KNN with concrete batch parameters.
         """
         n_y, d_y = y.shape
         _, d_x = x.shape
+        
+        # Infer dtype from input
+        dtype = x.dtype
 
         # Initialize results
         all_indices = jnp.zeros((n_y, k), dtype=jnp.int64)
@@ -105,8 +108,7 @@ class HPIndex:
                 x_tile_actual_size = jnp.minimum(x_tile_size, n_x - x_start)
 
                 # Compute distances between y_batch and x_tile
-
-                tile_distances = _compute_batch_distances_l2(y_batch, x_tile)
+                tile_distances = _compute_batch_distances_l2(y_batch, x_tile, dtype=dtype)
 
                 # Mask out invalid indices (those beyond the actual data)
                 valid_mask = jnp.arange(x_tile_size) < x_tile_actual_size
@@ -189,8 +191,7 @@ class HPIndex:
                 x_tile_actual_size = jnp.minimum(x_tile_size, n_x - x_start)
 
                 # Compute distances between padded_y and x_tile
-
-                tile_distances = _compute_batch_distances_l2(padded_y, x_tile)
+                tile_distances = _compute_batch_distances_l2(padded_y, x_tile, dtype=dtype)
 
                 # Mask out invalid indices (both for y padding and x overflow)
                 x_valid_mask = jnp.arange(x_tile_size) < x_tile_actual_size
@@ -257,19 +258,29 @@ def _compute_batch_distances_l2(y_batch, x, dtype=jnp.float64):
     Args:
         y_batch: (batch_size, d) array of query points
         x: (n, d) array of database points
+        dtype: data type for computation
 
     Returns:
         (batch_size, n) array of squared distances
     """
-    # Compute squared norms
-    x_norm = jnp.sum(x**2, axis=1)
-    y_norm = jnp.sum(y_batch**2, axis=1)
+    # Ensure consistent dtype
+    y_batch = y_batch.astype(dtype)
+    x = x.astype(dtype)
+    
+    # Compute squared norms using more numerically stable method
+    x_norm = jnp.sum(x * x, axis=1)
+    y_norm = jnp.sum(y_batch * y_batch, axis=1)
 
-    # Compute xy term
-    xy = jnp.dot(y_batch, x.T)
+    # Compute xy term with explicit dtype
+    xy = jnp.dot(y_batch, x.T, precision=jax.lax.Precision.DEFAULT)
 
     # Complete squared distance: ||y||² + ||x||² - 2*<y,x>
-    dists2 = y_norm[:, jnp.newaxis] + x_norm[jnp.newaxis, :] - 2 * xy
-    dists2 = jnp.clip(dists2, 0, jnp.finfo(dtype).max)
+    # Use broadcasting with consistent dtype
+    two = jnp.array(2.0, dtype=dtype)
+    dists2 = y_norm[:, jnp.newaxis] + x_norm[jnp.newaxis, :] - two * xy
+    
+    # Clip to valid range for the dtype
+    zero = jnp.array(0.0, dtype=dtype)
+    dists2 = jnp.maximum(dists2, zero)
 
     return dists2

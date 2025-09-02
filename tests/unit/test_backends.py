@@ -4,6 +4,10 @@
 Tests for both JAX and PyTorch backends.
 """
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 import unittest
 import numpy as np
 from sklearn.datasets import make_blobs
