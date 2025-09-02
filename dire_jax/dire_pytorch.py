@@ -244,7 +244,12 @@ class DiRePyTorch(TransformerMixin):
         # Adjust chunk size based on available memory
         # Estimate memory usage: chunk_size * (k + n_neg) * D * 4 bytes
         n_neg_samples = min(int(self.neg_ratio * self.n_neighbors), n_samples - 1)
-        memory_per_point = (self.n_neighbors + n_neg_samples) * positions.shape[1] * 4  # bytes
+        n_dims = positions.shape[1]
+        
+        # Memory estimate per point (in bytes):
+        # k*D*4 for attraction + n_neg*D*4 for repulsion
+        bytes_per_float = 4
+        memory_per_point = (self.n_neighbors + n_neg_samples) * n_dims * bytes_per_float * 2  # x2 for safety
         
         if self.device.type == 'cuda':
             # Get available GPU memory and use 20% for force computation (more conservative)
@@ -254,8 +259,11 @@ class DiRePyTorch(TransformerMixin):
             # For very large datasets, be extra conservative
             if n_samples > 500000:
                 chunk_size = min(chunk_size, 2000)
+            # Ensure reasonable chunk size
+            chunk_size = max(100, min(chunk_size, 5000))  # Between 100 and 5000
+            self.logger.debug(f"Using chunk size: {chunk_size} (available memory: {gpu_mem_free/1e9:.1f} GB)")
         else:
-            chunk_size = min(chunk_size, n_samples)
+            chunk_size = min(1000, n_samples)  # Smaller chunks for CPU
 
         # Process in chunks to manage memory
         knn_indices_torch = torch.tensor(self._knn_indices, device=self.device)
@@ -263,65 +271,128 @@ class DiRePyTorch(TransformerMixin):
         for start_idx in range(0, n_samples, chunk_size):
             end_idx = min(start_idx + chunk_size, n_samples)
             chunk_indices = slice(start_idx, end_idx)
+            chunk_size_actual = end_idx - start_idx
             
             # ============ ATTRACTION FORCES (k-NN only) ============
             # Get chunk data
             chunk_positions = positions[chunk_indices]  # (chunk, D)
             chunk_knn_indices = knn_indices_torch[chunk_indices]  # (chunk, k)
             
-            # Get neighbor positions for this chunk
-            neighbor_positions = positions[chunk_knn_indices]  # (chunk, k, D)
-            current_positions = chunk_positions.unsqueeze(1)  # (chunk, 1, D)
+            # Check if we have enough memory for vectorized computation
+            attraction_memory = chunk_size_actual * self.n_neighbors * n_dims * bytes_per_float
             
-            # Compute differences and distances
-            diff = neighbor_positions - current_positions  # (chunk, k, D)
-            dist = torch.norm(diff, dim=2, keepdim=True) + 1e-10  # (chunk, k, 1)
-            
-            # Attraction kernel
-            att_coeff = 1.0 / (1.0 + a_val * (1.0 / dist) ** b_exp)  # (chunk, k, 1)
-            
-            # Compute attraction forces and sum over neighbors
-            att_forces = (att_coeff * diff / dist).sum(dim=1)  # (chunk, D)
-            forces[chunk_indices] += att_forces
-
-            # ============ REPULSION FORCES (Random Sampling) ============
-            if n_neg_samples > 0:
-                chunk_size_actual = end_idx - start_idx
+            try:
+                if self.device.type == 'cuda':
+                    gpu_mem_free = torch.cuda.mem_get_info()[0]
+                    if attraction_memory > gpu_mem_free * 0.4:
+                        raise RuntimeError("Not enough memory for vectorized attraction")
                 
-                # Generate random samples for this chunk
-                neg_indices = torch.randint(0, n_samples, (chunk_size_actual, n_neg_samples + 5), 
-                                          device=self.device)
-                
-                # Create mask to exclude points from the current chunk
-                chunk_range = torch.arange(start_idx, end_idx, device=self.device)
-                self_mask = neg_indices == chunk_range.unsqueeze(1)
-                
-                # Replace self indices with valid random ones
-                replacement_indices = torch.randint(0, n_samples, (chunk_size_actual, n_neg_samples + 5), 
-                                                  device=self.device)
-                neg_indices = torch.where(self_mask, replacement_indices, neg_indices)
-                
-                # Take first n_neg_samples
-                neg_indices = neg_indices[:, :n_neg_samples]
-                
-                # Get negative sample positions
-                neg_positions = positions[neg_indices]  # (chunk, n_neg, D)
+                # Try vectorized version (faster)
+                neighbor_positions = positions[chunk_knn_indices]  # (chunk, k, D)
                 current_positions = chunk_positions.unsqueeze(1)  # (chunk, 1, D)
                 
                 # Compute differences and distances
-                diff = neg_positions - current_positions  # (chunk, n_neg, D)
-                dist = torch.norm(diff, dim=2, keepdim=True) + 1e-10  # (chunk, n_neg, 1)
+                diff = neighbor_positions - current_positions  # (chunk, k, D)
+                dist = torch.norm(diff, dim=2, keepdim=True) + 1e-10  # (chunk, k, 1)
                 
-                # Repulsion kernel
-                rep_coeff = -1.0 / (1.0 + a_val * (dist ** b_exp))  # (chunk, n_neg, 1)
+                # Attraction kernel
+                att_coeff = 1.0 / (1.0 + a_val * (1.0 / dist) ** b_exp)  # (chunk, k, 1)
                 
-                # Apply distance cutoff
-                cutoff_scale = torch.exp(-dist / self.cutoff)
-                rep_coeff = rep_coeff * cutoff_scale
+                # Compute attraction forces and sum over neighbors
+                att_forces = (att_coeff * diff / dist).sum(dim=1)  # (chunk, D)
+                forces[chunk_indices] += att_forces
                 
-                # Compute repulsion forces and sum over negative samples
-                rep_forces = (rep_coeff * diff / dist).sum(dim=1)  # (chunk, D)
-                forces[chunk_indices] += rep_forces
+            except (RuntimeError, torch.cuda.OutOfMemoryError) as e:
+                # Fall back to point-by-point if memory is tight
+                if self.device.type == 'cuda':
+                    torch.cuda.empty_cache()
+                self.logger.debug(f"Falling back to point-by-point attraction due to memory")
+                
+                for i in range(start_idx, end_idx):
+                    neighbor_ids = self._knn_indices[i]
+                    pos_i = positions[i:i+1]
+                    pos_neighbors = positions[neighbor_ids]
+                    
+                    diff = pos_neighbors - pos_i
+                    dist = torch.norm(diff, dim=1, keepdim=True) + 1e-10
+                    att_coeff = 1.0 / (1.0 + a_val * (1.0 / dist) ** b_exp)
+                    forces[i] += (att_coeff * diff / dist).sum(0)
+
+            # ============ REPULSION FORCES (Random Sampling) ============
+            if n_neg_samples > 0:
+                # Check memory for repulsion
+                repulsion_memory = chunk_size_actual * n_neg_samples * n_dims * bytes_per_float
+                
+                try:
+                    if self.device.type == 'cuda':
+                        gpu_mem_free = torch.cuda.mem_get_info()[0]
+                        if repulsion_memory > gpu_mem_free * 0.4:
+                            raise RuntimeError("Not enough memory for vectorized repulsion")
+                    
+                    # Try vectorized version
+                    # Generate random samples for this chunk
+                    neg_indices = torch.randint(0, n_samples, (chunk_size_actual, n_neg_samples + 5), 
+                                              device=self.device)
+                    
+                    # Create mask to exclude points from the current chunk
+                    chunk_range = torch.arange(start_idx, end_idx, device=self.device)
+                    self_mask = neg_indices == chunk_range.unsqueeze(1)
+                    
+                    # Replace self indices with valid random ones
+                    replacement_indices = torch.randint(0, n_samples, (chunk_size_actual, n_neg_samples + 5), 
+                                                      device=self.device)
+                    neg_indices = torch.where(self_mask, replacement_indices, neg_indices)
+                    
+                    # Take first n_neg_samples
+                    neg_indices = neg_indices[:, :n_neg_samples]
+                    
+                    # Get negative sample positions
+                    neg_positions = positions[neg_indices]  # (chunk, n_neg, D)
+                    current_positions = chunk_positions.unsqueeze(1)  # (chunk, 1, D)
+                    
+                    # Compute differences and distances
+                    diff = neg_positions - current_positions  # (chunk, n_neg, D)
+                    dist = torch.norm(diff, dim=2, keepdim=True) + 1e-10  # (chunk, n_neg, 1)
+                    
+                    # Repulsion kernel
+                    rep_coeff = -1.0 / (1.0 + a_val * (dist ** b_exp))  # (chunk, n_neg, 1)
+                    
+                    # Apply distance cutoff
+                    cutoff_scale = torch.exp(-dist / self.cutoff)
+                    rep_coeff = rep_coeff * cutoff_scale
+                    
+                    # Compute repulsion forces and sum over negative samples
+                    rep_forces = (rep_coeff * diff / dist).sum(dim=1)  # (chunk, D)
+                    forces[chunk_indices] += rep_forces
+                    
+                except (RuntimeError, torch.cuda.OutOfMemoryError) as e:
+                    # Fall back to point-by-point
+                    if self.device.type == 'cuda':
+                        torch.cuda.empty_cache()
+                    self.logger.debug(f"Falling back to point-by-point repulsion due to memory")
+                    
+                    for i in range(start_idx, end_idx):
+                        # Random sample for repulsion
+                        neg_samples = np.random.choice(n_samples, min(n_neg_samples, n_samples-1), replace=False)
+                        neg_samples = neg_samples[neg_samples != i][:n_neg_samples]  # Exclude self
+                        
+                        if len(neg_samples) > 0:
+                            pos_i = positions[i:i+1]
+                            pos_neg = positions[neg_samples]
+                            
+                            # Compute differences and distances
+                            diff = pos_neg - pos_i
+                            dist = torch.norm(diff, dim=1, keepdim=True) + 1e-10
+                            
+                            # Repulsion kernel
+                            rep_coeff = -1.0 / (1.0 + a_val * (dist ** b_exp))
+                            
+                            # Apply distance cutoff
+                            cutoff_scale = torch.exp(-dist / self.cutoff)
+                            rep_coeff = rep_coeff * cutoff_scale
+                            
+                            # Apply force
+                            forces[i] += (rep_coeff * diff / dist).sum(0)
 
         # Apply cooling and clipping
         forces = alpha * forces
