@@ -259,7 +259,7 @@ class DiRePyTorch(TransformerMixin):
             positions += forces
 
             # Log progress
-            self.logger.debug(f"Iteration {iteration}/{self.max_iter_layout}")
+            self.logger.info(f"Iteration {iteration}/{self.max_iter_layout}")
 
         # Final normalization
         positions -= positions.mean(dim=0)
