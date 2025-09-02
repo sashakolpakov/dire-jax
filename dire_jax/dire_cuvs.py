@@ -29,6 +29,17 @@ except ImportError:
     logger.warning("cuVS not available. Install RAPIDS for GPU-accelerated k-NN: "
                   "conda install -c rapidsai -c conda-forge rapids=25.08")
 
+# Try to import cuML for GPU-accelerated PCA
+try:
+    from cuml.decomposition import PCA as cuPCA
+    from cuml.decomposition import TruncatedSVD as cuTruncatedSVD
+    CUML_AVAILABLE = True
+    logger.info("cuML available - GPU-accelerated PCA enabled")
+except ImportError:
+    CUML_AVAILABLE = False
+    if CUVS_AVAILABLE:
+        logger.warning("cuML not available but cuVS is. PCA will run on CPU.")
+
 
 class DiReCuVS(DiRePyTorch):
     """
@@ -47,6 +58,7 @@ class DiReCuVS(DiRePyTorch):
         self,
         *args,
         use_cuvs=None,  # Auto-detect by default
+        use_cuml=None,  # Auto-detect by default
         cuvs_index_type='auto',  # 'auto', 'ivf_flat', 'ivf_pq', 'cagra'
         cuvs_build_params=None,
         cuvs_search_params=None,
@@ -76,6 +88,18 @@ class DiReCuVS(DiRePyTorch):
             if use_cuvs and not CUVS_AVAILABLE:
                 logger.warning("cuVS requested but not available, falling back to PyTorch")
         
+        # Auto-detect cuML usage for PCA
+        if use_cuml is None:
+            self.use_cuml = CUML_AVAILABLE and self.device.type == 'cuda'
+        else:
+            self.use_cuml = use_cuml and CUML_AVAILABLE
+        
+        if self.use_cuml:
+            logger.info("cuML backend enabled for PCA initialization")
+        else:
+            if use_cuml and not CUML_AVAILABLE:
+                logger.warning("cuML requested but not available, falling back to sklearn")
+        
         self.cuvs_index_type = cuvs_index_type
         self.cuvs_build_params = cuvs_build_params
         self.cuvs_search_params = cuvs_search_params
@@ -89,18 +113,20 @@ class DiReCuVS(DiRePyTorch):
             return self.cuvs_index_type
         
         # Decision tree based on scale and dimensionality
+        # For high dimensions (>500), prefer IVF methods over graph-based
         if n_samples < 50000:
-            # Small dataset - use exact search
+            # Small dataset - use flat (IVF with many lists)
             return 'flat'
-        elif n_samples < 500000:
-            # Medium dataset - IVF without compression
+        elif n_samples < 500000 or n_dims > 500:
+            # Medium dataset or high-D - IVF without compression
+            # IVF-Flat works better than CAGRA for high dimensions
             return 'ivf_flat'
         elif n_samples < 5000000:
             # Large dataset - IVF with compression
             return 'ivf_pq'
         else:
-            # Very large dataset - graph-based
-            return 'cagra'
+            # Very large dataset with moderate dimensions - graph-based
+            return 'cagra' if n_dims <= 500 else 'ivf_pq'
     
     def _build_cuvs_index(self, X_gpu, index_type):
         """
@@ -117,7 +143,12 @@ class DiReCuVS(DiRePyTorch):
             
         elif index_type == 'ivf_flat':
             # IVF without compression
-            n_lists = min(int(np.sqrt(n_samples)), 4096)
+            # For high-D data, use more lists for better quantization
+            if n_dims > 500:
+                # High-D: more lists help with curse of dimensionality
+                n_lists = min(int(np.sqrt(n_samples) * 2), 8192)
+            else:
+                n_lists = min(int(np.sqrt(n_samples)), 4096)
             
             build_params = ivf_flat.IndexParams(
                 n_lists=n_lists,
@@ -130,7 +161,7 @@ class DiReCuVS(DiRePyTorch):
             
             index = ivf_flat.build(build_params, X_gpu)
             
-            self.logger.info(f"Built IVF-Flat index with {n_lists} lists")
+            self.logger.info(f"Built IVF-Flat index with {n_lists} lists for {n_dims}D data")
             
         elif index_type == 'ivf_pq':
             # IVF with product quantization
@@ -182,19 +213,25 @@ class DiReCuVS(DiRePyTorch):
         self.logger.info(f"Searching for {k} nearest neighbors using cuVS {index_type}...")
         
         if index_type == 'flat':
-            # Use cuVS brute force search
-            from cuvs.neighbors import brute_force
+            # For flat/brute force, just use IVF-Flat with many lists for exact search
+            # This avoids dtype issues with brute_force module
+            n_lists = min(int(np.sqrt(n_samples)), 1024)
             
-            # Build a brute force index
-            build_params = brute_force.Index()
-            index = brute_force.build(build_params, X_gpu)
+            build_params = ivf_flat.IndexParams(
+                n_lists=n_lists,
+                metric='euclidean',
+                add_data_on_build=True
+            )
             
-            # Search for k+1 nearest neighbors
-            distances, indices = brute_force.search(
-                brute_force.SearchParams(), 
-                index, 
-                X_gpu, 
-                k+1
+            index = ivf_flat.build(build_params, X_gpu)
+            
+            # Search with high probe count for near-exact results
+            search_params = ivf_flat.SearchParams(
+                n_probes=min(n_lists, 256)  # High probe count for accuracy
+            )
+            
+            distances, indices = ivf_flat.search(
+                search_params, index, X_gpu, k+1
             )
             
         elif index_type == 'ivf_flat':
@@ -267,7 +304,8 @@ class DiReCuVS(DiRePyTorch):
         
         # Convert to CuPy array
         # Note: cuVS requires float32, not float16
-        X_gpu = cp.asarray(X, dtype=cp.float32)
+        # cuVS also requires C-contiguous (row-major) arrays
+        X_gpu = cp.asarray(X, dtype=cp.float32, order='C')
         
         # Select index type
         index_type = self._select_cuvs_index_type(n_samples, n_dims)
@@ -299,6 +337,55 @@ class DiReCuVS(DiRePyTorch):
         cp.get_default_memory_pool().free_all_blocks()
         
         return self
+    
+    def _initialize_embedding(self, X):
+        """
+        Initialize embedding using cuML PCA if available, else fall back to sklearn.
+        """
+        if self.use_cuml and self.init == 'pca':
+            self.logger.info("Initializing with cuML PCA (GPU-accelerated)")
+            
+            # Convert to CuPy array if needed
+            if isinstance(X, np.ndarray):
+                X_gpu = cp.asarray(X, dtype=cp.float32)
+            else:
+                X_gpu = X
+            
+            # Use TruncatedSVD for high-dimensional data (more efficient)
+            if X.shape[1] > 100:
+                # TruncatedSVD is perfect for high-D to low-D reduction
+                pca = cuTruncatedSVD(
+                    n_components=self.n_components,
+                    random_state=self.random_state
+                )
+            else:
+                # Regular PCA for lower dimensions
+                pca = cuPCA(
+                    n_components=self.n_components,
+                    random_state=self.random_state
+                )
+            
+            # Fit and transform on GPU
+            embedding_gpu = pca.fit_transform(X_gpu)
+            
+            # Convert to PyTorch tensor on GPU
+            # cuML returns cupy array, convert to torch
+            embedding_cp = cp.asarray(embedding_gpu)
+            
+            # Normalize on GPU
+            embedding_cp -= embedding_cp.mean(axis=0)
+            embedding_cp /= embedding_cp.std(axis=0)
+            
+            # Convert to PyTorch
+            # Use dlpack for zero-copy transfer from CuPy to PyTorch
+            from torch.utils.dlpack import from_dlpack
+            embedding_torch = from_dlpack(embedding_cp.toDlpack())
+            
+            return embedding_torch.to(self.device)
+        
+        else:
+            # Fall back to CPU sklearn PCA
+            return super()._initialize_embedding(X)
     
     def fit_transform(self, X, y=None):
         """
