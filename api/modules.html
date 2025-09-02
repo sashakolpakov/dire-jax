@@ -1205,7 +1205,7 @@ For both 2D and 3D, hover over points to see their coordinates and labels.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">compute_forces_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#compute_forces_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">compute_forces_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_float32</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#compute_forces_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Fully vectorized JAX kernel for computing forces - no chunking.</p>
 <p>Let JAX handle large tensors efficiently rather than fighting with recompilation.
 Modern GPUs can easily handle the memory requirements for most datasets.</p>
@@ -1219,6 +1219,7 @@ Modern GPUs can easily handle the memory requirements for most datasets.</p>
 <li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Cooling factor that scales force magnitude</p></li>
 <li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Attraction parameter</p></li>
 <li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Repulsion parameter</p></li>
+<li><p><strong>use_float32</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to use float32 for computations (MPA optimization)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1266,7 +1267,7 @@ Modern GPUs can easily handle the memory requirements for most datasets.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">rand_directions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#rand_directions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">rand_directions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num=100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'jax.numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#rand_directions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Sample unit vectors in random directions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1274,6 +1275,7 @@ Modern GPUs can easily handle the memory requirements for most datasets.</p>
 <li><p><strong>key</strong> (<em>jax.random.PRNGKey</em>) – Random number generator key</p></li>
 <li><p><strong>dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Dimensionality of the vectors</p></li>
 <li><p><strong>num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of random directions to sample</p></li>
+<li><p><strong>dtype</strong> (<em>jnp.dtype</em>) – Data type for computation</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

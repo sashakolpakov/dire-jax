@@ -651,14 +651,20 @@
             <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
-        <span class="n">rand_basis</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_dim</span><span class="p">))</span>
+        
+        <span class="c1"># Use appropriate dtype for MPA</span>
+        <span class="n">compute_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
+        <span class="n">rand_basis</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_dim</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span>
 
-        <span class="c1"># Move data and projection matrix to device memory</span>
-        <span class="n">data_matrix</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+        <span class="c1"># Move data and projection matrix to device memory with consistent dtype</span>
+        <span class="n">data_matrix</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">compute_dtype</span><span class="p">))</span>
         <span class="n">rand_basis</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="n">rand_basis</span><span class="p">)</span>
 
-        <span class="c1"># Project data onto random basis</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span> <span class="o">=</span> <span class="n">data_matrix</span> <span class="o">@</span> <span class="n">rand_basis</span><span class="o">.</span><span class="n">T</span>
+        <span class="c1"># Project data onto random basis with explicit precision control</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span>
+            <span class="n">data_matrix</span><span class="p">,</span> <span class="n">rand_basis</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> 
+            <span class="n">precision</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">Precision</span><span class="o">.</span><span class="n">DEFAULT</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">Precision</span><span class="o">.</span><span class="n">HIGHEST</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_random_embedding done ...&quot;</span><span class="p">)</span></div>
 
@@ -713,9 +719,10 @@
         <span class="n">sampled_indices_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">arr_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
 
-        <span class="c1"># Get random unit vectors for projections</span>
+        <span class="c1"># Get random unit vectors for projections with appropriate dtype</span>
         <span class="n">key</span><span class="p">,</span> <span class="n">subkey</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="n">direction_vectors</span> <span class="o">=</span> <span class="n">rand_directions</span><span class="p">(</span><span class="n">subkey</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="n">n_dirs</span><span class="p">)</span>
+        <span class="n">compute_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;mpa&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
+        <span class="n">direction_vectors</span> <span class="o">=</span> <span class="n">rand_directions</span><span class="p">(</span><span class="n">subkey</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="n">n_dirs</span><span class="p">,</span> <span class="n">compute_dtype</span><span class="p">)</span>
 
         <span class="c1"># For each direction, sample points based on projections</span>
         <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">direction_vectors</span><span class="p">:</span>
@@ -780,8 +787,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;do_layout ...&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Setup parameters</span>
-        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="p">])</span>
+        <span class="c1"># Setup parameters with appropriate dtype</span>
+        <span class="n">compute_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
+        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span>
         <span class="n">num_iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iter_layout</span>
 
         <span class="c1"># Handle automatic batch size calculation if needed</span>
@@ -801,6 +809,7 @@
         <span class="c1"># Other parameters</span>
         <span class="n">n_dirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sample_dirs</span>
         <span class="n">neg_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neg_ratio</span>
+        <span class="n">compute_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
 
         <span class="c1"># Debug initial embedding precision</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
@@ -810,18 +819,24 @@
         <span class="c1"># we shall use force_cpu only as a flag passed to the routine</span>
         <span class="c1"># force_cpu = force_cpu or large_dataset_mode and (jax.devices()[0].platform == &#39;tpu&#39;)</span>
 
-        <span class="c1"># Initialize and normalize positions</span>
+        <span class="c1"># Initialize and normalize positions with appropriate dtype</span>
+        <span class="n">compute_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
         <span class="k">if</span> <span class="n">force_cpu</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Forcing computations on CPU&quot;</span><span class="p">)</span>
             <span class="n">cpu_device</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cpu_device</span><span class="p">)</span>
+            <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">compute_dtype</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">cpu_device</span><span class="p">)</span>
             <span class="n">neighbor_indices_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indices_np</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cpu_device</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="p">)</span>
+            <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_embedding</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">compute_dtype</span><span class="p">))</span>
             <span class="n">neighbor_indices_jax</span> <span class="o">=</span> <span class="n">device_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indices_jax</span><span class="p">)</span>
 
-        <span class="n">init_pos_jax</span> <span class="o">-=</span> <span class="n">init_pos_jax</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Center positions</span>
-        <span class="n">init_pos_jax</span> <span class="o">/=</span> <span class="n">init_pos_jax</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Normalize variance</span>
+        <span class="c1"># Use dtype-consistent operations for normalization</span>
+        <span class="n">mean_pos</span> <span class="o">=</span> <span class="n">init_pos_jax</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">init_pos_jax</span> <span class="o">-</span> <span class="n">mean_pos</span>  <span class="c1"># Center positions</span>
+        <span class="n">std_pos</span> <span class="o">=</span> <span class="n">init_pos_jax</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Avoid division by zero with appropriate epsilon for dtype</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e-7</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="mf">1e-15</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span>
+        <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">init_pos_jax</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">std_pos</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span>  <span class="c1"># Normalize variance</span>
 
         <span class="c1"># Set random seed for reproducibility</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -890,8 +905,9 @@
                     <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">iter_id</span> <span class="o">/</span> <span class="n">num_iterations</span><span class="p">,</span>
                 <span class="p">)</span>
 
-            <span class="c1"># Clip forces to prevent extreme movements</span>
-            <span class="n">net_force</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">net_force</span><span class="p">,</span> <span class="o">-</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
+            <span class="c1"># Clip forces to prevent extreme movements (with dtype-aware cutoff)</span>
+            <span class="n">cutoff_typed</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span>
+            <span class="n">net_force</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">net_force</span><span class="p">,</span> <span class="o">-</span><span class="n">cutoff_typed</span><span class="p">,</span> <span class="n">cutoff_typed</span><span class="p">)</span>
 
             <span class="c1"># Update positions</span>
             <span class="n">init_pos_jax</span> <span class="o">+=</span> <span class="n">net_force</span>
@@ -902,9 +918,12 @@
             <span class="c1"># Clean up resources</span>
             <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 
-        <span class="c1"># Normalize final layout</span>
-        <span class="n">init_pos_jax</span> <span class="o">-=</span> <span class="n">init_pos_jax</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">init_pos_jax</span> <span class="o">/=</span> <span class="n">init_pos_jax</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># Normalize final layout with dtype consistency</span>
+        <span class="n">mean_final</span> <span class="o">=</span> <span class="n">init_pos_jax</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">init_pos_jax</span> <span class="o">-</span> <span class="n">mean_final</span>
+        <span class="n">std_final</span> <span class="o">=</span> <span class="n">init_pos_jax</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e-7</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span> <span class="k">else</span> <span class="mf">1e-15</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span>
+        <span class="n">init_pos_jax</span> <span class="o">=</span> <span class="n">init_pos_jax</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">std_final</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span>
 
         <span class="c1"># Store final layout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">init_pos_jax</span><span class="p">)</span>
@@ -944,15 +963,10 @@
 <span class="sd">            Net force vectors for each point</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="p">:</span>
-            <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[FORCE] Computing forces on device: </span><span class="si">{</span><span class="n">positions</span><span class="o">.</span><span class="n">device</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[FORCE] Using precision: </span><span class="si">{</span><span class="n">positions</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[FORCE] Using MPA: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Call the JAX-optimized kernel</span>
+        <span class="c1"># Call the JAX-optimized kernel with MPA flag</span>
         <span class="k">return</span> <span class="n">compute_forces_kernel</span><span class="p">(</span>
             <span class="n">positions</span><span class="p">,</span>
             <span class="n">chunk_indices</span><span class="p">,</span>
@@ -961,6 +975,7 @@
             <span class="n">alpha</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_a</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span>
+            <span class="n">use_float32</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mpa</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1">#</span>
@@ -1103,9 +1118,9 @@
 
 <div class="viewcode-block" id="compute_forces_kernel">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.compute_forces_kernel">[docs]</a>
-<span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_forces_kernel</span><span class="p">(</span>
-    <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
+    <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">use_float32</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fully vectorized JAX kernel for computing forces - no chunking.</span>
@@ -1129,6 +1144,8 @@
 <span class="sd">        Attraction parameter</span>
 <span class="sd">    b : float</span>
 <span class="sd">        Repulsion parameter</span>
+<span class="sd">    use_float32 : bool</span>
+<span class="sd">        Whether to use float32 for computations (MPA optimization)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1136,9 +1153,16 @@
 <span class="sd">        Net force vectors for each point (N, D)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
+    <span class="c1"># Convert to appropriate dtype at the beginning</span>
+    <span class="n">compute_dtype</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="n">use_float32</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float64</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">compute_dtype</span><span class="p">)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span>
+    
     <span class="c1"># Get current positions for processing</span>
     <span class="n">current_positions</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">chunk_indices</span><span class="p">]</span>  <span class="c1"># (N, D)</span>
-    <span class="n">forces</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">current_positions</span><span class="p">)</span>
+    <span class="n">forces</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">current_positions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span>
 
     <span class="c1"># ===== ATTRACTION FORCES (k-NN only) =====</span>
     <span class="c1"># Get neighbor positions efficiently using advanced indexing</span>
@@ -1149,10 +1173,14 @@
     
     <span class="c1"># Compute differences and distances</span>
     <span class="n">att_diff</span> <span class="o">=</span> <span class="n">neighbor_positions</span> <span class="o">-</span> <span class="n">current_pos_expanded</span>  <span class="c1"># (N, k, D)</span>
-    <span class="n">att_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">att_diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-10</span>  <span class="c1"># (N, k, 1)</span>
+    <span class="c1"># Use more stable distance computation for MPA</span>
+    <span class="n">att_dist_sq</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">att_diff</span> <span class="o">*</span> <span class="n">att_diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># (N, k, 1)</span>
+    <span class="n">att_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">att_dist_sq</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">))</span>  <span class="c1"># (N, k, 1)</span>
     
     <span class="c1"># Attraction coefficient: 1 / (1 + a * (1/d)^(2b))</span>
-    <span class="n">att_coeff</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">att_dist</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>  <span class="c1"># (N, k, 1)</span>
+    <span class="c1"># Use more numerically stable computation</span>
+    <span class="n">inv_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span> <span class="o">/</span> <span class="n">att_dist</span>
+    <span class="n">att_coeff</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">inv_dist</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>  <span class="c1"># (N, k, 1)</span>
     
     <span class="c1"># Compute attraction forces and sum over neighbors</span>
     <span class="n">att_forces</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">att_coeff</span> <span class="o">*</span> <span class="n">att_diff</span> <span class="o">/</span> <span class="n">att_dist</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (N, D)</span>
@@ -1165,10 +1193,12 @@
         
         <span class="c1"># Compute differences and distances</span>
         <span class="n">rep_diff</span> <span class="o">=</span> <span class="n">sample_positions</span> <span class="o">-</span> <span class="n">current_pos_expanded</span>  <span class="c1"># (N, n_neg, D)</span>
-        <span class="n">rep_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rep_diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-10</span>  <span class="c1"># (N, n_neg, 1)</span>
+        <span class="c1"># Use more stable distance computation for MPA</span>
+        <span class="n">rep_dist_sq</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rep_diff</span> <span class="o">*</span> <span class="n">rep_diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># (N, n_neg, 1)</span>
+        <span class="n">rep_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rep_dist_sq</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">))</span>  <span class="c1"># (N, n_neg, 1)</span>
         
         <span class="c1"># Repulsion coefficient: -1 / (1 + a * d^(2b))</span>
-        <span class="n">rep_coeff</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">rep_dist</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>  <span class="c1"># (N, n_neg, 1)</span>
+        <span class="n">rep_coeff</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">)</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">rep_dist</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>  <span class="c1"># (N, n_neg, 1)</span>
         
         <span class="c1"># Compute repulsion forces and sum over negative samples</span>
         <span class="n">rep_forces</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rep_coeff</span> <span class="o">*</span> <span class="n">rep_diff</span> <span class="o">/</span> <span class="n">rep_dist</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (N, D)</span>
@@ -1232,8 +1262,8 @@
 
 <div class="viewcode-block" id="rand_directions">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.rand_directions">[docs]</a>
-<span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">rand_directions</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rand_directions</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sample unit vectors in random directions.</span>
 
@@ -1245,15 +1275,19 @@
 <span class="sd">        Dimensionality of the vectors</span>
 <span class="sd">    num : int</span>
 <span class="sd">        Number of random directions to sample</span>
+<span class="sd">    dtype : jnp.dtype</span>
+<span class="sd">        Data type for computation</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    jax.numpy.ndarray</span>
 <span class="sd">        Array of shape (num, dim) containing unit vectors</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">points</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">dim</span><span class="p">))</span>
-    <span class="n">norms</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">points</span> <span class="o">*</span> <span class="n">points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">points</span> <span class="o">/</span> <span class="n">norms</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span></div>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">norms</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">points</span> <span class="o">*</span> <span class="n">points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="c1"># Add small epsilon to avoid division by zero</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e-7</span> <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span> <span class="k">else</span> <span class="mf">1e-15</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">points</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">norms</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span></div>
 
 
 
