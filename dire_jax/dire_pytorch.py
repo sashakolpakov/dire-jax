@@ -124,16 +124,26 @@ class DiRePyTorch(TransformerMixin):
     def _compute_knn(self, X, chunk_size=50000):
         """
         Compute k-nearest neighbors with memory-efficient chunking.
+        Intelligently chooses between PyKeOps and PyTorch based on dimensionality.
         """
-        if not PYKEOPS_AVAILABLE:
-            raise RuntimeError("PyKeOps required for k-NN computation. Install with: pip install pykeops")
-        
         n_samples = X.shape[0]
-        self.logger.info(f"Computing {self.n_neighbors}-NN graph for {n_samples} points...")
+        n_dims = X.shape[1]
+        self.logger.info(f"Computing {self.n_neighbors}-NN graph for {n_samples} points in {n_dims}D...")
 
         X_torch = torch.tensor(X, dtype=torch.float32, device=self.device)
         
-        # Adaptive chunk sizing based on available GPU memory and dataset size
+        # CRITICAL: PyKeOps is slower than PyTorch for high dimensions!
+        # Use PyTorch for high-D, PyKeOps for low-D
+        use_pykeops = PYKEOPS_AVAILABLE and n_dims < 200 and self.device.type == 'cuda'
+        
+        if n_dims >= 200:
+            self.logger.info(f"Using PyTorch for k-NN (high dimension: {n_dims}D)")
+        elif use_pykeops:
+            self.logger.info("Using PyKeOps for k-NN (low dimension, GPU available)")
+        else:
+            self.logger.info("Using PyTorch for k-NN")
+        
+        # Adaptive chunk sizing based on available GPU memory
         if self.device.type == 'cuda':
             gpu_mem_free = torch.cuda.mem_get_info()[0]
             # Estimate memory for k-NN: chunk_size * n_samples * 4 bytes for distances
@@ -155,13 +165,14 @@ class DiRePyTorch(TransformerMixin):
         for start_idx in range(0, n_samples, chunk_size):
             end_idx = min(start_idx + chunk_size, n_samples)
             
-            self.logger.info(f"Processing chunk {start_idx//chunk_size + 1}/{(n_samples + chunk_size - 1)//chunk_size}")
+            if n_samples > 50000:  # Only log for large datasets
+                self.logger.info(f"Processing chunk {start_idx//chunk_size + 1}/{(n_samples + chunk_size - 1)//chunk_size}")
             
             # Get chunk data
             X_chunk = X_torch[start_idx:end_idx]  # (chunk_size, D)
             
-            if PYKEOPS_AVAILABLE:
-                # Use PyKeOps for this chunk vs all points
+            if use_pykeops:
+                # Use PyKeOps for LOW dimensional data
                 X_i = LazyTensor(X_chunk[:, None, :])  # (chunk_size, 1, D)
                 X_j = LazyTensor(X_torch[None, :, :])   # (1, N, D)
                 
@@ -175,7 +186,7 @@ class DiRePyTorch(TransformerMixin):
                 chunk_indices = knn_indices[:, 1:].cpu().numpy()
                 chunk_distances = torch.sqrt(knn_dists[:, 1:]).cpu().numpy()
             else:
-                # Fallback to PyTorch (slower but more memory friendly)
+                # Use PyTorch for HIGH dimensional data (MUCH faster!)
                 distances = torch.cdist(X_chunk, X_torch, p=2)
                 knn_dists, knn_indices = torch.topk(distances, k=self.n_neighbors + 1, 
                                                    dim=1, largest=False)
@@ -187,8 +198,8 @@ class DiRePyTorch(TransformerMixin):
             all_knn_indices.append(chunk_indices)
             all_knn_distances.append(chunk_distances)
             
-            # Clear GPU memory for this chunk
-            if self.device.type == 'cuda':
+            # Clear GPU memory periodically
+            if self.device.type == 'cuda' and start_idx % (chunk_size * 10) == 0:
                 torch.cuda.empty_cache()
         
         # Concatenate results
