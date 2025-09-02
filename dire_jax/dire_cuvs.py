@@ -185,8 +185,9 @@ class DiReCuVS(DiRePyTorch):
             # Use cuVS brute force search
             from cuvs.neighbors import brute_force
             
-            # Build a brute force index (essentially a no-op, just stores reference)
-            index = brute_force.build(brute_force.Index(), X_gpu)
+            # Build a brute force index
+            build_params = brute_force.Index()
+            index = brute_force.build(build_params, X_gpu)
             
             # Search for k+1 nearest neighbors
             distances, indices = brute_force.search(
@@ -282,9 +283,11 @@ class DiReCuVS(DiRePyTorch):
             self.cuvs_index, index_type, X_gpu, self.n_neighbors
         )
         
-        # Remove self (first neighbor) and convert to numpy
-        self._knn_indices = cp.asnumpy(indices[:, 1:])
-        self._knn_distances = cp.asnumpy(distances[:, 1:])
+        # Convert to CuPy arrays first, then remove self (first neighbor) and convert to numpy
+        indices_cp = cp.asarray(indices)
+        distances_cp = cp.asarray(distances)
+        self._knn_indices = cp.asnumpy(indices_cp[:, 1:])
+        self._knn_distances = cp.asnumpy(distances_cp[:, 1:])
         
         self.logger.info(f"k-NN graph computed: shape {self._knn_indices.shape}")
         
