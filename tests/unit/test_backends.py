@@ -38,7 +38,7 @@ class TestBackends(unittest.TestCase):
     def test_jax_backend(self):
         """Test JAX backend functionality."""
         reducer = DiRe(
-            dimension=self.n_components,
+            n_components=self.n_components,
             n_neighbors=self.n_neighbors,
             sample_size=self.sample_size,
             max_iter_layout=self.max_iter_layout,

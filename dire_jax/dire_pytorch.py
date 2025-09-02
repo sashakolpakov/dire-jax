@@ -153,9 +153,9 @@ class DiRePyTorch(TransformerMixin):
 
         return torch.tensor(embedding, dtype=torch.float32, device=self.device)
 
-    def _compute_forces(self, positions, iteration, max_iterations):
+    def _compute_forces(self, positions, iteration, max_iterations, chunk_size=10000):
         """
-        Compute forces efficiently using PyKeOps:
+        Memory-efficient force computation with chunked processing:
         - Attraction: only between k-NN neighbors
         - Repulsion: random sampling
         """
@@ -172,68 +172,85 @@ class DiRePyTorch(TransformerMixin):
         a_val = float(self._a)
         b_val = float(self._b)
         b_exp = float(2 * b_val)
+        
+        # Adjust chunk size based on available memory
+        # Estimate memory usage: chunk_size * (k + n_neg) * D * 4 bytes
+        n_neg_samples = min(int(self.neg_ratio * self.n_neighbors), n_samples - 1)
+        memory_per_point = (self.n_neighbors + n_neg_samples) * positions.shape[1] * 4  # bytes
+        
+        if self.device.type == 'cuda':
+            # Get available GPU memory and use 50% of it
+            gpu_mem_free = torch.cuda.mem_get_info()[0]
+            max_chunk_size = int(gpu_mem_free * 0.5 / memory_per_point)
+            chunk_size = min(chunk_size, max_chunk_size, n_samples)
+        else:
+            chunk_size = min(chunk_size, n_samples)
 
-        # ============ ATTRACTION FORCES (k-NN only) ============
-        # Vectorized attraction using advanced indexing
+        # Process in chunks to manage memory
         knn_indices_torch = torch.tensor(self._knn_indices, device=self.device)
         
-        # Get all neighbor positions efficiently
-        # positions[knn_indices_torch] gives shape (N, k, D)
-        neighbor_positions = positions[knn_indices_torch]  # (N, k, D)
-        
-        # Broadcast current positions to match
-        current_positions = positions.unsqueeze(1)  # (N, 1, D)
-        
-        # Compute differences and distances
-        diff = neighbor_positions - current_positions  # (N, k, D)
-        dist = torch.norm(diff, dim=2, keepdim=True) + 1e-10  # (N, k, 1)
-        
-        # Attraction kernel
-        att_coeff = 1.0 / (1.0 + a_val * (1.0 / dist) ** b_exp)  # (N, k, 1)
-        
-        # Compute attraction forces and sum over neighbors
-        att_forces = (att_coeff * diff / dist).sum(dim=1)  # (N, D)
-        forces += att_forces
-
-        # ============ REPULSION FORCES (Random Sampling) ============
-        # Use random sampling for efficiency
-        n_neg_samples = min(int(self.neg_ratio * self.n_neighbors), n_samples - 1)
-        
-        if n_neg_samples > 0:
-            # Generate random samples for all points at once
-            # This is more efficient than doing it point by point
-            neg_indices = torch.randint(0, n_samples, (n_samples, n_neg_samples + 5), 
-                                      device=self.device)
+        for start_idx in range(0, n_samples, chunk_size):
+            end_idx = min(start_idx + chunk_size, n_samples)
+            chunk_indices = slice(start_idx, end_idx)
             
-            # Create mask to exclude self
-            self_mask = neg_indices == torch.arange(n_samples, device=self.device).unsqueeze(1)
+            # ============ ATTRACTION FORCES (k-NN only) ============
+            # Get chunk data
+            chunk_positions = positions[chunk_indices]  # (chunk, D)
+            chunk_knn_indices = knn_indices_torch[chunk_indices]  # (chunk, k)
             
-            # Replace self indices with valid random ones
-            replacement_indices = torch.randint(0, n_samples, (n_samples, n_neg_samples + 5), 
-                                              device=self.device)
-            neg_indices = torch.where(self_mask, replacement_indices, neg_indices)
-            
-            # Take first n_neg_samples
-            neg_indices = neg_indices[:, :n_neg_samples]
-            
-            # Get negative sample positions
-            neg_positions = positions[neg_indices]  # (N, n_neg, D)
-            current_positions = positions.unsqueeze(1)  # (N, 1, D)
+            # Get neighbor positions for this chunk
+            neighbor_positions = positions[chunk_knn_indices]  # (chunk, k, D)
+            current_positions = chunk_positions.unsqueeze(1)  # (chunk, 1, D)
             
             # Compute differences and distances
-            diff = neg_positions - current_positions  # (N, n_neg, D)
-            dist = torch.norm(diff, dim=2, keepdim=True) + 1e-10  # (N, n_neg, 1)
+            diff = neighbor_positions - current_positions  # (chunk, k, D)
+            dist = torch.norm(diff, dim=2, keepdim=True) + 1e-10  # (chunk, k, 1)
             
-            # Repulsion kernel
-            rep_coeff = -1.0 / (1.0 + a_val * (dist ** b_exp))  # (N, n_neg, 1)
+            # Attraction kernel
+            att_coeff = 1.0 / (1.0 + a_val * (1.0 / dist) ** b_exp)  # (chunk, k, 1)
             
-            # Apply distance cutoff
-            cutoff_scale = torch.exp(-dist / self.cutoff)
-            rep_coeff = rep_coeff * cutoff_scale
-            
-            # Compute repulsion forces and sum over negative samples
-            rep_forces = (rep_coeff * diff / dist).sum(dim=1)  # (N, D)
-            forces += rep_forces
+            # Compute attraction forces and sum over neighbors
+            att_forces = (att_coeff * diff / dist).sum(dim=1)  # (chunk, D)
+            forces[chunk_indices] += att_forces
+
+            # ============ REPULSION FORCES (Random Sampling) ============
+            if n_neg_samples > 0:
+                chunk_size_actual = end_idx - start_idx
+                
+                # Generate random samples for this chunk
+                neg_indices = torch.randint(0, n_samples, (chunk_size_actual, n_neg_samples + 5), 
+                                          device=self.device)
+                
+                # Create mask to exclude points from the current chunk
+                chunk_range = torch.arange(start_idx, end_idx, device=self.device)
+                self_mask = neg_indices == chunk_range.unsqueeze(1)
+                
+                # Replace self indices with valid random ones
+                replacement_indices = torch.randint(0, n_samples, (chunk_size_actual, n_neg_samples + 5), 
+                                                  device=self.device)
+                neg_indices = torch.where(self_mask, replacement_indices, neg_indices)
+                
+                # Take first n_neg_samples
+                neg_indices = neg_indices[:, :n_neg_samples]
+                
+                # Get negative sample positions
+                neg_positions = positions[neg_indices]  # (chunk, n_neg, D)
+                current_positions = chunk_positions.unsqueeze(1)  # (chunk, 1, D)
+                
+                # Compute differences and distances
+                diff = neg_positions - current_positions  # (chunk, n_neg, D)
+                dist = torch.norm(diff, dim=2, keepdim=True) + 1e-10  # (chunk, n_neg, 1)
+                
+                # Repulsion kernel
+                rep_coeff = -1.0 / (1.0 + a_val * (dist ** b_exp))  # (chunk, n_neg, 1)
+                
+                # Apply distance cutoff
+                cutoff_scale = torch.exp(-dist / self.cutoff)
+                rep_coeff = rep_coeff * cutoff_scale
+                
+                # Compute repulsion forces and sum over negative samples
+                rep_forces = (rep_coeff * diff / dist).sum(dim=1)  # (chunk, D)
+                forces[chunk_indices] += rep_forces
 
         # Apply cooling and clipping
         forces = alpha * forces
