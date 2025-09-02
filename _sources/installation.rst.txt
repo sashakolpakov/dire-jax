@@ -4,36 +4,28 @@ Installation
 Requirements
 ------------
 
-DiRe-JAX has multiple dependency sets for different backends:
+DiRe-JAX has the following dependencies:
 
 * **Core dependencies** (required): jax, numpy, scipy, tqdm, pandas, plotly, loguru, scikit-learn
 * **Utilities dependencies** (optional): ripser, persim, fastdtw, fast-twed, pot
-* **PyTorch backend dependencies** (optional): torch>=1.13.0, pykeops>=2.1.0
 
-Backend Options
-~~~~~~~~~~~~~~~
+JAX Implementation
+~~~~~~~~~~~~~~~~~~
 
 .. important::
-   **JAX Backend (default)**
+   **DiRe-JAX Features**
    
-   - Best for small-medium datasets (<50K points)
+   - Optimized for small-medium datasets (<50K points)
    - Excellent CPU performance with JIT compilation
-   - For GPU acceleration, JAX needs specific installation: `JAX GPU instructions <https://github.com/google/jax#installation>`
+   - GPU acceleration available when JAX is installed with CUDA support
+   - TPU support for cloud-based computation
    - Ideal for research and development workflows
-
-.. important::
-   **PyTorch/PyKeOps Backend**
-   
-   - Optimized for large datasets (>50K points) on CUDA GPUs
-   - Memory-efficient chunked processing with adaptive GPU memory management
-   - Uses k-NN graphs with random sampling for scalability
-   - Handles millions of points reliably
 
 Installation Options
 --------------------
 
-Basic Installation (JAX backend only)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Basic Installation
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -46,15 +38,8 @@ With Utilities for Benchmarking
 
     pip install dire-jax[utils]
 
-With PyTorch/PyKeOps Backend (recommended for CUDA GPUs)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-    pip install dire-jax[pytorch]
-
-Complete Installation (all backends and utilities)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Complete Installation (with all utilities)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -69,4 +54,31 @@ Development Installation
     cd dire-jax
     pip install -e .[all]
 
-After installation, you may need to install JAX with GPU/TPU support separately for the JAX backend.
+Hardware Acceleration
+---------------------
+
+JAX GPU Support
+~~~~~~~~~~~~~~~
+
+For GPU acceleration, JAX needs to be installed with CUDA support:
+
+.. code-block:: bash
+
+    # For CUDA 12
+    pip install --upgrade "jax[cuda12]"
+    
+    # For CUDA 11
+    pip install --upgrade "jax[cuda11]"
+
+See the `JAX GPU installation guide <https://github.com/google/jax#installation>`_ for detailed instructions.
+
+JAX TPU Support
+~~~~~~~~~~~~~~~
+
+For TPU support on Google Cloud:
+
+.. code-block:: bash
+
+    pip install --upgrade "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
+
+See the `JAX TPU documentation <https://github.com/google/jax#tpu-tpu-vm>`_ for more information.

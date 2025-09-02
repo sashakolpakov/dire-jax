@@ -47,13 +47,16 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#jax-backend-default">JAX Backend (default)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pytorch-backend-faster-on-cuda-gpus">PyTorch Backend (faster on CUDA GPUs)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick Start</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#backend-performance-comparison">Backend Performance Comparison</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-characteristics">Performance Characteristics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-with-custom-parameters">Example with Custom Parameters</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#benchmarking">Benchmarking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-different-data-types">Working with Different Data Types</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">API Reference</a></li>
@@ -89,9 +92,9 @@
 <h1>Usage Guide<a class="headerlink" href="#usage-guide" title="Link to this heading"></a></h1>
 <section id="basic-usage">
 <h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h2>
-<p>DiRe offers fast dimensionality reduction with both JAX and PyTorch backends.</p>
-<section id="jax-backend-default">
-<h3>JAX Backend (default)<a class="headerlink" href="#jax-backend-default" title="Link to this heading"></a></h3>
+<p>DiRe-JAX offers fast dimensionality reduction with JAX-based computation.</p>
+<section id="quick-start">
+<h3>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -115,38 +118,17 @@
 </pre></div>
 </div>
 </section>
-<section id="pytorch-backend-faster-on-cuda-gpus">
-<h3>PyTorch Backend (faster on CUDA GPUs)<a class="headerlink" href="#pytorch-backend-faster-on-cuda-gpus" title="Link to this heading"></a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRePyTorch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="c1"># Create some sample data</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>  <span class="c1"># 1000 samples in 50 dimensions</span>
-
-<span class="c1"># Initialize DiRe with desired parameters</span>
-<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRePyTorch</span><span class="p">(</span>
-    <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>         <span class="c1"># Target dimension</span>
-    <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>         <span class="c1"># Number of neighbors to consider</span>
-    <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>    <span class="c1"># Maximum number of layout iterations</span>
-    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>            <span class="c1"># Show progress</span>
-<span class="p">)</span>
-
-<span class="c1"># Fit and transform the data</span>
-<span class="n">embedding</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-<span class="c1"># Visualize the results</span>
-<span class="n">reducer</span><span class="o">.</span><span class="n">visualize</span><span class="p">()</span>
-</pre></div>
-</div>
 </section>
-</section>
-<section id="backend-performance-comparison">
-<h2>Backend Performance Comparison<a class="headerlink" href="#backend-performance-comparison" title="Link to this heading"></a></h2>
+<section id="performance-characteristics">
+<h2>Performance Characteristics<a class="headerlink" href="#performance-characteristics" title="Link to this heading"></a></h2>
+<p>DiRe-JAX is optimized for:</p>
 <ul class="simple">
-<li><p><strong>JAX backend</strong>: Optimized for small-medium datasets (&lt;50K points). Features fully vectorized computation with JIT compilation. Excellent CPU performance, good for research and development workflows.</p></li>
-<li><p><strong>PyTorch/PyKeOps backend</strong>: Designed for large datasets (&gt;50K points) on CUDA GPUs. Uses memory-efficient chunked processing with k-NN graphs and random sampling. Handles millions of points with adaptive GPU memory management.</p></li>
+<li><p>Small to medium datasets (&lt;50K points)</p></li>
+<li><p>Fully vectorized computation with JIT compilation</p></li>
+<li><p>Excellent CPU performance</p></li>
+<li><p>GPU acceleration when JAX is installed with CUDA support</p></li>
+<li><p>TPU support for cloud-based computation</p></li>
 </ul>
-<p>Both backends are API-compatible - simply replace <code class="docutils literal notranslate"><span class="pre">DiRe</span></code> with <code class="docutils literal notranslate"><span class="pre">DiRePyTorch</span></code> as a drop-in replacement.</p>
 </section>
 <section id="advanced-configuration">
 <h2>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading"></a></h2>
@@ -163,6 +145,38 @@
 <li><p><cite>sample_size</cite>: Sample size for the layout algorithm</p></li>
 <li><p><cite>neg_ratio</cite>: Ratio of negative to positive samples</p></li>
 </ul>
+<section id="example-with-custom-parameters">
+<h3>Example with Custom Parameters<a class="headerlink" href="#example-with-custom-parameters" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_blobs</span>
+
+<span class="c1"># Create dataset with clusters</span>
+<span class="n">features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">make_blobs</span><span class="p">(</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">n_features</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">centers</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Initialize with custom parameters</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span>
+    <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>          <span class="c1"># More neighbors for global structure</span>
+    <span class="n">init</span><span class="o">=</span><span class="s1">&#39;spectral&#39;</span><span class="p">,</span>         <span class="c1"># Spectral initialization</span>
+    <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>     <span class="c1"># More iterations for convergence</span>
+    <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>           <span class="c1"># Tighter packing</span>
+    <span class="n">spread</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>              <span class="c1"># More spread out embedding</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit and transform</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+<span class="c1"># Visualize with labels</span>
+<span class="n">reducer</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="benchmarking">
 <h2>Benchmarking<a class="headerlink" href="#benchmarking" title="Link to this heading"></a></h2>
@@ -173,32 +187,61 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">random</span>
 
 <span class="c1"># Create data</span>
-<span class="n">features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">make_blobs</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">centers</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">make_blobs</span><span class="p">(</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">n_features</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">centers</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
 
 <span class="c1"># Initialize reducer</span>
 <span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
 
-<span class="c1"># Then either run the benchmark ...</span>
-<span class="n">benchmark_results</span> <span class="o">=</span> <span class="n">run_benchmark</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span>
-                                  <span class="n">features</span><span class="p">,</span>
-                                  <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
-                                  <span class="n">dimension</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># for persistence homology</span>
-                                  <span class="n">subsample_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># subsample for speed</span>
-                                  <span class="n">rng_key</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">),</span>
-                                  <span class="n">num_trials</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># choose sample size</span>
-                                  <span class="n">only_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
+<span class="c1"># Run the benchmark</span>
+<span class="n">benchmark_results</span> <span class="o">=</span> <span class="n">run_benchmark</span><span class="p">(</span>
+    <span class="n">reducer</span><span class="p">,</span>
+    <span class="n">features</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+    <span class="n">dimension</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># for persistence homology</span>
+    <span class="n">subsample_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># subsample for speed</span>
+    <span class="n">rng_key</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">),</span>
+    <span class="n">num_trials</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># choose sample size</span>
+    <span class="n">only_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 
-<span class="c1"># and print the results ...</span>
+<span class="c1"># Print the results</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">benchmark_results</span><span class="p">)</span>
 
-<span class="c1"># ... or visualize the benchmark ...</span>
-<span class="n">viz_benchmark</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span>
-              <span class="n">features</span><span class="p">,</span>
-              <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
-              <span class="n">dimension</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># for persistence homology</span>
-              <span class="n">subsample_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># subsample for speed</span>
-              <span class="n">rng_key</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">),</span>
-              <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># Or visualize the benchmark</span>
+<span class="n">viz_benchmark</span><span class="p">(</span>
+    <span class="n">reducer</span><span class="p">,</span>
+    <span class="n">features</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+    <span class="n">dimension</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># for persistence homology</span>
+    <span class="n">subsample_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># subsample for speed</span>
+    <span class="n">rng_key</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">),</span>
+    <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="working-with-different-data-types">
+<h2>Working with Different Data Types<a class="headerlink" href="#working-with-different-data-types" title="Link to this heading"></a></h2>
+<p>DiRe-JAX works with various data formats:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
+
+<span class="c1"># NumPy arrays</span>
+<span class="n">data_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
+
+<span class="c1"># Pandas DataFrames</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data_numpy</span><span class="p">)</span>
+
+<span class="c1"># Both work seamlessly</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">embedding_numpy</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data_numpy</span><span class="p">)</span>
+<span class="n">embedding_df</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data_df</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>

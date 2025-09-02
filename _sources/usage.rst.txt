@@ -4,10 +4,10 @@ Usage Guide
 Basic Usage
 -----------
 
-DiRe offers fast dimensionality reduction with both JAX and PyTorch backends.
+DiRe-JAX offers fast dimensionality reduction with JAX-based computation.
 
-JAX Backend (default)
-~~~~~~~~~~~~~~~~~~~~~
+Quick Start
+~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -32,38 +32,16 @@ JAX Backend (default)
     # Visualize the results
     reducer.visualize()
 
-PyTorch Backend (faster on CUDA GPUs)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Performance Characteristics
+---------------------------
 
-.. code-block:: python
+DiRe-JAX is optimized for:
 
-    from dire_jax import DiRePyTorch
-    import numpy as np
-    
-    # Create some sample data
-    data = np.random.random((1000, 50))  # 1000 samples in 50 dimensions
-    
-    # Initialize DiRe with desired parameters
-    reducer = DiRePyTorch(
-        n_components=2,         # Target dimension
-        n_neighbors=15,         # Number of neighbors to consider
-        max_iter_layout=128,    # Maximum number of layout iterations
-        verbose=True            # Show progress
-    )
-    
-    # Fit and transform the data
-    embedding = reducer.fit_transform(data)
-    
-    # Visualize the results
-    reducer.visualize()
-
-Backend Performance Comparison
--------------------------------
-
-* **JAX backend**: Optimized for small-medium datasets (<50K points). Features fully vectorized computation with JIT compilation. Excellent CPU performance, good for research and development workflows.
-* **PyTorch/PyKeOps backend**: Designed for large datasets (>50K points) on CUDA GPUs. Uses memory-efficient chunked processing with k-NN graphs and random sampling. Handles millions of points with adaptive GPU memory management.
-
-Both backends are API-compatible - simply replace ``DiRe`` with ``DiRePyTorch`` as a drop-in replacement.
+* Small to medium datasets (<50K points)
+* Fully vectorized computation with JIT compilation
+* Excellent CPU performance
+* GPU acceleration when JAX is installed with CUDA support
+* TPU support for cloud-based computation
 
 Advanced Configuration
 ----------------------
@@ -81,6 +59,39 @@ DiRe offers several parameters that can be tuned to optimize the dimensionality 
 * `sample_size`: Sample size for the layout algorithm
 * `neg_ratio`: Ratio of negative to positive samples
 
+Example with Custom Parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    from dire_jax import DiRe
+    from sklearn.datasets import make_blobs
+    
+    # Create dataset with clusters
+    features, labels = make_blobs(
+        n_samples=10000, 
+        n_features=100, 
+        centers=5, 
+        random_state=42
+    )
+    
+    # Initialize with custom parameters
+    reducer = DiRe(
+        n_components=2,
+        n_neighbors=30,          # More neighbors for global structure
+        init='spectral',         # Spectral initialization
+        max_iter_layout=256,     # More iterations for convergence
+        min_dist=0.01,           # Tighter packing
+        spread=2.0,              # More spread out embedding
+        verbose=True
+    )
+    
+    # Fit and transform
+    embedding = reducer.fit_transform(features)
+    
+    # Visualize with labels
+    reducer.visualize(labels=labels, point_size=3)
+
 Benchmarking
 ------------
 
@@ -94,29 +105,60 @@ If you've installed DiRe-JAX with the `[utils]` extra, you can use the benchmark
     from jax import random
     
     # Create data
-    features, labels = make_blobs(n_samples=10000, n_features=100, centers=5, random_state=42)
+    features, labels = make_blobs(
+        n_samples=10000, 
+        n_features=100, 
+        centers=5, 
+        random_state=42
+    )
     
     # Initialize reducer
     reducer = DiRe(n_components=2, n_neighbors=15)
     
-    # Then either run the benchmark ...
-    benchmark_results = run_benchmark(reducer,
-				      features,
-                          	      labels=labels,
-                          	      dimension=1, # for persistence homology
-                             	      subsample_threshold=0.1, # subsample for speed
-                          	      rng_key=random.PRNGKey(42),
-                          	      num_trials=1, # choose sample size
-                          	      only_stats=True,)
+    # Run the benchmark
+    benchmark_results = run_benchmark(
+        reducer,
+        features,
+        labels=labels,
+        dimension=1,  # for persistence homology
+        subsample_threshold=0.1,  # subsample for speed
+        rng_key=random.PRNGKey(42),
+        num_trials=1,  # choose sample size
+        only_stats=True,
+    )
     
-    # and print the results ... 
+    # Print the results
     print(benchmark_results)
+    
+    # Or visualize the benchmark
+    viz_benchmark(
+        reducer,
+        features,
+        labels=labels,
+        dimension=1,  # for persistence homology
+        subsample_threshold=0.1,  # subsample for speed
+        rng_key=random.PRNGKey(42),
+        point_size=2
+    )
 
-    # ... or visualize the benchmark ...
-    viz_benchmark(reducer,
-                  features,
-                  labels=labels,
-                  dimension=1, # for persistence homology
-                  subsample_threshold=0.1, # subsample for speed
-                  rng_key=random.PRNGKey(42),
-                  point_size=2)
+Working with Different Data Types
+----------------------------------
+
+DiRe-JAX works with various data formats:
+
+.. code-block:: python
+
+    import numpy as np
+    import pandas as pd
+    from dire_jax import DiRe
+    
+    # NumPy arrays
+    data_numpy = np.random.random((1000, 50))
+    
+    # Pandas DataFrames
+    data_df = pd.DataFrame(data_numpy)
+    
+    # Both work seamlessly
+    reducer = DiRe(n_components=2)
+    embedding_numpy = reducer.fit_transform(data_numpy)
+    embedding_df = reducer.fit_transform(data_df.values)

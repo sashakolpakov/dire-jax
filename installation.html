@@ -46,15 +46,19 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#backend-options">Backend Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jax-implementation">JAX Implementation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#installation-options">Installation Options</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#basic-installation-jax-backend-only">Basic Installation (JAX backend only)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#basic-installation">Basic Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#with-utilities-for-benchmarking">With Utilities for Benchmarking</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#with-pytorch-pykeops-backend-recommended-for-cuda-gpus">With PyTorch/PyKeOps Backend (recommended for CUDA GPUs)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#complete-installation-all-backends-and-utilities">Complete Installation (all backends and utilities)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#complete-installation-with-all-utilities">Complete Installation (with all utilities)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#development-installation">Development Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#hardware-acceleration">Hardware Acceleration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#jax-gpu-support">JAX GPU Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jax-tpu-support">JAX TPU Support</a></li>
 </ul>
 </li>
 </ul>
@@ -93,40 +97,30 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
-<p>DiRe-JAX has multiple dependency sets for different backends:</p>
+<p>DiRe-JAX has the following dependencies:</p>
 <ul class="simple">
 <li><p><strong>Core dependencies</strong> (required): jax, numpy, scipy, tqdm, pandas, plotly, loguru, scikit-learn</p></li>
 <li><p><strong>Utilities dependencies</strong> (optional): ripser, persim, fastdtw, fast-twed, pot</p></li>
-<li><p><strong>PyTorch backend dependencies</strong> (optional): torch&gt;=1.13.0, pykeops&gt;=2.1.0</p></li>
 </ul>
-<section id="backend-options">
-<h3>Backend Options<a class="headerlink" href="#backend-options" title="Link to this heading"></a></h3>
+<section id="jax-implementation">
+<h3>JAX Implementation<a class="headerlink" href="#jax-implementation" title="Link to this heading"></a></h3>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p><strong>JAX Backend (default)</strong></p>
+<p><strong>DiRe-JAX Features</strong></p>
 <ul class="simple">
-<li><p>Best for small-medium datasets (&lt;50K points)</p></li>
+<li><p>Optimized for small-medium datasets (&lt;50K points)</p></li>
 <li><p>Excellent CPU performance with JIT compilation</p></li>
-<li><p>For GPU acceleration, JAX needs specific installation: <cite>JAX GPU instructions &lt;https://github.com/google/jax#installation&gt;</cite></p></li>
+<li><p>GPU acceleration available when JAX is installed with CUDA support</p></li>
+<li><p>TPU support for cloud-based computation</p></li>
 <li><p>Ideal for research and development workflows</p></li>
-</ul>
-</div>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p><strong>PyTorch/PyKeOps Backend</strong></p>
-<ul class="simple">
-<li><p>Optimized for large datasets (&gt;50K points) on CUDA GPUs</p></li>
-<li><p>Memory-efficient chunked processing with adaptive GPU memory management</p></li>
-<li><p>Uses k-NN graphs with random sampling for scalability</p></li>
-<li><p>Handles millions of points reliably</p></li>
 </ul>
 </div>
 </section>
 </section>
 <section id="installation-options">
 <h2>Installation Options<a class="headerlink" href="#installation-options" title="Link to this heading"></a></h2>
-<section id="basic-installation-jax-backend-only">
-<h3>Basic Installation (JAX backend only)<a class="headerlink" href="#basic-installation-jax-backend-only" title="Link to this heading"></a></h3>
+<section id="basic-installation">
+<h3>Basic Installation<a class="headerlink" href="#basic-installation" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dire-jax
 </pre></div>
 </div>
@@ -137,14 +131,8 @@
 </pre></div>
 </div>
 </section>
-<section id="with-pytorch-pykeops-backend-recommended-for-cuda-gpus">
-<h3>With PyTorch/PyKeOps Backend (recommended for CUDA GPUs)<a class="headerlink" href="#with-pytorch-pykeops-backend-recommended-for-cuda-gpus" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dire-jax<span class="o">[</span>pytorch<span class="o">]</span>
-</pre></div>
-</div>
-</section>
-<section id="complete-installation-all-backends-and-utilities">
-<h3>Complete Installation (all backends and utilities)<a class="headerlink" href="#complete-installation-all-backends-and-utilities" title="Link to this heading"></a></h3>
+<section id="complete-installation-with-all-utilities">
+<h3>Complete Installation (with all utilities)<a class="headerlink" href="#complete-installation-with-all-utilities" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dire-jax<span class="o">[</span>all<span class="o">]</span>
 </pre></div>
 </div>
@@ -156,7 +144,29 @@
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>all<span class="o">]</span>
 </pre></div>
 </div>
-<p>After installation, you may need to install JAX with GPU/TPU support separately for the JAX backend.</p>
+</section>
+</section>
+<section id="hardware-acceleration">
+<h2>Hardware Acceleration<a class="headerlink" href="#hardware-acceleration" title="Link to this heading"></a></h2>
+<section id="jax-gpu-support">
+<h3>JAX GPU Support<a class="headerlink" href="#jax-gpu-support" title="Link to this heading"></a></h3>
+<p>For GPU acceleration, JAX needs to be installed with CUDA support:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For CUDA 12</span>
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span><span class="s2">&quot;jax[cuda12]&quot;</span>
+
+<span class="c1"># For CUDA 11</span>
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span><span class="s2">&quot;jax[cuda11]&quot;</span>
+</pre></div>
+</div>
+<p>See the <a class="reference external" href="https://github.com/google/jax#installation">JAX GPU installation guide</a> for detailed instructions.</p>
+</section>
+<section id="jax-tpu-support">
+<h3>JAX TPU Support<a class="headerlink" href="#jax-tpu-support" title="Link to this heading"></a></h3>
+<p>For TPU support on Google Cloud:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span><span class="s2">&quot;jax[tpu]&quot;</span><span class="w"> </span>-f<span class="w"> </span>https://storage.googleapis.com/jax-releases/libtpu_releases.html
+</pre></div>
+</div>
+<p>See the <a class="reference external" href="https://github.com/google/jax#tpu-tpu-vm">JAX TPU documentation</a> for more information.</p>
 </section>
 </section>
 </section>
