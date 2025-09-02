@@ -1095,25 +1095,28 @@
 <span class="c1">#</span>
 
 
-<div class="viewcode-block" id="compute_forces_kernel_chunked">
-<a class="viewcode-back" href="../../api/modules.html#dire_jax.compute_forces_kernel_chunked">[docs]</a>
+<div class="viewcode-block" id="compute_forces_kernel">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.compute_forces_kernel">[docs]</a>
 <span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_forces_kernel_chunked</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_forces_kernel</span><span class="p">(</span>
     <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Memory-efficient JAX kernel for computing forces with chunked processing.</span>
+<span class="sd">    Fully vectorized JAX kernel for computing forces - no chunking.</span>
+<span class="sd">    </span>
+<span class="sd">    Let JAX handle large tensors efficiently rather than fighting with recompilation.</span>
+<span class="sd">    Modern GPUs can easily handle the memory requirements for most datasets.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    positions : jax.numpy.ndarray</span>
-<span class="sd">        Current point positions</span>
+<span class="sd">        Current point positions (N, D)</span>
 <span class="sd">    chunk_indices : jax.numpy.ndarray</span>
-<span class="sd">        Current chunk indices being processed</span>
+<span class="sd">        Indices being processed (N,)</span>
 <span class="sd">    neighbor_indices : jax.numpy.ndarray</span>
-<span class="sd">        Indices of neighbors for attractive forces (shape: chunk_size, k)</span>
+<span class="sd">        Indices of neighbors for attractive forces (N, k)</span>
 <span class="sd">    sample_indices : jax.numpy.ndarray</span>
-<span class="sd">        Indices of points for repulsive forces (shape: chunk_size, n_neg)</span>
+<span class="sd">        Indices of points for repulsive forces (N, n_neg)</span>
 <span class="sd">    alpha : float</span>
 <span class="sd">        Cooling factor that scales force magnitude</span>
 <span class="sd">    a : float</span>
@@ -1124,93 +1127,49 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    jax.numpy.ndarray</span>
-<span class="sd">        Net force vectors for the chunk</span>
+<span class="sd">        Net force vectors for each point (N, D)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="c1"># Get current positions for the chunk</span>
-    <span class="n">current_positions</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">chunk_indices</span><span class="p">]</span>  <span class="c1"># (chunk_size, D)</span>
+    <span class="c1"># Get current positions for processing</span>
+    <span class="n">current_positions</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">chunk_indices</span><span class="p">]</span>  <span class="c1"># (N, D)</span>
     <span class="n">forces</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">current_positions</span><span class="p">)</span>
 
     <span class="c1"># ===== ATTRACTION FORCES (k-NN only) =====</span>
     <span class="c1"># Get neighbor positions efficiently using advanced indexing</span>
-    <span class="n">neighbor_positions</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">neighbor_indices</span><span class="p">]</span>  <span class="c1"># (chunk_size, k, D)</span>
+    <span class="n">neighbor_positions</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">neighbor_indices</span><span class="p">]</span>  <span class="c1"># (N, k, D)</span>
     
     <span class="c1"># Broadcast current positions for vectorized computation</span>
-    <span class="n">current_pos_expanded</span> <span class="o">=</span> <span class="n">current_positions</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># (chunk_size, 1, D)</span>
+    <span class="n">current_pos_expanded</span> <span class="o">=</span> <span class="n">current_positions</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># (N, 1, D)</span>
     
     <span class="c1"># Compute differences and distances</span>
-    <span class="n">att_diff</span> <span class="o">=</span> <span class="n">neighbor_positions</span> <span class="o">-</span> <span class="n">current_pos_expanded</span>  <span class="c1"># (chunk_size, k, D)</span>
-    <span class="n">att_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">att_diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-10</span>  <span class="c1"># (chunk_size, k, 1)</span>
+    <span class="n">att_diff</span> <span class="o">=</span> <span class="n">neighbor_positions</span> <span class="o">-</span> <span class="n">current_pos_expanded</span>  <span class="c1"># (N, k, D)</span>
+    <span class="n">att_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">att_diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-10</span>  <span class="c1"># (N, k, 1)</span>
     
     <span class="c1"># Attraction coefficient: 1 / (1 + a * (1/d)^(2b))</span>
-    <span class="n">att_coeff</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">att_dist</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>  <span class="c1"># (chunk_size, k, 1)</span>
+    <span class="n">att_coeff</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">att_dist</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>  <span class="c1"># (N, k, 1)</span>
     
     <span class="c1"># Compute attraction forces and sum over neighbors</span>
-    <span class="n">att_forces</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">att_coeff</span> <span class="o">*</span> <span class="n">att_diff</span> <span class="o">/</span> <span class="n">att_dist</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (chunk_size, D)</span>
+    <span class="n">att_forces</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">att_coeff</span> <span class="o">*</span> <span class="n">att_diff</span> <span class="o">/</span> <span class="n">att_dist</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (N, D)</span>
     <span class="n">forces</span> <span class="o">+=</span> <span class="n">att_forces</span>
 
     <span class="c1"># ===== REPULSION FORCES (Random Sampling) =====</span>
     <span class="k">if</span> <span class="n">sample_indices</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># Get negative sample positions</span>
-        <span class="n">sample_positions</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">sample_indices</span><span class="p">]</span>  <span class="c1"># (chunk_size, n_neg, D)</span>
+        <span class="n">sample_positions</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">sample_indices</span><span class="p">]</span>  <span class="c1"># (N, n_neg, D)</span>
         
         <span class="c1"># Compute differences and distances</span>
-        <span class="n">rep_diff</span> <span class="o">=</span> <span class="n">sample_positions</span> <span class="o">-</span> <span class="n">current_pos_expanded</span>  <span class="c1"># (chunk_size, n_neg, D)</span>
-        <span class="n">rep_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rep_diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-10</span>  <span class="c1"># (chunk_size, n_neg, 1)</span>
+        <span class="n">rep_diff</span> <span class="o">=</span> <span class="n">sample_positions</span> <span class="o">-</span> <span class="n">current_pos_expanded</span>  <span class="c1"># (N, n_neg, D)</span>
+        <span class="n">rep_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rep_diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-10</span>  <span class="c1"># (N, n_neg, 1)</span>
         
         <span class="c1"># Repulsion coefficient: -1 / (1 + a * d^(2b))</span>
-        <span class="n">rep_coeff</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">rep_dist</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>  <span class="c1"># (chunk_size, n_neg, 1)</span>
+        <span class="n">rep_coeff</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">rep_dist</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>  <span class="c1"># (N, n_neg, 1)</span>
         
         <span class="c1"># Compute repulsion forces and sum over negative samples</span>
-        <span class="n">rep_forces</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rep_coeff</span> <span class="o">*</span> <span class="n">rep_diff</span> <span class="o">/</span> <span class="n">rep_dist</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (chunk_size, D)</span>
+        <span class="n">rep_forces</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rep_coeff</span> <span class="o">*</span> <span class="n">rep_diff</span> <span class="o">/</span> <span class="n">rep_dist</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (N, D)</span>
         <span class="n">forces</span> <span class="o">+=</span> <span class="n">rep_forces</span>
 
     <span class="c1"># Apply cooling factor</span>
     <span class="k">return</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">forces</span></div>
-
-
-<span class="c1"># Keep the original function for backward compatibility but add chunked processing</span>
-<div class="viewcode-block" id="compute_forces_kernel">
-<a class="viewcode-back" href="../../api/modules.html#dire_jax.compute_forces_kernel">[docs]</a>
-<span class="nd">@functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_forces_kernel</span><span class="p">(</span>
-    <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Wrapper that handles chunked force computation for memory efficiency.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">n_points</span> <span class="o">=</span> <span class="n">chunk_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">n_dims</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> 
-    <span class="n">forces</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_points</span><span class="p">,</span> <span class="n">n_dims</span><span class="p">))</span>
-    
-    <span class="c1"># Define chunk size based on memory constraints</span>
-    <span class="c1"># For GPU: ~10K points per chunk, for CPU: ~5K</span>
-    <span class="n">max_chunk_size</span> <span class="o">=</span> <span class="mi">10000</span>
-    
-    <span class="c1"># Process in chunks if needed</span>
-    <span class="k">if</span> <span class="n">n_points</span> <span class="o">&lt;=</span> <span class="n">max_chunk_size</span><span class="p">:</span>
-        <span class="c1"># Small enough to process all at once</span>
-        <span class="k">return</span> <span class="n">compute_forces_kernel_chunked</span><span class="p">(</span>
-            <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_indices</span><span class="p">,</span> <span class="n">neighbor_indices</span><span class="p">,</span> <span class="n">sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Process in chunks</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_points</span><span class="p">,</span> <span class="n">max_chunk_size</span><span class="p">):</span>
-            <span class="n">end_i</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">max_chunk_size</span><span class="p">,</span> <span class="n">n_points</span><span class="p">)</span>
-            
-            <span class="n">chunk_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">end_i</span><span class="p">)</span>
-            <span class="n">chunk_chunk_indices</span> <span class="o">=</span> <span class="n">chunk_indices</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">]</span>
-            <span class="n">chunk_neighbor_indices</span> <span class="o">=</span> <span class="n">neighbor_indices</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">]</span>
-            <span class="n">chunk_sample_indices</span> <span class="o">=</span> <span class="n">sample_indices</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">]</span> <span class="k">if</span> <span class="n">sample_indices</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
-            
-            <span class="n">chunk_forces</span> <span class="o">=</span> <span class="n">compute_forces_kernel_chunked</span><span class="p">(</span>
-                <span class="n">positions</span><span class="p">,</span> <span class="n">chunk_chunk_indices</span><span class="p">,</span> <span class="n">chunk_neighbor_indices</span><span class="p">,</span> 
-                <span class="n">chunk_sample_indices</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
-            <span class="p">)</span>
-            
-            <span class="n">forces</span> <span class="o">=</span> <span class="n">forces</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">chunk_forces</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="n">forces</span></div>
 
 
 
