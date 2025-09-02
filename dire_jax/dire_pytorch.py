@@ -27,19 +27,17 @@ except ImportError:
     logger.warning("PyKeOps not available. Install with: pip install pykeops")
 
 
-class DiRePyTorchFixed(TransformerMixin):
+class DiRePyTorch(TransformerMixin):
     """
-    FIXED PyTorch/PyKeOps implementation that correctly handles k-NN attraction.
-
-    Key fix: Attraction forces are applied ONLY between k-NN neighbors,
-    not all pairs. Repulsion uses random sampling.
+    PyTorch/PyKeOps implementation where attraction forces are applied
+    only between k-NN neighbors, not all pairs. Repulsion uses random sampling.
     """
 
     def __init__(
             self,
             n_components=2,
             n_neighbors=16,
-            init="random",
+            init="pca",
             max_iter_layout=128,
             min_dist=1e-2,
             spread=1.0,
@@ -106,50 +104,28 @@ class DiRePyTorchFixed(TransformerMixin):
 
     def _compute_knn(self, X):
         """
-        Compute k-nearest neighbors using PyTorch.
-        For simplicity, using brute force here - could use FAISS/cuVS for larger datasets.
+        Compute k-nearest neighbors using PyKeOps for efficiency.
         """
-        self.logger.info(f"Computing {self.n_neighbors}-NN graph...")
+        if not PYKEOPS_AVAILABLE:
+            raise RuntimeError("PyKeOps required for k-NN computation. Install with: pip install pykeops")
+        
+        self.logger.info(f"Computing {self.n_neighbors}-NN graph with PyKeOps...")
 
         X_torch = torch.tensor(X, dtype=torch.float32, device=self.device)
-        n_samples = X.shape[0]
-
-        # Compute pairwise distances
-        # For large datasets, this should be done in chunks
-        if n_samples < 50000:
-            # Compute all pairwise distances
-            dist_matrix = torch.cdist(X_torch, X_torch, p=2)
-
-            # Get k+1 nearest neighbors (including self)
-            knn_dists, knn_indices = torch.topk(dist_matrix, k=self.n_neighbors + 1,
-                                                dim=1, largest=False)
-
-            # Remove self (first neighbor)
-            self._knn_indices = knn_indices[:, 1:].cpu().numpy()
-            self._knn_distances = knn_dists[:, 1:].cpu().numpy()
-        else:
-            # For larger datasets, process in chunks
-            self.logger.warning("Large dataset - using chunked k-NN computation")
-            batch_size = 5000
-            all_indices = []
-            all_distances = []
-
-            for i in range(0, n_samples, batch_size):
-                end_i = min(i + batch_size, n_samples)
-                batch = X_torch[i:end_i]
-
-                # Compute distances from batch to all points
-                dist_batch = torch.cdist(batch, X_torch, p=2)
-
-                # Get k+1 nearest
-                knn_dists, knn_indices = torch.topk(dist_batch, k=self.n_neighbors + 1,
-                                                    dim=1, largest=False)
-
-                all_indices.append(knn_indices[:, 1:].cpu().numpy())
-                all_distances.append(knn_dists[:, 1:].cpu().numpy())
-
-            self._knn_indices = np.vstack(all_indices)
-            self._knn_distances = np.vstack(all_distances)
+        
+        # Create LazyTensors for efficient k-NN computation
+        X_i = LazyTensor(X_torch[:, None, :])  # (N, 1, D)
+        X_j = LazyTensor(X_torch[None, :, :])  # (1, N, D)
+        
+        # Compute squared distances
+        D_ij = ((X_i - X_j) ** 2).sum(-1)  # (N, N) LazyTensor
+        
+        # Find k+1 nearest neighbors (including self)
+        knn_dists, knn_indices = D_ij.Kmin_argKmin(K=self.n_neighbors + 1, dim=1)
+        
+        # Remove self (first neighbor) and take square root for actual distances
+        self._knn_indices = knn_indices[:, 1:].cpu().numpy()
+        self._knn_distances = torch.sqrt(knn_dists[:, 1:]).cpu().numpy()
 
         self.logger.info(f"k-NN graph computed: shape {self._knn_indices.shape}")
 
@@ -177,11 +153,11 @@ class DiRePyTorchFixed(TransformerMixin):
 
         return torch.tensor(embedding, dtype=torch.float32, device=self.device)
 
-    def _compute_forces_correct(self, positions, iteration, max_iterations):
+    def _compute_forces(self, positions, iteration, max_iterations):
         """
-        CORRECTLY compute forces:
-        - Attraction: ONLY between k-NN neighbors
-        - Repulsion: From random samples (or all-pairs if use_exact_repulsion=True)
+        Compute forces:
+        - Attraction: only between k-NN neighbors
+        - Repulsion: from random samples (or all-pairs if use_exact_repulsion=True)
         """
 
         n_samples = positions.shape[0]
@@ -277,7 +253,7 @@ class DiRePyTorchFixed(TransformerMixin):
         # Optimization loop
         for iteration in range(self.max_iter_layout):
             # Compute forces correctly
-            forces = self._compute_forces_correct(positions, iteration, self.max_iter_layout)
+            forces = self._compute_forces(positions, iteration, self.max_iter_layout)
 
             # Update positions
             positions += forces
