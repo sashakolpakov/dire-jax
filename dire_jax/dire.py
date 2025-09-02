@@ -985,22 +985,25 @@ class DiRe(TransformerMixin):
 
 
 @functools.partial(jit, static_argnums=(5, 6))
-def compute_forces_kernel_chunked(
+def compute_forces_kernel(
     positions, chunk_indices, neighbor_indices, sample_indices, alpha, a, b
 ):
     """
-    Memory-efficient JAX kernel for computing forces with chunked processing.
+    Fully vectorized JAX kernel for computing forces - no chunking.
+    
+    Let JAX handle large tensors efficiently rather than fighting with recompilation.
+    Modern GPUs can easily handle the memory requirements for most datasets.
 
     Parameters
     ----------
     positions : jax.numpy.ndarray
-        Current point positions
+        Current point positions (N, D)
     chunk_indices : jax.numpy.ndarray
-        Current chunk indices being processed
+        Indices being processed (N,)
     neighbor_indices : jax.numpy.ndarray
-        Indices of neighbors for attractive forces (shape: chunk_size, k)
+        Indices of neighbors for attractive forces (N, k)
     sample_indices : jax.numpy.ndarray
-        Indices of points for repulsive forces (shape: chunk_size, n_neg)
+        Indices of points for repulsive forces (N, n_neg)
     alpha : float
         Cooling factor that scales force magnitude
     a : float
@@ -1011,90 +1014,49 @@ def compute_forces_kernel_chunked(
     Returns
     -------
     jax.numpy.ndarray
-        Net force vectors for the chunk
+        Net force vectors for each point (N, D)
     """
     
-    # Get current positions for the chunk
-    current_positions = positions[chunk_indices]  # (chunk_size, D)
+    # Get current positions for processing
+    current_positions = positions[chunk_indices]  # (N, D)
     forces = jnp.zeros_like(current_positions)
 
     # ===== ATTRACTION FORCES (k-NN only) =====
     # Get neighbor positions efficiently using advanced indexing
-    neighbor_positions = positions[neighbor_indices]  # (chunk_size, k, D)
+    neighbor_positions = positions[neighbor_indices]  # (N, k, D)
     
     # Broadcast current positions for vectorized computation
-    current_pos_expanded = current_positions[:, None, :]  # (chunk_size, 1, D)
+    current_pos_expanded = current_positions[:, None, :]  # (N, 1, D)
     
     # Compute differences and distances
-    att_diff = neighbor_positions - current_pos_expanded  # (chunk_size, k, D)
-    att_dist = jnp.linalg.norm(att_diff, axis=2, keepdims=True) + 1e-10  # (chunk_size, k, 1)
+    att_diff = neighbor_positions - current_pos_expanded  # (N, k, D)
+    att_dist = jnp.linalg.norm(att_diff, axis=2, keepdims=True) + 1e-10  # (N, k, 1)
     
     # Attraction coefficient: 1 / (1 + a * (1/d)^(2b))
-    att_coeff = 1.0 / (1.0 + a * jnp.power(1.0 / att_dist, 2.0 * b))  # (chunk_size, k, 1)
+    att_coeff = 1.0 / (1.0 + a * jnp.power(1.0 / att_dist, 2.0 * b))  # (N, k, 1)
     
     # Compute attraction forces and sum over neighbors
-    att_forces = jnp.sum(att_coeff * att_diff / att_dist, axis=1)  # (chunk_size, D)
+    att_forces = jnp.sum(att_coeff * att_diff / att_dist, axis=1)  # (N, D)
     forces += att_forces
 
     # ===== REPULSION FORCES (Random Sampling) =====
     if sample_indices.size > 0:
         # Get negative sample positions
-        sample_positions = positions[sample_indices]  # (chunk_size, n_neg, D)
+        sample_positions = positions[sample_indices]  # (N, n_neg, D)
         
         # Compute differences and distances
-        rep_diff = sample_positions - current_pos_expanded  # (chunk_size, n_neg, D)
-        rep_dist = jnp.linalg.norm(rep_diff, axis=2, keepdims=True) + 1e-10  # (chunk_size, n_neg, 1)
+        rep_diff = sample_positions - current_pos_expanded  # (N, n_neg, D)
+        rep_dist = jnp.linalg.norm(rep_diff, axis=2, keepdims=True) + 1e-10  # (N, n_neg, 1)
         
         # Repulsion coefficient: -1 / (1 + a * d^(2b))
-        rep_coeff = -1.0 / (1.0 + a * jnp.power(rep_dist, 2.0 * b))  # (chunk_size, n_neg, 1)
+        rep_coeff = -1.0 / (1.0 + a * jnp.power(rep_dist, 2.0 * b))  # (N, n_neg, 1)
         
         # Compute repulsion forces and sum over negative samples
-        rep_forces = jnp.sum(rep_coeff * rep_diff / rep_dist, axis=1)  # (chunk_size, D)
+        rep_forces = jnp.sum(rep_coeff * rep_diff / rep_dist, axis=1)  # (N, D)
         forces += rep_forces
 
     # Apply cooling factor
     return alpha * forces
-
-# Keep the original function for backward compatibility but add chunked processing
-@functools.partial(jit, static_argnums=(5, 6))
-def compute_forces_kernel(
-    positions, chunk_indices, neighbor_indices, sample_indices, alpha, a, b
-):
-    """
-    Wrapper that handles chunked force computation for memory efficiency.
-    """
-    n_points = chunk_indices.shape[0]
-    n_dims = positions.shape[1] 
-    forces = jnp.zeros((n_points, n_dims))
-    
-    # Define chunk size based on memory constraints
-    # For GPU: ~10K points per chunk, for CPU: ~5K
-    max_chunk_size = 10000
-    
-    # Process in chunks if needed
-    if n_points <= max_chunk_size:
-        # Small enough to process all at once
-        return compute_forces_kernel_chunked(
-            positions, chunk_indices, neighbor_indices, sample_indices, alpha, a, b
-        )
-    else:
-        # Process in chunks
-        for i in range(0, n_points, max_chunk_size):
-            end_i = min(i + max_chunk_size, n_points)
-            
-            chunk_slice = slice(i, end_i)
-            chunk_chunk_indices = chunk_indices[chunk_slice]
-            chunk_neighbor_indices = neighbor_indices[chunk_slice]
-            chunk_sample_indices = sample_indices[chunk_slice] if sample_indices.size > 0 else jnp.array([])
-            
-            chunk_forces = compute_forces_kernel_chunked(
-                positions, chunk_chunk_indices, chunk_neighbor_indices, 
-                chunk_sample_indices, alpha, a, b
-            )
-            
-            forces = forces.at[chunk_slice].set(chunk_forces)
-        
-        return forces
 
 
 #
