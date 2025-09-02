@@ -16,16 +16,18 @@ Backend Options
 .. important::
    **JAX Backend (default)**
    
-   - Best for TPUs and CPU processing
+   - Best for small-medium datasets (<50K points)
+   - Excellent CPU performance with JIT compilation
    - For GPU acceleration, JAX needs specific installation: `JAX GPU instructions <https://github.com/google/jax#installation>`
-   - Moderate GPU performance
+   - Ideal for research and development workflows
 
 .. important::
    **PyTorch/PyKeOps Backend**
    
-   - 100x+ faster on CUDA GPUs for datasets <2M points
-   - Uses all-pairs force computation without k-NN graphs
-   - Requires CUDA-compatible GPU
+   - Optimized for large datasets (>50K points) on CUDA GPUs
+   - Memory-efficient chunked processing with adaptive GPU memory management
+   - Uses k-NN graphs with random sampling for scalability
+   - Handles millions of points reliably
 
 Installation Options
 --------------------

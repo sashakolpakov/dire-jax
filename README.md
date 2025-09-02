@@ -118,8 +118,8 @@ Our working paper is available on the arXiv. [![Paper](https://img.shields.io/ba
 
 ### Backend Performance Comparison
 
-- **JAX backend**: Best for TPUs, good CPU performance, moderate GPU performance
-- **PyTorch/PyKeOps backend**: 100x+ faster on CUDA GPUs for datasets <2M points
+- **JAX backend**: Best for small-medium datasets (<50K points), excellent CPU performance, good for research and development. Optimized vectorized computation with JIT compilation.
+- **PyTorch/PyKeOps backend**: Best for large datasets (>50K points) on CUDA GPUs. Features memory-efficient chunking, handles millions of points with adaptive GPU memory management.
 
 ### Benchmarking and utilities
 

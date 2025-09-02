@@ -1,10 +1,19 @@
 # dire_pytorch.py
 
 """
-Fixed PyTorch/PyKeOps backend for DiRe dimensionality reduction.
+PyTorch/PyKeOps backend for DiRe dimensionality reduction.
 
-This version implements attraction forces only between k-NN neighbors
-and repulsion forces from random samples, matching the JAX implementation.
+This implementation features:
+- Memory-efficient chunked k-NN computation for large datasets (>100K points)
+- Attraction forces applied only between k-NN neighbors  
+- Repulsion forces computed from random samples
+- Automatic GPU memory management with adaptive chunk sizing
+- Designed for high-performance processing on CUDA GPUs
+
+Performance characteristics:
+- Best for datasets >50K points on CUDA GPUs
+- Memory-aware processing up to millions of points
+- Chunked computation prevents GPU out-of-memory errors
 """
 
 import numpy as np
@@ -29,8 +38,18 @@ except ImportError:
 
 class DiRePyTorch(TransformerMixin):
     """
-    PyTorch/PyKeOps implementation where attraction forces are applied
-    only between k-NN neighbors, not all pairs. Repulsion uses random sampling.
+    Memory-efficient PyTorch/PyKeOps implementation of DiRe.
+    
+    Features adaptive memory management for large datasets:
+    - Chunked k-NN computation prevents GPU out-of-memory errors
+    - Memory-aware force computation with automatic chunk sizing  
+    - Attraction forces between k-NN neighbors only
+    - Repulsion forces from random sampling for efficiency
+    
+    Best suited for:
+    - Large datasets (>50K points) on CUDA GPUs
+    - Production environments requiring reliable memory usage
+    - High-performance dimensionality reduction workflows
     """
 
     def __init__(
@@ -102,30 +121,79 @@ class DiRePyTorch(TransformerMixin):
 
         self.logger.info(f"Found kernel params: a={self._a:.4f}, b={self._b:.4f}")
 
-    def _compute_knn(self, X):
+    def _compute_knn(self, X, chunk_size=50000):
         """
-        Compute k-nearest neighbors using PyKeOps for efficiency.
+        Compute k-nearest neighbors with memory-efficient chunking.
         """
         if not PYKEOPS_AVAILABLE:
             raise RuntimeError("PyKeOps required for k-NN computation. Install with: pip install pykeops")
         
-        self.logger.info(f"Computing {self.n_neighbors}-NN graph with PyKeOps...")
+        n_samples = X.shape[0]
+        self.logger.info(f"Computing {self.n_neighbors}-NN graph for {n_samples} points...")
 
         X_torch = torch.tensor(X, dtype=torch.float32, device=self.device)
         
-        # Create LazyTensors for efficient k-NN computation
-        X_i = LazyTensor(X_torch[:, None, :])  # (N, 1, D)
-        X_j = LazyTensor(X_torch[None, :, :])  # (1, N, D)
+        # Adaptive chunk sizing based on available GPU memory and dataset size
+        if self.device.type == 'cuda':
+            gpu_mem_free = torch.cuda.mem_get_info()[0]
+            # Estimate memory for k-NN: chunk_size * n_samples * 4 bytes for distances
+            memory_per_chunk = chunk_size * n_samples * 4
+            
+            # Use 30% of available memory for k-NN computation
+            max_memory = gpu_mem_free * 0.3
+            if memory_per_chunk > max_memory:
+                chunk_size = int(max_memory / (n_samples * 4))
+                chunk_size = max(1000, chunk_size)  # Minimum chunk size
+            
+            self.logger.info(f"Using chunk size: {chunk_size} (GPU memory: {gpu_mem_free/1024**3:.1f}GB)")
         
-        # Compute squared distances
-        D_ij = ((X_i - X_j) ** 2).sum(-1)  # (N, N) LazyTensor
+        # Initialize arrays for results
+        all_knn_indices = []
+        all_knn_distances = []
         
-        # Find k+1 nearest neighbors (including self)
-        knn_dists, knn_indices = D_ij.Kmin_argKmin(K=self.n_neighbors + 1, dim=1)
+        # Process in chunks to avoid memory issues
+        for start_idx in range(0, n_samples, chunk_size):
+            end_idx = min(start_idx + chunk_size, n_samples)
+            
+            self.logger.info(f"Processing chunk {start_idx//chunk_size + 1}/{(n_samples + chunk_size - 1)//chunk_size}")
+            
+            # Get chunk data
+            X_chunk = X_torch[start_idx:end_idx]  # (chunk_size, D)
+            
+            if PYKEOPS_AVAILABLE:
+                # Use PyKeOps for this chunk vs all points
+                X_i = LazyTensor(X_chunk[:, None, :])  # (chunk_size, 1, D)
+                X_j = LazyTensor(X_torch[None, :, :])   # (1, N, D)
+                
+                # Compute squared distances
+                D_ij = ((X_i - X_j) ** 2).sum(-1)  # (chunk_size, N) LazyTensor
+                
+                # Find k+1 nearest neighbors (including self)
+                knn_dists, knn_indices = D_ij.Kmin_argKmin(K=self.n_neighbors + 1, dim=1)
+                
+                # Remove self and convert to actual distances
+                chunk_indices = knn_indices[:, 1:].cpu().numpy()
+                chunk_distances = torch.sqrt(knn_dists[:, 1:]).cpu().numpy()
+            else:
+                # Fallback to PyTorch (slower but more memory friendly)
+                distances = torch.cdist(X_chunk, X_torch, p=2)
+                knn_dists, knn_indices = torch.topk(distances, k=self.n_neighbors + 1, 
+                                                   dim=1, largest=False)
+                
+                # Remove self
+                chunk_indices = knn_indices[:, 1:].cpu().numpy()  
+                chunk_distances = knn_dists[:, 1:].cpu().numpy()
+            
+            all_knn_indices.append(chunk_indices)
+            all_knn_distances.append(chunk_distances)
+            
+            # Clear GPU memory for this chunk
+            if self.device.type == 'cuda':
+                torch.cuda.empty_cache()
         
-        # Remove self (first neighbor) and take square root for actual distances
-        self._knn_indices = knn_indices[:, 1:].cpu().numpy()
-        self._knn_distances = torch.sqrt(knn_dists[:, 1:]).cpu().numpy()
+        # Concatenate results
+        self._knn_indices = np.vstack(all_knn_indices)
+        self._knn_distances = np.vstack(all_knn_distances)
 
         self.logger.info(f"k-NN graph computed: shape {self._knn_indices.shape}")
 
@@ -153,7 +221,7 @@ class DiRePyTorch(TransformerMixin):
 
         return torch.tensor(embedding, dtype=torch.float32, device=self.device)
 
-    def _compute_forces(self, positions, iteration, max_iterations, chunk_size=10000):
+    def _compute_forces(self, positions, iteration, max_iterations, chunk_size=5000):
         """
         Memory-efficient force computation with chunked processing:
         - Attraction: only between k-NN neighbors
@@ -179,10 +247,13 @@ class DiRePyTorch(TransformerMixin):
         memory_per_point = (self.n_neighbors + n_neg_samples) * positions.shape[1] * 4  # bytes
         
         if self.device.type == 'cuda':
-            # Get available GPU memory and use 50% of it
+            # Get available GPU memory and use 20% for force computation (more conservative)
             gpu_mem_free = torch.cuda.mem_get_info()[0]
-            max_chunk_size = int(gpu_mem_free * 0.5 / memory_per_point)
+            max_chunk_size = int(gpu_mem_free * 0.2 / memory_per_point)
             chunk_size = min(chunk_size, max_chunk_size, n_samples)
+            # For very large datasets, be extra conservative
+            if n_samples > 500000:
+                chunk_size = min(chunk_size, 2000)
         else:
             chunk_size = min(chunk_size, n_samples)
 
