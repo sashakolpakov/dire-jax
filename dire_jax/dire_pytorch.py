@@ -244,7 +244,7 @@ class DiRePyTorch(TransformerMixin):
 
     def _optimize_layout(self, initial_positions):
         """
-        Main optimization loop using CORRECT force computation.
+        Main optimization loop using force computation.
         """
         positions = initial_positions.clone()
 
@@ -259,10 +259,7 @@ class DiRePyTorch(TransformerMixin):
             positions += forces
 
             # Log progress
-            if iteration % 20 == 0:
-                force_magnitude = torch.norm(forces, dim=1).mean().item()
-                self.logger.debug(f"Iteration {iteration}/{self.max_iter_layout}, "
-                                  f"avg force magnitude: {force_magnitude:.6f}")
+            self.logger.debug(f"Iteration {iteration}/{self.max_iter_layout}")
 
         # Final normalization
         positions -= positions.mean(dim=0)
@@ -272,7 +269,7 @@ class DiRePyTorch(TransformerMixin):
 
     def fit_transform(self, X, y=None):
         """
-        Fit the model and transform data (API compatible with original DiRe).
+        Fit the model and transform data (API compatible with JAX backend).
         """
         # Store data
         self._data = np.asarray(X, dtype=np.float32)
@@ -283,13 +280,13 @@ class DiRePyTorch(TransformerMixin):
         # Find distribution kernel parameters
         self._find_ab_params()
 
-        # Compute k-NN graph (CRUCIAL!)
+        # Compute k-NN graph
         self._compute_knn(self._data)
 
         # Initialize embedding
         initial_embedding = self._initialize_embedding(self._data)
 
-        # Optimize layout with CORRECT forces
+        # Optimize layout
         final_embedding = self._optimize_layout(initial_embedding)
 
         # Convert back to numpy and store
