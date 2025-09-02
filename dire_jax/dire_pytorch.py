@@ -155,10 +155,12 @@ class DiRePyTorch(TransformerMixin):
 
     def _compute_forces(self, positions, iteration, max_iterations):
         """
-        Compute forces:
+        Compute forces efficiently using PyKeOps:
         - Attraction: only between k-NN neighbors
-        - Repulsion: from random samples (or all-pairs if use_exact_repulsion=True)
+        - Repulsion: random sampling
         """
+        if not PYKEOPS_AVAILABLE:
+            raise RuntimeError("PyKeOps required for efficient force computation")
 
         n_samples = positions.shape[0]
         forces = torch.zeros_like(positions)
@@ -172,69 +174,66 @@ class DiRePyTorch(TransformerMixin):
         b_exp = float(2 * b_val)
 
         # ============ ATTRACTION FORCES (k-NN only) ============
-        # Use PyTorch for k-NN attraction (simpler and works)
-        if True:  # Always use this path for now
-            # Fallback to PyTorch
-            for i in range(n_samples):
-                neighbor_ids = self._knn_indices[i]
-                pos_i = positions[i:i + 1]  # Keep dimensions
-                pos_neighbors = positions[neighbor_ids]
+        # Vectorized attraction using advanced indexing
+        knn_indices_torch = torch.tensor(self._knn_indices, device=self.device)
+        
+        # Get all neighbor positions efficiently
+        # positions[knn_indices_torch] gives shape (N, k, D)
+        neighbor_positions = positions[knn_indices_torch]  # (N, k, D)
+        
+        # Broadcast current positions to match
+        current_positions = positions.unsqueeze(1)  # (N, 1, D)
+        
+        # Compute differences and distances
+        diff = neighbor_positions - current_positions  # (N, k, D)
+        dist = torch.norm(diff, dim=2, keepdim=True) + 1e-10  # (N, k, 1)
+        
+        # Attraction kernel
+        att_coeff = 1.0 / (1.0 + a_val * (1.0 / dist) ** b_exp)  # (N, k, 1)
+        
+        # Compute attraction forces and sum over neighbors
+        att_forces = (att_coeff * diff / dist).sum(dim=1)  # (N, D)
+        forces += att_forces
 
-                # Compute differences and distances
-                diff = pos_neighbors - pos_i
-                dist = torch.norm(diff, dim=1, keepdim=True) + 1e-10
-
-                # Attraction kernel
-                att_coeff = 1.0 / (1.0 + a_val * (1.0 / dist) ** b_exp)
-
-                # Apply force
-                forces[i] += (att_coeff * diff / dist).sum(0)
-
-        # ============ REPULSION FORCES ============
-        if self.use_exact_repulsion and PYKEOPS_AVAILABLE and self.device.type == 'cuda':
-            # All-pairs repulsion (for testing)
-            X_i = LazyTensor(positions[:, None, :])
-            X_j = LazyTensor(positions[None, :, :])
-
-            diff = X_j - X_i
-            D_ij = (diff ** 2).sum(-1).sqrt() + 1e-10
-
-            # Repulsion kernel: -1 / (1 + a * d^(2b))
-            rep_kernel = -1.0 / (1.0 + a_val * (D_ij ** b_exp))
-
+        # ============ REPULSION FORCES (Random Sampling) ============
+        # Use random sampling for efficiency
+        n_neg_samples = min(int(self.neg_ratio * self.n_neighbors), n_samples - 1)
+        
+        if n_neg_samples > 0:
+            # Generate random samples for all points at once
+            # This is more efficient than doing it point by point
+            neg_indices = torch.randint(0, n_samples, (n_samples, n_neg_samples + 5), 
+                                      device=self.device)
+            
+            # Create mask to exclude self
+            self_mask = neg_indices == torch.arange(n_samples, device=self.device).unsqueeze(1)
+            
+            # Replace self indices with valid random ones
+            replacement_indices = torch.randint(0, n_samples, (n_samples, n_neg_samples + 5), 
+                                              device=self.device)
+            neg_indices = torch.where(self_mask, replacement_indices, neg_indices)
+            
+            # Take first n_neg_samples
+            neg_indices = neg_indices[:, :n_neg_samples]
+            
+            # Get negative sample positions
+            neg_positions = positions[neg_indices]  # (N, n_neg, D)
+            current_positions = positions.unsqueeze(1)  # (N, 1, D)
+            
+            # Compute differences and distances
+            diff = neg_positions - current_positions  # (N, n_neg, D)
+            dist = torch.norm(diff, dim=2, keepdim=True) + 1e-10  # (N, n_neg, 1)
+            
+            # Repulsion kernel
+            rep_coeff = -1.0 / (1.0 + a_val * (dist ** b_exp))  # (N, n_neg, 1)
+            
             # Apply distance cutoff
-            cutoff_scale = (-D_ij / self.cutoff).exp()
-            rep_kernel = rep_kernel * cutoff_scale
-
-            # Compute repulsion forces
-            force_dir = diff / D_ij
-            rep_forces = (rep_kernel * force_dir).sum(1)
+            cutoff_scale = torch.exp(-dist / self.cutoff)
+            rep_coeff = rep_coeff * cutoff_scale
+            
+            # Compute repulsion forces and sum over negative samples
+            rep_forces = (rep_coeff * diff / dist).sum(dim=1)  # (N, D)
             forces += rep_forces
-        else:
-            # Random sampling for repulsion (more efficient and often better)
-            n_neg_samples = min(int(self.neg_ratio * self.n_neighbors), n_samples - 1)
-
-            for i in range(n_samples):
-                # Random sample for repulsion
-                neg_samples = np.random.choice(n_samples, n_neg_samples, replace=False)
-                neg_samples = neg_samples[neg_samples != i]  # Exclude self
-
-                pos_i = positions[i:i + 1]
-                pos_neg = positions[neg_samples]
-
-                # Compute differences and distances
-                diff = pos_neg - pos_i
-                dist = torch.norm(diff, dim=1, keepdim=True) + 1e-10
-
-                # Repulsion kernel
-                rep_coeff = -1.0 / (1.0 + a_val * (dist ** b_exp))
-
-                # Apply distance cutoff
-                cutoff_scale = torch.exp(-dist / self.cutoff)
-                rep_coeff = rep_coeff * cutoff_scale
-
-                # Apply force
-                forces[i] += (rep_coeff * diff / dist).sum(0)
 
         # Apply cooling and clipping
         forces = alpha * forces
