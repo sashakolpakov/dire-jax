@@ -11,6 +11,7 @@ print("For benchmarking, metrics and utilities, use the [utils] extra.")
 # Core dependencies (dire.py and hpindex.py)
 core_deps = [
     "jax",
+    "jaxlib",
     "numpy",
     "scipy",
     "tqdm",
