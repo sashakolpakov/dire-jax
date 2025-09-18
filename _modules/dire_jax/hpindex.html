@@ -79,7 +79,7 @@
 <span class="sd">A JAX-based implementation for efficient k-nearest neighbors.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span><span class="p">,</span> <span class="n">lru_cache</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
 
@@ -105,9 +105,8 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">knn_tiled</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="o">=</span><span class="mi">8192</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Advanced implementation that tiles both database and query points.</span>
-<span class="sd">        This wrapper handles the dynamic aspects before calling the JIT-compiled</span>
-<span class="sd">        function.</span>
+<span class="sd">        Single-kernel kNN implementation that compiles once and reuses efficiently.</span>
+<span class="sd">        Uses a single JIT-compiled kernel with fixed tile/batch parameters.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            x: (n, d) array of database points</span>
@@ -118,223 +117,154 @@
 <span class="sd">            dtype: desired floating-point dtype (e.g., jnp.float32 or jnp.float64)</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            (m, k) array of indices of nearest neighbors</span>
+<span class="sd">            (m, k) array of indices and distances of nearest neighbors</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="c1"># Get or compile the kernel for this configuration</span>
+        <span class="n">kernel</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">_get_knn_kernel</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
-        <span class="n">n_x</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">n_y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span>
-
-        <span class="c1"># Ensure batch sizes aren&#39;t larger than the data dimensions</span>
-        <span class="n">x_tile_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">x_tile_size</span><span class="p">,</span> <span class="n">n_x</span><span class="p">)</span>
-        <span class="n">y_batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">n_y</span><span class="p">)</span>
-
-        <span class="c1"># Calculate batching parameters</span>
-        <span class="n">num_y_batches</span> <span class="o">=</span> <span class="n">n_y</span> <span class="o">//</span> <span class="n">y_batch_size</span>
-        <span class="n">y_remainder</span> <span class="o">=</span> <span class="n">n_y</span> <span class="o">%</span> <span class="n">y_batch_size</span>
-        <span class="n">num_x_tiles</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_x</span> <span class="o">+</span> <span class="n">x_tile_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">x_tile_size</span>
-
-        <span class="c1"># Call the JIT-compiled implementation with concrete values</span>
-        <span class="k">return</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">_knn_tiled_jit</span><span class="p">(</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="p">,</span>
-            <span class="n">num_y_batches</span><span class="p">,</span> <span class="n">y_remainder</span><span class="p">,</span> <span class="n">num_x_tiles</span><span class="p">,</span> <span class="n">n_x</span>
-        <span class="p">)</span></div>
+        <span class="c1"># Call the compiled kernel</span>
+        <span class="k">return</span> <span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
 
 
     <span class="nd">@staticmethod</span>
-    <span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_knn_tiled_jit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="p">,</span>
-                       <span class="n">num_y_batches</span><span class="p">,</span> <span class="n">y_remainder</span><span class="p">,</span> <span class="n">num_x_tiles</span><span class="p">,</span> <span class="n">n_x</span><span class="p">):</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>  <span class="c1"># Cache compiled kernels for different configurations</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_knn_kernel</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        JIT-compiled implementation of tiled KNN with concrete batch parameters.</span>
+<span class="sd">        Get or create a cached JIT-compiled kNN kernel for the given configuration.</span>
+<span class="sd">        This ensures we reuse compiled kernels across different datasets with same params.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">n_y</span><span class="p">,</span> <span class="n">d_y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">d_x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
-        
-        <span class="c1"># Infer dtype from input</span>
-        <span class="n">dtype</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span>
 
-        <span class="c1"># Initialize results</span>
-        <span class="n">all_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_y</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-        <span class="n">all_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">n_y</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+        <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">knn_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="c1"># Ensure consistent dtypes</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
 
-        <span class="c1"># Define the scan function for processing y batches</span>
-        <span class="k">def</span><span class="w"> </span><span class="nf">process_y_batch</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">y_batch_idx</span><span class="p">):</span>
-            <span class="n">curr_indices</span><span class="p">,</span> <span class="n">curr_distances</span> <span class="o">=</span> <span class="n">carry</span>
+            <span class="n">n_x</span><span class="p">,</span> <span class="n">d_x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">n_y</span><span class="p">,</span> <span class="n">d_y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span>
 
-            <span class="c1"># Get current batch of query points</span>
-            <span class="n">y_start</span> <span class="o">=</span> <span class="n">y_batch_idx</span> <span class="o">*</span> <span class="n">y_batch_size</span>
-            <span class="n">y_batch</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_slice</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">d_y</span><span class="p">))</span>
+            <span class="c1"># Pad data to tile/batch boundaries</span>
+            <span class="n">padded_n_x</span> <span class="o">=</span> <span class="p">((</span><span class="n">n_x</span> <span class="o">+</span> <span class="n">x_tile_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">x_tile_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_tile_size</span>
+            <span class="n">padded_n_y</span> <span class="o">=</span> <span class="p">((</span><span class="n">n_y</span> <span class="o">+</span> <span class="n">y_batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">y_batch_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">y_batch_size</span>
 
-            <span class="c1"># Initialize batch results</span>
-            <span class="n">batch_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-            <span class="n">batch_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+            <span class="c1"># Pad x if needed</span>
+            <span class="k">if</span> <span class="n">padded_n_x</span> <span class="o">&gt;</span> <span class="n">n_x</span><span class="p">:</span>
+                <span class="n">x_pad</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">padded_n_x</span> <span class="o">-</span> <span class="n">n_x</span><span class="p">,</span> <span class="n">d_x</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">x_padded</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pad</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x_padded</span> <span class="o">=</span> <span class="n">x</span>
 
-            <span class="c1"># Define the scan function for processing x tiles within a y batch</span>
-            <span class="k">def</span><span class="w"> </span><span class="nf">process_x_tile</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">x_tile_idx</span><span class="p">):</span>
-                <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch_dist</span> <span class="o">=</span> <span class="n">carry</span>
+            <span class="c1"># Pad y if needed</span>
+            <span class="k">if</span> <span class="n">padded_n_y</span> <span class="o">&gt;</span> <span class="n">n_y</span><span class="p">:</span>
+                <span class="n">y_pad</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">padded_n_y</span> <span class="o">-</span> <span class="n">n_y</span><span class="p">,</span> <span class="n">d_y</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">y_padded</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">y</span><span class="p">,</span> <span class="n">y_pad</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y_padded</span> <span class="o">=</span> <span class="n">y</span>
 
-                <span class="c1"># Get current tile of database points - use fixed size slices</span>
-                <span class="n">x_start</span> <span class="o">=</span> <span class="n">x_tile_idx</span> <span class="o">*</span> <span class="n">x_tile_size</span>
+            <span class="c1"># Calculate number of tiles/batches</span>
+            <span class="n">num_y_batches</span> <span class="o">=</span> <span class="n">padded_n_y</span> <span class="o">//</span> <span class="n">y_batch_size</span>
+            <span class="n">num_x_tiles</span> <span class="o">=</span> <span class="n">padded_n_x</span> <span class="o">//</span> <span class="n">x_tile_size</span>
 
-                <span class="c1"># Use a fixed size for the slice and then mask invalid values</span>
-                <span class="n">x_tile</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_slice</span><span class="p">(</span>
-                    <span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">x_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">x_tile_size</span><span class="p">,</span> <span class="n">d_x</span><span class="p">)</span>
+            <span class="c1"># Initialize results</span>
+            <span class="n">all_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">padded_n_y</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="n">all_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">padded_n_y</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+
+            <span class="c1"># Get distance kernel for this dtype</span>
+            <span class="n">distance_kernel</span> <span class="o">=</span> <span class="n">_get_distance_kernel</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+
+            <span class="c1"># Main processing loop using scan for efficiency</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">process_y_batch</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">y_batch_idx</span><span class="p">):</span>
+                <span class="n">curr_indices</span><span class="p">,</span> <span class="n">curr_distances</span> <span class="o">=</span> <span class="n">carry</span>
+                <span class="n">y_start</span> <span class="o">=</span> <span class="n">y_batch_idx</span> <span class="o">*</span> <span class="n">y_batch_size</span>
+                <span class="n">y_batch</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_slice</span><span class="p">(</span><span class="n">y_padded</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">d_y</span><span class="p">))</span>
+
+                <span class="n">batch_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                <span class="n">batch_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+
+                <span class="k">def</span><span class="w"> </span><span class="nf">process_x_tile</span><span class="p">(</span><span class="n">tile_carry</span><span class="p">,</span> <span class="n">x_tile_idx</span><span class="p">):</span>
+                    <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch_dist</span> <span class="o">=</span> <span class="n">tile_carry</span>
+                    <span class="n">x_start</span> <span class="o">=</span> <span class="n">x_tile_idx</span> <span class="o">*</span> <span class="n">x_tile_size</span>
+                    <span class="n">x_tile</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_slice</span><span class="p">(</span><span class="n">x_padded</span><span class="p">,</span> <span class="p">(</span><span class="n">x_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">x_tile_size</span><span class="p">,</span> <span class="n">d_x</span><span class="p">))</span>
+
+                    <span class="c1"># Compute distances</span>
+                    <span class="n">tile_distances</span> <span class="o">=</span> <span class="n">distance_kernel</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x_tile</span><span class="p">)</span>
+
+                    <span class="c1"># Create tile indices</span>
+                    <span class="n">tile_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x_tile_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_start</span>
+                    <span class="n">tile_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">tile_indices</span><span class="p">,</span> <span class="n">tile_distances</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+                    <span class="c1"># Merge and get top k</span>
+                    <span class="n">combined_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">batch_dist</span><span class="p">,</span> <span class="n">tile_distances</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">combined_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">batch_idx</span><span class="p">,</span> <span class="n">tile_indices</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">top_k_idx</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">combined_distances</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">k</span><span class="p">]</span>
+
+                    <span class="n">new_batch_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">combined_distances</span><span class="p">,</span> <span class="n">top_k_idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">new_batch_idx</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">combined_indices</span><span class="p">,</span> <span class="n">top_k_idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="p">(</span><span class="n">new_batch_idx</span><span class="p">,</span> <span class="n">new_batch_dist</span><span class="p">),</span> <span class="kc">None</span>
+
+                <span class="c1"># Process all x tiles for this y batch</span>
+                <span class="p">(</span><span class="n">batch_indices</span><span class="p">,</span> <span class="n">batch_distances</span><span class="p">),</span> <span class="n">_</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span>
+                    <span class="n">process_x_tile</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">batch_indices</span><span class="p">,</span> <span class="n">batch_distances</span><span class="p">),</span>
+                    <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_x_tiles</span><span class="p">)</span>
                 <span class="p">)</span>
 
-                <span class="c1"># Calculate how many elements are actually valid</span>
-                <span class="c1"># (This is now done without dynamic shapes)</span>
-                <span class="n">x_tile_actual_size</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">x_tile_size</span><span class="p">,</span> <span class="n">n_x</span> <span class="o">-</span> <span class="n">x_start</span><span class="p">)</span>
+                <span class="c1"># Update results</span>
+                <span class="n">curr_indices</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_update_slice</span><span class="p">(</span><span class="n">curr_indices</span><span class="p">,</span> <span class="n">batch_indices</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="n">curr_distances</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_update_slice</span><span class="p">(</span><span class="n">curr_distances</span><span class="p">,</span> <span class="n">batch_distances</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-                <span class="c1"># Compute distances between y_batch and x_tile</span>
-                <span class="n">tile_distances</span> <span class="o">=</span> <span class="n">_compute_batch_distances_l2</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x_tile</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">curr_indices</span><span class="p">,</span> <span class="n">curr_distances</span><span class="p">),</span> <span class="kc">None</span>
 
-                <span class="c1"># Mask out invalid indices (those beyond the actual data)</span>
-                <span class="n">valid_mask</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x_tile_size</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">x_tile_actual_size</span>
-                <span class="n">tile_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-                    <span class="n">valid_mask</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span>
-                    <span class="n">tile_distances</span><span class="p">,</span>
-                    <span class="n">jnp</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">tile_distances</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
-                <span class="p">)</span>
-
-                <span class="c1"># Adjust indices to account for tile offset</span>
-                <span class="c1"># Make sure indices are within bounds</span>
-                <span class="n">tile_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span>
-                    <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x_tile_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_start</span><span class="p">,</span>
-                    <span class="n">n_x</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># Ensure indices don&#39;t go beyond n_x</span>
-                <span class="p">)</span>
-                <span class="n">tile_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">tile_indices</span><span class="p">,</span> <span class="n">tile_distances</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
-                <span class="c1"># Merge current tile results with previous results</span>
-                <span class="n">combined_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">batch_dist</span><span class="p">,</span> <span class="n">tile_distances</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">combined_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">batch_idx</span><span class="p">,</span> <span class="n">tile_indices</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-                <span class="c1"># Sort and get top k</span>
-                <span class="n">top_k_idx</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">combined_distances</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">k</span><span class="p">]</span>
-
-                <span class="c1"># Gather top k distances and indices</span>
-                <span class="n">new_batch_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">combined_distances</span><span class="p">,</span> <span class="n">top_k_idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">new_batch_idx</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">combined_indices</span><span class="p">,</span> <span class="n">top_k_idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-                <span class="k">return</span> <span class="p">(</span><span class="n">new_batch_idx</span><span class="p">,</span> <span class="n">new_batch_dist</span><span class="p">),</span> <span class="kc">None</span>
-
-            <span class="c1"># Process all x tiles for this y batch</span>
-            <span class="p">(</span><span class="n">batch_indices</span><span class="p">,</span> <span class="n">batch_distances</span><span class="p">),</span> <span class="n">_</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span>
-                <span class="n">process_x_tile</span><span class="p">,</span>
-                <span class="p">(</span><span class="n">batch_indices</span><span class="p">,</span> <span class="n">batch_distances</span><span class="p">),</span>
-                <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_x_tiles</span><span class="p">)</span>
+            <span class="c1"># Process all y batches</span>
+            <span class="p">(</span><span class="n">all_indices</span><span class="p">,</span> <span class="n">all_distances</span><span class="p">),</span> <span class="n">_</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span>
+                <span class="n">process_y_batch</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">all_indices</span><span class="p">,</span> <span class="n">all_distances</span><span class="p">),</span>
+                <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_y_batches</span><span class="p">)</span>
             <span class="p">)</span>
 
-            <span class="c1"># Update overall results for this batch</span>
-            <span class="n">curr_indices</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_update_slice</span><span class="p">(</span>
-                <span class="n">curr_indices</span><span class="p">,</span> <span class="n">batch_indices</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">curr_distances</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_update_slice</span><span class="p">(</span>
-                <span class="n">curr_distances</span><span class="p">,</span> <span class="n">batch_distances</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="c1"># Return only valid portion</span>
+            <span class="k">return</span> <span class="n">all_indices</span><span class="p">[:</span><span class="n">n_y</span><span class="p">],</span> <span class="n">all_distances</span><span class="p">[:</span><span class="n">n_y</span><span class="p">]</span>
 
-            <span class="k">return</span> <span class="p">(</span><span class="n">curr_indices</span><span class="p">,</span> <span class="n">curr_distances</span><span class="p">),</span> <span class="kc">None</span>
-
-        <span class="c1"># Process all full y batches</span>
-        <span class="p">(</span><span class="n">all_indices</span><span class="p">,</span> <span class="n">all_distances</span><span class="p">),</span> <span class="n">_</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span>
-            <span class="n">process_y_batch</span><span class="p">,</span>
-            <span class="p">(</span><span class="n">all_indices</span><span class="p">,</span> <span class="n">all_distances</span><span class="p">),</span>
-            <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_y_batches</span><span class="p">)</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Handle y remainder with similar changes if needed</span>
-        <span class="k">def</span><span class="w"> </span><span class="nf">handle_y_remainder</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">distances</span><span class="p">):</span>
-            <span class="n">y_start</span> <span class="o">=</span> <span class="n">num_y_batches</span> <span class="o">*</span> <span class="n">y_batch_size</span>
-
-            <span class="c1"># Get and pad remainder batch</span>
-            <span class="n">remainder_y</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_slice</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">y_remainder</span><span class="p">,</span> <span class="n">d_y</span><span class="p">))</span>
-            <span class="n">padded_y</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">remainder_y</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">y_batch_size</span> <span class="o">-</span> <span class="n">y_remainder</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
-
-            <span class="c1"># Initialize remainder results</span>
-            <span class="n">remainder_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-            <span class="n">remainder_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
-
-            <span class="c1"># Process x tiles for the remainder batch (with same fix as above)</span>
-            <span class="k">def</span><span class="w"> </span><span class="nf">process_x_tile_remainder</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">x_tile_idx</span><span class="p">):</span>
-                <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch_dist</span> <span class="o">=</span> <span class="n">carry</span>
-
-                <span class="c1"># Get current tile of database points - use fixed size slices</span>
-                <span class="n">x_start</span> <span class="o">=</span> <span class="n">x_tile_idx</span> <span class="o">*</span> <span class="n">x_tile_size</span>
-
-                <span class="c1"># Use fixed size for the slice</span>
-                <span class="n">x_tile</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_slice</span><span class="p">(</span>
-                    <span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">x_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">x_tile_size</span><span class="p">,</span> <span class="n">d_x</span><span class="p">)</span>
-                <span class="p">)</span>
-
-                <span class="c1"># Calculate actual valid size</span>
-                <span class="n">x_tile_actual_size</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">x_tile_size</span><span class="p">,</span> <span class="n">n_x</span> <span class="o">-</span> <span class="n">x_start</span><span class="p">)</span>
-
-                <span class="c1"># Compute distances between padded_y and x_tile</span>
-                <span class="n">tile_distances</span> <span class="o">=</span> <span class="n">_compute_batch_distances_l2</span><span class="p">(</span><span class="n">padded_y</span><span class="p">,</span> <span class="n">x_tile</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-
-                <span class="c1"># Mask out invalid indices (both for y padding and x overflow)</span>
-                <span class="n">x_valid_mask</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x_tile_size</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">x_tile_actual_size</span>
-                <span class="n">tile_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-                    <span class="n">x_valid_mask</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span>
-                    <span class="n">tile_distances</span><span class="p">,</span>
-                    <span class="n">jnp</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">tile_distances</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
-                <span class="p">)</span>
-
-                <span class="c1"># Adjust indices to account for tile offset</span>
-                <span class="n">tile_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span>
-                    <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x_tile_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_start</span><span class="p">,</span>
-                    <span class="n">n_x</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># Ensure indices don&#39;t go beyond n_x</span>
-                <span class="p">)</span>
-                <span class="n">tile_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">tile_indices</span><span class="p">,</span> <span class="n">tile_distances</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
-                <span class="c1"># Merge current tile results with previous results</span>
-                <span class="n">combined_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">batch_dist</span><span class="p">,</span> <span class="n">tile_distances</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">combined_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">batch_idx</span><span class="p">,</span> <span class="n">tile_indices</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-                <span class="c1"># Sort and get top k</span>
-                <span class="n">top_k_idx</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">combined_distances</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">k</span><span class="p">]</span>
-
-                <span class="c1"># Gather top k distances and indices</span>
-                <span class="n">new_batch_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">combined_distances</span><span class="p">,</span> <span class="n">top_k_idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">new_batch_idx</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">combined_indices</span><span class="p">,</span> <span class="n">top_k_idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-                <span class="k">return</span> <span class="p">(</span><span class="n">new_batch_idx</span><span class="p">,</span> <span class="n">new_batch_dist</span><span class="p">),</span> <span class="kc">None</span>
-
-            <span class="c1"># Process all x tiles for the remainder batch</span>
-            <span class="p">(</span><span class="n">remainder_indices</span><span class="p">,</span> <span class="n">remainder_distances</span><span class="p">),</span> <span class="n">_</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span>
-                <span class="n">process_x_tile_remainder</span><span class="p">,</span>
-                <span class="p">(</span><span class="n">remainder_indices</span><span class="p">,</span> <span class="n">remainder_distances</span><span class="p">),</span>
-                <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_x_tiles</span><span class="p">)</span>
-            <span class="p">)</span>
-
-            <span class="c1"># Extract valid remainder results and update both arrays</span>
-            <span class="n">valid_i</span> <span class="o">=</span> <span class="n">remainder_indices</span><span class="p">[:</span><span class="n">y_remainder</span><span class="p">]</span>
-            <span class="n">valid_d</span> <span class="o">=</span> <span class="n">remainder_distances</span><span class="p">[:</span><span class="n">y_remainder</span><span class="p">]</span>
-
-            <span class="n">indices</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_update_slice</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">valid_i</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-            <span class="n">distances</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_update_slice</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">valid_d</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-
-            <span class="k">return</span> <span class="n">indices</span><span class="p">,</span> <span class="n">distances</span>
-
-        <span class="c1"># Conditionally handle remainder to avoid issues with remainder=0</span>
-        <span class="n">all_indices</span><span class="p">,</span> <span class="n">all_distances</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
-            <span class="n">y_remainder</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">handle_y_remainder</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">),</span>
-            <span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">args</span><span class="p">,</span>
-            <span class="p">(</span><span class="n">all_indices</span><span class="p">,</span> <span class="n">all_distances</span><span class="p">)</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">all_indices</span><span class="p">,</span> <span class="n">all_distances</span></div>
+        <span class="k">return</span> <span class="n">knn_kernel</span></div>
 
 
 
 <span class="c1"># Globally define the _compute_batch_distances_l2 function for reuse</span>
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,))</span>
+<span class="c1"># Using lru_cache to avoid recompilation for different dtype combinations</span>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>  <span class="c1"># Cache different dtype combinations</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_distance_kernel</span><span class="p">(</span><span class="n">dtype</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get or create a JIT-compiled distance kernel for the given dtype.&quot;&quot;&quot;</span>
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_distances</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># Ensure consistent dtype</span>
+        <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="c1"># Compute squared norms using more numerically stable method</span>
+        <span class="n">x_norm</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">y_norm</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_batch</span> <span class="o">*</span> <span class="n">y_batch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Compute xy term with explicit dtype</span>
+        <span class="n">xy</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">Precision</span><span class="o">.</span><span class="n">DEFAULT</span><span class="p">)</span>
+
+        <span class="c1"># Complete squared distance: ||y||² + ||x||² - 2*&lt;y,x&gt;</span>
+        <span class="c1"># Use broadcasting with consistent dtype</span>
+        <span class="n">two</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">dists2</span> <span class="o">=</span> <span class="n">y_norm</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_norm</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">two</span> <span class="o">*</span> <span class="n">xy</span>
+
+        <span class="c1"># Clip to valid range for the dtype</span>
+        <span class="n">zero</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">dists2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">dists2</span><span class="p">,</span> <span class="n">zero</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dists2</span>
+
+    <span class="k">return</span> <span class="n">compute_distances</span>
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_compute_batch_distances_l2</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the squared L2 distances between a batch of query points</span>
-<span class="sd">    and all database points.</span>
+<span class="sd">    and all database points. Uses cached kernels to avoid recompilation.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        y_batch: (batch_size, d) array of query points</span>
@@ -344,27 +274,9 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        (batch_size, n) array of squared distances</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Ensure consistent dtype</span>
-    <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-    
-    <span class="c1"># Compute squared norms using more numerically stable method</span>
-    <span class="n">x_norm</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">y_norm</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_batch</span> <span class="o">*</span> <span class="n">y_batch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="c1"># Compute xy term with explicit dtype</span>
-    <span class="n">xy</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">Precision</span><span class="o">.</span><span class="n">DEFAULT</span><span class="p">)</span>
-
-    <span class="c1"># Complete squared distance: ||y||² + ||x||² - 2*&lt;y,x&gt;</span>
-    <span class="c1"># Use broadcasting with consistent dtype</span>
-    <span class="n">two</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-    <span class="n">dists2</span> <span class="o">=</span> <span class="n">y_norm</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_norm</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">two</span> <span class="o">*</span> <span class="n">xy</span>
-    
-    <span class="c1"># Clip to valid range for the dtype</span>
-    <span class="n">zero</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-    <span class="n">dists2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">dists2</span><span class="p">,</span> <span class="n">zero</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">dists2</span>
+    <span class="c1"># Get the cached kernel for this dtype</span>
+    <span class="n">distance_kernel</span> <span class="o">=</span> <span class="n">_get_distance_kernel</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">distance_kernel</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 </pre></div>
 
            </div>

@@ -386,37 +386,8 @@ which can capture nonlinear relationships.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">do_rand_sampling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dirs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neg_ratio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#DiRe.do_rand_sampling"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Sample points for force calculation using random projections.</p>
-<p>This method implements an efficient sampling strategy to identify points
-for applying attractive and repulsive forces during layout optimization.
-It uses random projections to quickly identify nearby points in different
-directions, and also adds random negative samples for repulsion.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>key</strong> (<em>jax.random.PRNGKey</em>) – Random number generator key</p></li>
-<li><p><strong>arr</strong> (<em>jax.numpy.ndarray</em>) – Array of current point positions</p></li>
-<li><p><strong>n_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of samples to take in each direction</p></li>
-<li><p><strong>n_dirs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of random directions to sample</p></li>
-<li><p><strong>neg_ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Ratio of negative samples to positive samples</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Array of sampled indices for force calculations</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>jax.numpy.ndarray</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The sampling strategy works as follows:
-1. Generate n_dirs random unit vectors
-2. Project the points onto each vector
-3. For each point, take the n_samples closest points in each direction
-4. Add random negative samples for repulsion
-5. Combine all sampled indices</p>
-<p>This approach is more efficient than a full nearest neighbor search
-while still capturing the important local relationships.</p>
+<dd><p>Sample points for force calculation using cached sampling kernel.
+Uses a cached kernel to avoid recompilation issues with dynamic vmap.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1109,37 +1080,8 @@ under certain conditions.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">do_rand_sampling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dirs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neg_ratio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#DiRe.do_rand_sampling"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Sample points for force calculation using random projections.</p>
-<p>This method implements an efficient sampling strategy to identify points
-for applying attractive and repulsive forces during layout optimization.
-It uses random projections to quickly identify nearby points in different
-directions, and also adds random negative samples for repulsion.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>key</strong> (<em>jax.random.PRNGKey</em>) – Random number generator key</p></li>
-<li><p><strong>arr</strong> (<em>jax.numpy.ndarray</em>) – Array of current point positions</p></li>
-<li><p><strong>n_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of samples to take in each direction</p></li>
-<li><p><strong>n_dirs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of random directions to sample</p></li>
-<li><p><strong>neg_ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Ratio of negative samples to positive samples</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Array of sampled indices for force calculations</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>jax.numpy.ndarray</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The sampling strategy works as follows:
-1. Generate n_dirs random unit vectors
-2. Project the points onto each vector
-3. For each point, take the n_samples closest points in each direction
-4. Add random negative samples for repulsion
-5. Combine all sampled indices</p>
-<p>This approach is more efficient than a full nearest neighbor search
-while still capturing the important local relationships.</p>
+<dd><p>Sample points for force calculation using cached sampling kernel.
+Uses a cached kernel to avoid recompilation issues with dynamic vmap.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1206,35 +1148,14 @@ For both 2D and 3D, hover over points to see their coordinates and labels.</p>
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">compute_forces_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_float32</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#compute_forces_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Fully vectorized JAX kernel for computing forces - no chunking.</p>
-<p>Let JAX handle large tensors efficiently rather than fighting with recompilation.
-Modern GPUs can easily handle the memory requirements for most datasets.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>positions</strong> (<em>jax.numpy.ndarray</em>) – Current point positions (N, D)</p></li>
-<li><p><strong>chunk_indices</strong> (<em>jax.numpy.ndarray</em>) – Indices being processed (N,)</p></li>
-<li><p><strong>neighbor_indices</strong> (<em>jax.numpy.ndarray</em>) – Indices of neighbors for attractive forces (N, k)</p></li>
-<li><p><strong>sample_indices</strong> (<em>jax.numpy.ndarray</em>) – Indices of points for repulsive forces (N, n_neg)</p></li>
-<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Cooling factor that scales force magnitude</p></li>
-<li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Attraction parameter</p></li>
-<li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Repulsion parameter</p></li>
-<li><p><strong>use_float32</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to use float32 for computations (MPA optimization)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Net force vectors for each point (N, D)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>jax.numpy.ndarray</p>
-</dd>
-</dl>
+<dd><p>Cached wrapper for force computation to avoid recompilation.
+Gets or creates a cached kernel for the given a, b, use_float32 configuration.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">distribution_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#distribution_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Probability kernel that maps distances to similarity scores.</p>
+<dd><p>Probability kernel that maps distances to similarity scores using cached kernels.</p>
 <p>This is a rational function approximation of a t-distribution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1256,19 +1177,19 @@ Modern GPUs can easily handle the memory requirements for most datasets.</p>
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">jax_coeff_att</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#jax_coeff_att"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>JAX-optimized attraction coefficient function.</p>
+<dd><p>JAX-optimized attraction coefficient function with caching.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">jax_coeff_rep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#jax_coeff_rep"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>JAX-optimized repulsion coefficient function.</p>
+<dd><p>JAX-optimized repulsion coefficient function with caching.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">rand_directions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num=100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'jax.numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#rand_directions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Sample unit vectors in random directions.</p>
+<dd><p>Sample unit vectors in random directions using cached kernels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1290,7 +1211,7 @@ Modern GPUs can easily handle the memory requirements for most datasets.</p>
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">get_slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/dire.html#get_slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Extract a slice of size k centered around index i.</p>
+<dd><p>Extract a slice of size k centered around index i using cached kernels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1518,9 +1439,8 @@ large datasets with limited memory usage.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">knn_tiled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k=5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_tile_size=8192</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_batch_size=1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'jax.numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dire_jax/hpindex.html#HPIndex.knn_tiled"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Advanced implementation that tiles both database and query points.
-This wrapper handles the dynamic aspects before calling the JIT-compiled
-function.</p>
+<dd><p>Single-kernel kNN implementation that compiles once and reuses efficiently.
+Uses a single JIT-compiled kernel with fixed tile/batch parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1533,7 +1453,7 @@ function.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>(m, k) array of indices of nearest neighbors</p>
+<dd class="field-even"><p>(m, k) array of indices and distances of nearest neighbors</p>
 </dd>
 </dl>
 </dd></dl>
