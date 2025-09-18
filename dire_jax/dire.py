@@ -678,8 +678,12 @@ class DiRe(TransformerMixin):
         # with a single JIT-compiled operation that avoids all recompilation issues
         self.logger.info(f"Using cached layout optimization kernel for {num_iterations} iterations")
 
+        # Use a reasonable max_iterations to allow caching across different iteration counts
+        # This enables a single kernel to handle 8, 16, 32, 64, 128 iterations efficiently
+        max_iterations = max(128, num_iterations)
+
         layout_kernel = _get_layout_optimization_kernel(
-            num_iterations=num_iterations,
+            max_iterations=max_iterations,
             sample_size=sample_size,
             n_dirs=n_dirs,
             neg_ratio=neg_ratio,
@@ -689,8 +693,8 @@ class DiRe(TransformerMixin):
             use_float32=self.mpa
         )
 
-        # Run the complete optimization in a single JIT-compiled call
-        final_positions = layout_kernel(init_pos_jax, neighbor_indices_jax, key)
+        # Run the complete optimization in a single JIT-compiled call with dynamic iterations
+        final_positions = layout_kernel(init_pos_jax, neighbor_indices_jax, key, num_iterations)
 
         # Store final layout
         self._layout = np.asarray(final_positions)
@@ -1155,15 +1159,15 @@ def _get_sampling_kernel(n_components, n_samples, n_dirs, neg_ratio, dtype):
 
     return sampling_kernel
 
-# Cache complete layout optimization kernels
+# Cache complete layout optimization kernels with max iterations
 @functools.lru_cache(maxsize=8)
-def _get_layout_optimization_kernel(num_iterations, sample_size, n_dirs, neg_ratio, cutoff, a, b, use_float32):
+def _get_layout_optimization_kernel(max_iterations, sample_size, n_dirs, neg_ratio, cutoff, a, b, use_float32):
     """Get or create a cached layout optimization kernel for the given configuration."""
 
     @jax.jit
-    def layout_kernel(init_positions, neighbor_indices, initial_key):
+    def layout_kernel(init_positions, neighbor_indices, initial_key, actual_iterations):
         """
-        Complete JIT-compiled layout optimization loop.
+        Complete JIT-compiled layout optimization loop with dynamic iteration count.
         This replaces the entire Python for-loop with a JAX-optimized implementation.
         """
         n_components = init_positions.shape[1]
@@ -1185,32 +1189,37 @@ def _get_layout_optimization_kernel(num_iterations, sample_size, n_dirs, neg_rat
             # Split key for this iteration
             key, subkey = random.split(key)
 
-            # Calculate cooling factor
-            alpha = 1.0 - iter_id / num_iterations
+            # Skip iterations beyond actual_iterations
+            skip_iteration = iter_id >= actual_iterations
+
+            # Calculate cooling factor (use actual_iterations for proper scaling)
+            alpha = jnp.where(skip_iteration, 0.0, 1.0 - iter_id / actual_iterations)
 
             # Sample points for force calculation
             sample_indices = sampling_kernel(subkey, current_positions)
 
-            # Compute forces for all points at once
-            n_points = current_positions.shape[0]
-            chunk_indices = jnp.arange(n_points)
-            net_force = force_kernel(
-                current_positions, chunk_indices, neighbor_indices, sample_indices, alpha
-            )
+            # Conditionally compute forces and update positions using lax.cond
+            def do_update(_):
+                n_points = current_positions.shape[0]
+                chunk_indices = jnp.arange(n_points)
+                net_force = force_kernel(
+                    current_positions, chunk_indices, neighbor_indices, sample_indices, alpha
+                )
+                net_force = jnp.clip(net_force, -cutoff_typed, cutoff_typed)
+                return current_positions + net_force
 
-            # Clip forces to prevent extreme movements
-            net_force = jnp.clip(net_force, -cutoff_typed, cutoff_typed)
+            def skip_update(_):
+                return current_positions
 
-            # Update positions
-            new_positions = current_positions + net_force
+            new_positions = lax.cond(skip_iteration, skip_update, do_update, None)
 
             return (new_positions, key), None
 
-        # Run the optimization loop using scan for efficiency
+        # Run the optimization loop using scan for efficiency with max iterations
         (final_positions, _), _ = lax.scan(
             optimization_step,
             (positions, initial_key),
-            jnp.arange(num_iterations)
+            jnp.arange(max_iterations)
         )
 
         # Final normalization
