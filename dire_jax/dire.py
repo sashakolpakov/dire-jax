@@ -574,79 +574,20 @@ class DiRe(TransformerMixin):
 
     def do_rand_sampling(self, key, arr, n_samples, n_dirs, neg_ratio):
         """
-        Sample points for force calculation using random projections.
-
-        This method implements an efficient sampling strategy to identify points
-        for applying attractive and repulsive forces during layout optimization.
-        It uses random projections to quickly identify nearby points in different
-        directions, and also adds random negative samples for repulsion.
-
-        Parameters
-        ----------
-        key : jax.random.PRNGKey
-            Random number generator key
-        arr : jax.numpy.ndarray
-            Array of current point positions
-        n_samples : int
-            Number of samples to take in each direction
-        n_dirs : int
-            Number of random directions to sample
-        neg_ratio : int
-            Ratio of negative samples to positive samples
-
-        Returns
-        -------
-        jax.numpy.ndarray
-            Array of sampled indices for force calculations
-
-        Notes
-        -----
-        The sampling strategy works as follows:
-        1. Generate n_dirs random unit vectors
-        2. Project the points onto each vector
-        3. For each point, take the n_samples closest points in each direction
-        4. Add random negative samples for repulsion
-        5. Combine all sampled indices
-
-        This approach is more efficient than a full nearest neighbor search
-        while still capturing the important local relationships.
+        Sample points for force calculation using cached sampling kernel.
+        Uses a cached kernel to avoid recompilation issues with dynamic vmap.
         """
         self.logger.info("do_rand_sampling ...")
 
-        sampled_indices_list = []
         arr_len = len(arr)
-
-        # Get random unit vectors for projections with appropriate dtype
-        key, subkey = random.split(key)
         compute_dtype = jnp.float32 if hasattr(self, 'mpa') and self.mpa else jnp.float64
-        direction_vectors = rand_directions(subkey, self.n_components, n_dirs, compute_dtype)
 
-        # For each direction, sample points based on projections
-        for vec in direction_vectors:
-            # Project points onto the direction vector
-            arr_proj = vec @ arr.T
+        # Use cached sampling kernel
+        sampling_kernel = _get_sampling_kernel(
+            self.n_components, n_samples, n_dirs, neg_ratio, compute_dtype
+        )
 
-            # Sort indices by projection values
-            indices_sort = jnp.argsort(arr_proj)
-
-            # For each point, take n_samples points around it in sorted order
-            vmap_get_slice = vmap(get_slice, in_axes=(None, None, 0))
-            indices = vmap_get_slice(indices_sort, n_samples, jnp.arange(arr_len))
-
-            # Reorder indices back to original ordering
-            indices = indices[indices_sort]
-
-            # Add to list of sampled indices
-            sampled_indices_list.append(indices)
-
-        # Generate random negative samples for repulsion
-        n_neg_samples = int(neg_ratio * n_samples)
-        key, subkey = random.split(key)
-        neg_indices = random.randint(subkey, (arr_len, n_neg_samples), 0, arr_len)
-        sampled_indices_list.append(neg_indices)
-
-        # Combine all sampled indices
-        sampled_indices = jnp.concatenate(sampled_indices_list, axis=-1)
+        sampled_indices = sampling_kernel(key, arr)
 
         self.logger.info("do_rand_sampling done ...")
 
@@ -733,89 +674,26 @@ class DiRe(TransformerMixin):
         else:
             key = random.PRNGKey(self.random_state)
 
-        # Optimization loop
-        for iter_id in tqdm(range(num_iterations)):
-            logger.debug(f"Iteration {iter_id + 1}")
+        # Use cached layout optimization kernel - this replaces the entire Python loop
+        # with a single JIT-compiled operation that avoids all recompilation issues
+        self.logger.info(f"Using cached layout optimization kernel for {num_iterations} iterations")
 
-            # Sample random points for repulsion
-            sample_indices_jax = self.do_rand_sampling(
-                key, init_pos_jax, sample_size, n_dirs, neg_ratio
-            )
+        layout_kernel = _get_layout_optimization_kernel(
+            num_iterations=num_iterations,
+            sample_size=sample_size,
+            n_dirs=n_dirs,
+            neg_ratio=neg_ratio,
+            cutoff=self.cutoff,
+            a=self._a,
+            b=self._b,
+            use_float32=self.mpa
+        )
 
-            if force_cpu:
-                cpu_device = jax.devices("cpu")[0]
-                sample_indices_jax = device_put(sample_indices_jax, device=cpu_device)
-            else:
-                sample_indices_jax = device_put(sample_indices_jax)
-
-            # Split computation for memory efficiency if needed
-            if large_dataset_mode:
-                # Process in chunks to reduce peak memory usage
-                if jax.devices()[0].platform == "tpu":
-                    chunk_size = min(self.memm["tpu"], self._n_samples)
-                elif jax.devices()[0].platform == "gpu":
-                    chunk_size = min(self.memm["gpu"], self._n_samples)
-                else:
-                    chunk_size = min(self.memm["other"], self._n_samples)
-                    # this is actually inefficient, but let's postpone
-
-                all_forces = []
-
-                self.logger.info(f"Using memory tiling with tile size: {chunk_size}")
-
-                for chunk_start in range(0, self._n_samples, chunk_size):
-                    chunk_end = min(chunk_start + chunk_size, self._n_samples)
-                    chunk_indices = jnp.arange(chunk_start, chunk_end)
-
-                    # Process this chunk using our kernelized function
-                    chunk_force = self._compute_forces(
-                        init_pos_jax,
-                        chunk_indices,
-                        neighbor_indices_jax[chunk_indices],
-                        sample_indices_jax[chunk_indices],
-                        alpha=1.0 - iter_id / num_iterations,
-                    )
-
-                    all_forces.append(chunk_force)
-
-                    # Explicitly clean up to reduce memory pressure
-                    gc.collect()
-
-                # Combine results from all chunks
-                net_force = jnp.concatenate(all_forces, axis=0)
-
-            else:
-                # Process all points at once for smaller datasets
-                net_force = self._compute_forces(
-                    init_pos_jax,
-                    jnp.arange(self._n_samples),
-                    neighbor_indices_jax,
-                    sample_indices_jax,
-                    alpha=1.0 - iter_id / num_iterations,
-                )
-
-            # Clip forces to prevent extreme movements (with dtype-aware cutoff)
-            cutoff_typed = jnp.array(self.cutoff, dtype=compute_dtype)
-            net_force = jnp.clip(net_force, -cutoff_typed, cutoff_typed)
-
-            # Update positions
-            init_pos_jax += net_force
-
-            # Ensure we're not accumulating unnecessary computation graphs in JAX
-            init_pos_jax.block_until_ready()
-
-            # Clean up resources
-            gc.collect()
-
-        # Normalize final layout with dtype consistency
-        mean_final = init_pos_jax.mean(axis=0, keepdims=True)
-        init_pos_jax = init_pos_jax - mean_final
-        std_final = init_pos_jax.std(axis=0, keepdims=True)
-        eps = jnp.array(1e-7 if self.mpa else 1e-15, dtype=compute_dtype)
-        init_pos_jax = init_pos_jax / jnp.maximum(std_final, eps)
+        # Run the complete optimization in a single JIT-compiled call
+        final_positions = layout_kernel(init_pos_jax, neighbor_indices_jax, key)
 
         # Store final layout
-        self._layout = np.asarray(init_pos_jax)
+        self._layout = np.asarray(final_positions)
 
         # Clear any cached values to free memory
         gc.collect()
@@ -1000,39 +878,33 @@ class DiRe(TransformerMixin):
 #
 
 
-@functools.partial(jit, static_argnums=(5, 6, 7))
+# Cache force computation kernels to avoid recompilation
+@functools.lru_cache(maxsize=8)
+def _get_force_computation_kernel(a, b, use_float32):
+    """Get or create a cached force computation kernel for the given parameters."""
+
+    @jax.jit
+    def force_kernel(positions, chunk_indices, neighbor_indices, sample_indices, alpha):
+        return _compute_forces_impl(positions, chunk_indices, neighbor_indices, sample_indices, alpha, a, b, use_float32)
+
+    return force_kernel
+
 def compute_forces_kernel(
     positions, chunk_indices, neighbor_indices, sample_indices, alpha, a, b, use_float32=True
 ):
     """
-    Fully vectorized JAX kernel for computing forces - no chunking.
-    
-    Let JAX handle large tensors efficiently rather than fighting with recompilation.
-    Modern GPUs can easily handle the memory requirements for most datasets.
+    Cached wrapper for force computation to avoid recompilation.
+    Gets or creates a cached kernel for the given a, b, use_float32 configuration.
+    """
+    kernel = _get_force_computation_kernel(a, b, use_float32)
+    return kernel(positions, chunk_indices, neighbor_indices, sample_indices, alpha)
 
-    Parameters
-    ----------
-    positions : jax.numpy.ndarray
-        Current point positions (N, D)
-    chunk_indices : jax.numpy.ndarray
-        Indices being processed (N,)
-    neighbor_indices : jax.numpy.ndarray
-        Indices of neighbors for attractive forces (N, k)
-    sample_indices : jax.numpy.ndarray
-        Indices of points for repulsive forces (N, n_neg)
-    alpha : float
-        Cooling factor that scales force magnitude
-    a : float
-        Attraction parameter
-    b : float
-        Repulsion parameter
-    use_float32 : bool
-        Whether to use float32 for computations (MPA optimization)
-
-    Returns
-    -------
-    jax.numpy.ndarray
-        Net force vectors for each point (N, D)
+def _compute_forces_impl(
+    positions, chunk_indices, neighbor_indices, sample_indices, alpha, a, b, use_float32
+):
+    """
+    Fully vectorized JAX implementation of force computation.
+    This is the core computation that gets JIT-compiled and cached.
     """
     
     # Convert to appropriate dtype at the beginning
@@ -1095,10 +967,20 @@ def compute_forces_kernel(
 #
 
 
-@jax.jit
+# Cache coefficient kernels to avoid recompilation
+@functools.lru_cache(maxsize=8)
+def _get_distribution_kernel(a, b):
+    """Get or create a cached distribution kernel for the given parameters."""
+
+    @jax.jit
+    def dist_kernel(dist):
+        return 1.0 / (1.0 + a * dist ** (2 * b))
+
+    return dist_kernel
+
 def distribution_kernel(dist, a, b):
     """
-    Probability kernel that maps distances to similarity scores.
+    Probability kernel that maps distances to similarity scores using cached kernels.
 
     This is a rational function approximation of a t-distribution.
 
@@ -1116,26 +998,59 @@ def distribution_kernel(dist, a, b):
     float or jax.numpy.ndarray
         Similarity score(s) between 0 and 1
     """
-    return 1.0 / (1.0 + a * dist ** (2 * b))
+    kernel = _get_distribution_kernel(a, b)
+    return kernel(dist)
 
+# Cache coefficient kernels
+@functools.lru_cache(maxsize=8)
+def _get_coeff_att_kernel(a, b):
+    """Get or create a cached attraction coefficient kernel."""
 
-# Helper functions for force calculations
-@jax.jit
+    @jax.jit
+    def att_kernel(dist):
+        return 1.0 / (1.0 + a * (1.0 / dist) ** (2 * b))
+
+    return att_kernel
+
+@functools.lru_cache(maxsize=8)
+def _get_coeff_rep_kernel(a, b):
+    """Get or create a cached repulsion coefficient kernel."""
+
+    @jax.jit
+    def rep_kernel(dist):
+        return -1.0 / (1.0 + a * dist ** (2 * b))
+
+    return rep_kernel
+
 def jax_coeff_att(dist, a, b):
-    """JAX-optimized attraction coefficient function."""
-    return 1.0 * distribution_kernel(1 / dist, a, b)
+    """JAX-optimized attraction coefficient function with caching."""
+    kernel = _get_coeff_att_kernel(a, b)
+    return kernel(dist)
 
-
-@jax.jit
 def jax_coeff_rep(dist, a, b):
-    """JAX-optimized repulsion coefficient function."""
-    return -1.0 * distribution_kernel(dist, a, b)
+    """JAX-optimized repulsion coefficient function with caching."""
+    kernel = _get_coeff_rep_kernel(a, b)
+    return kernel(dist)
 
 
-@functools.partial(jit, static_argnums=(1, 2, 3))
+# Cache random direction kernels to avoid recompilation
+@functools.lru_cache(maxsize=8)
+def _get_rand_directions_kernel(dim, num, dtype):
+    """Get or create a cached random directions kernel for the given configuration."""
+
+    @jax.jit
+    def rand_dir_kernel(key):
+        points = random.normal(key, (num, dim), dtype=dtype)
+        norms = jnp.sqrt(jnp.sum(points * points, axis=-1, keepdims=True))
+        # Add small epsilon to avoid division by zero
+        eps = jnp.array(1e-7 if dtype == jnp.float32 else 1e-15, dtype=dtype)
+        return points / jnp.maximum(norms, eps)
+
+    return rand_dir_kernel
+
 def rand_directions(key, dim=2, num=100, dtype=jnp.float64):
     """
-    Sample unit vectors in random directions.
+    Sample unit vectors in random directions using cached kernels.
 
     Parameters
     ----------
@@ -1153,17 +1068,24 @@ def rand_directions(key, dim=2, num=100, dtype=jnp.float64):
     jax.numpy.ndarray
         Array of shape (num, dim) containing unit vectors
     """
-    points = random.normal(key, (num, dim), dtype=dtype)
-    norms = jnp.sqrt(jnp.sum(points * points, axis=-1, keepdims=True))
-    # Add small epsilon to avoid division by zero
-    eps = jnp.array(1e-7 if dtype == jnp.float32 else 1e-15, dtype=dtype)
-    return points / jnp.maximum(norms, eps)
+    kernel = _get_rand_directions_kernel(dim, num, dtype)
+    return kernel(key)
 
 
-@functools.partial(jit, static_argnums=(1,))
+# Cache slice kernels to avoid recompilation
+@functools.lru_cache(maxsize=16)
+def _get_slice_kernel(k):
+    """Get or create a cached slice kernel for the given slice size."""
+
+    @jax.jit
+    def slice_kernel(arr, i):
+        return lax.dynamic_slice(arr, (i - k // 2,), (k,))
+
+    return slice_kernel
+
 def get_slice(arr, k, i):
     """
-    Extract a slice of size k centered around index i.
+    Extract a slice of size k centered around index i using cached kernels.
 
     Parameters
     ----------
@@ -1179,4 +1101,125 @@ def get_slice(arr, k, i):
     jax.numpy.ndarray
         Slice of the input array
     """
-    return lax.dynamic_slice(arr, (i - k // 2,), (k,))
+    kernel = _get_slice_kernel(k)
+    return kernel(arr, i)
+
+# Cache sampling kernels to avoid recompilation in do_rand_sampling
+@functools.lru_cache(maxsize=16)
+def _get_sampling_kernel(n_components, n_samples, n_dirs, neg_ratio, dtype):
+    """Get or create a cached sampling kernel for the given configuration."""
+
+    @jax.jit
+    def sampling_kernel(key, arr):
+        arr_len = arr.shape[0]
+        sampled_indices_list = []
+
+        # Get random unit vectors for projections
+        key, subkey = random.split(key)
+        direction_vectors = _get_rand_directions_kernel(n_components, n_dirs, dtype)(subkey)
+
+        # Get slice kernel for this n_samples
+        slice_kernel = _get_slice_kernel(n_samples)
+
+        # For each direction, sample points based on projections
+        for i in range(n_dirs):
+            vec = direction_vectors[i]
+
+            # Project points onto the direction vector
+            arr_proj = jnp.dot(vec, arr.T)
+
+            # Sort indices by projection values
+            indices_sort = jnp.argsort(arr_proj)
+
+            # For each point, take n_samples points around it in sorted order
+            # Use vmap on the cached slice kernel
+            vmap_slice = vmap(slice_kernel, in_axes=(None, 0))
+            indices = vmap_slice(indices_sort, jnp.arange(arr_len))
+
+            # Reorder indices back to original ordering
+            indices = indices[indices_sort]
+
+            # Add to list of sampled indices
+            sampled_indices_list.append(indices)
+
+        # Generate random negative samples for repulsion
+        n_neg_samples = int(neg_ratio * n_samples)
+        key, subkey = random.split(key)
+        neg_indices = random.randint(subkey, (arr_len, n_neg_samples), 0, arr_len)
+        sampled_indices_list.append(neg_indices)
+
+        # Combine all sampled indices
+        sampled_indices = jnp.concatenate(sampled_indices_list, axis=-1)
+
+        return sampled_indices
+
+    return sampling_kernel
+
+# Cache complete layout optimization kernels
+@functools.lru_cache(maxsize=8)
+def _get_layout_optimization_kernel(num_iterations, sample_size, n_dirs, neg_ratio, cutoff, a, b, use_float32):
+    """Get or create a cached layout optimization kernel for the given configuration."""
+
+    @jax.jit
+    def layout_kernel(init_positions, neighbor_indices, initial_key):
+        """
+        Complete JIT-compiled layout optimization loop.
+        This replaces the entire Python for-loop with a JAX-optimized implementation.
+        """
+        n_components = init_positions.shape[1]
+        compute_dtype = jnp.float32 if use_float32 else jnp.float64
+
+        # Ensure consistent dtypes
+        positions = init_positions.astype(compute_dtype)
+        cutoff_typed = jnp.array(cutoff, dtype=compute_dtype)
+        a_typed = jnp.array(a, dtype=compute_dtype)
+        b_typed = jnp.array(b, dtype=compute_dtype)
+
+        # Get cached kernels
+        sampling_kernel = _get_sampling_kernel(n_components, sample_size, n_dirs, neg_ratio, compute_dtype)
+        force_kernel = _get_force_computation_kernel(a, b, use_float32)
+
+        def optimization_step(carry, iter_id):
+            current_positions, key = carry
+
+            # Split key for this iteration
+            key, subkey = random.split(key)
+
+            # Calculate cooling factor
+            alpha = 1.0 - iter_id / num_iterations
+
+            # Sample points for force calculation
+            sample_indices = sampling_kernel(subkey, current_positions)
+
+            # Compute forces for all points at once
+            n_points = current_positions.shape[0]
+            chunk_indices = jnp.arange(n_points)
+            net_force = force_kernel(
+                current_positions, chunk_indices, neighbor_indices, sample_indices, alpha
+            )
+
+            # Clip forces to prevent extreme movements
+            net_force = jnp.clip(net_force, -cutoff_typed, cutoff_typed)
+
+            # Update positions
+            new_positions = current_positions + net_force
+
+            return (new_positions, key), None
+
+        # Run the optimization loop using scan for efficiency
+        (final_positions, _), _ = lax.scan(
+            optimization_step,
+            (positions, initial_key),
+            jnp.arange(num_iterations)
+        )
+
+        # Final normalization
+        mean_final = final_positions.mean(axis=0, keepdims=True)
+        final_positions = final_positions - mean_final
+        std_final = final_positions.std(axis=0, keepdims=True)
+        eps = jnp.array(1e-7 if use_float32 else 1e-15, dtype=compute_dtype)
+        final_positions = final_positions / jnp.maximum(std_final, eps)
+
+        return final_positions
+
+    return layout_kernel

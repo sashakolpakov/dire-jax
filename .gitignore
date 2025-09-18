@@ -135,3 +135,6 @@ dmypy.json
 # IDEs
 .idea/
 .vscode/
+
+# Development test files (not for public repository)
+dev_test/
