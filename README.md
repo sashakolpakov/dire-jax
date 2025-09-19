@@ -104,14 +104,20 @@ Please refer to the DiRe API [documentation](https://sashakolpakov.github.io/dir
 
 Our working paper is available on the arXiv. [![Paper](https://img.shields.io/badge/arXiv-read%20PDF-b31b1b.svg)](https://arxiv.org/abs/2503.03156)
 
- Also, check out the Jupyter notebook with benchmarking results. [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](
+ Also, check out the Jupyter notebook with comprehensive benchmarking results and performance analysis. [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](
   https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/benchmarking/dire_benchmarks.ipynb
 )
 
 
 ### Performance Characteristics
 
-DiRe-JAX is optimized for small-medium datasets (<50K points) with excellent CPU performance and GPU acceleration via JAX. Features fully vectorized computation with JIT compilation for optimal performance.
+DiRe-JAX is optimized for small-medium datasets (<50K points) with excellent CPU performance and GPU acceleration via JAX. Features include:
+
+- **Fully vectorized computation** with JIT compilation for optimal performance
+- **Memory-efficient chunking** to handle large datasets without excessive memory usage
+- **Mixed precision arithmetic (MPA)** support for improved performance on modern hardware
+- **Optimized kernel caching** to avoid recompilation and improve runtime efficiency
+- **Large dataset mode** with automatic memory management for datasets >65K points
 
 ### Benchmarking and utilities
 

@@ -44,8 +44,8 @@ The `dire_utils` module provides functions for benchmarking:
 Jupyter Notebook
 ----------------
 
-For detailed benchmarking examples, see the Jupyter notebook in the repository:
+For detailed benchmarking examples and comprehensive performance analysis, see the Jupyter notebook in the repository:
 
 .. image:: https://colab.research.google.com/assets/colab-badge.svg
-   :target: https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/tests/dire_benchmarks.ipynb
+   :target: https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/benchmarking/dire_benchmarks.ipynb
    :alt: Open in Colab

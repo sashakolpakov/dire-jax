@@ -38,10 +38,14 @@ Performance Characteristics
 DiRe-JAX is optimized for:
 
 * Small to medium datasets (<50K points)
+* **Large dataset support** (>65K points) with automatic memory management
 * Fully vectorized computation with JIT compilation
 * Excellent CPU performance
 * GPU acceleration when JAX is installed with CUDA support
 * TPU support for cloud-based computation
+* **Mixed precision arithmetic (MPA)** for enhanced performance on modern hardware
+* **Memory-efficient chunking** to handle large datasets without memory issues
+* **Optimized kernel caching** to minimize recompilation and improve runtime
 
 Advanced Configuration
 ----------------------
@@ -58,6 +62,9 @@ DiRe offers several parameters that can be tuned to optimize the dimensionality 
 * `n_sample_dirs`: Number of sample directions for the layout algorithm
 * `sample_size`: Sample size for the layout algorithm
 * `neg_ratio`: Ratio of negative to positive samples
+* `batch_size`: Number of samples to process at once (None for automatic sizing)
+* `mpa`: Enable Mixed Precision Arithmetic for improved performance (default: True)
+* `memm`: Memory manager dictionary for different hardware architectures
 
 Example with Custom Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -91,6 +98,35 @@ Example with Custom Parameters
     
     # Visualize with labels
     reducer.visualize(labels=labels, point_size=3)
+
+Large Dataset Example
+~~~~~~~~~~~~~~~~~~~~~~
+
+For very large datasets, DiRe-JAX automatically switches to memory-efficient mode:
+
+.. code-block:: python
+
+    from dire_jax import DiRe
+    import numpy as np
+
+    # Create a large dataset
+    large_data = np.random.random((100000, 200))  # 100K samples, 200 dimensions
+
+    # DiRe will automatically use large dataset mode
+    reducer = DiRe(
+        n_components=2,
+        n_neighbors=16,
+        batch_size=4096,        # Custom batch size for memory control
+        mpa=True,               # Enable mixed precision arithmetic
+        max_iter_layout=64,     # Fewer iterations for faster processing
+        verbose=True            # Monitor progress
+    )
+
+    # Memory-efficient processing with automatic chunking
+    embedding = reducer.fit_transform(large_data)
+
+    # Visualize the result
+    reducer.visualize(point_size=1)
 
 Benchmarking
 ------------

@@ -8,6 +8,9 @@ DiRe-JAX is a pure JAX implementation optimized for:
 - Excellent CPU performance with JIT compilation
 - GPU acceleration when JAX is installed with CUDA support
 - TPU support for cloud-based computation
+- Memory-efficient chunking for large datasets (>65K points)
+- Mixed precision arithmetic (MPA) for enhanced performance
+- Optimized kernel caching to minimize recompilation overhead
 
 ### Hardware Acceleration
 - For GPU acceleration, JAX needs specific installation: [JAX GPU instructions](https://github.com/google/jax#installation)

@@ -14,11 +14,15 @@ JAX Implementation
 
 .. important::
    **DiRe-JAX Features**
-   
+
    - Optimized for small-medium datasets (<50K points)
+   - **Large dataset mode** for datasets >65K points with automatic memory management
    - Excellent CPU performance with JIT compilation
    - GPU acceleration available when JAX is installed with CUDA support
    - TPU support for cloud-based computation
+   - **Mixed precision arithmetic (MPA)** support for enhanced performance
+   - **Memory-efficient chunking** to prevent out-of-memory issues
+   - **Optimized kernel caching** to minimize recompilation overhead
    - Ideal for research and development workflows
 
 Installation Options

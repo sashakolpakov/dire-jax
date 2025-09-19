@@ -6,7 +6,7 @@ Welcome to DiRe-JAX's documentation!
    :alt: View PDF
 
 .. image:: https://colab.research.google.com/assets/colab-badge.svg
-   :target: https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/tests/dire_benchmarks.ipynb
+   :target: https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/benchmarking/dire_benchmarks.ipynb
    :alt: Open in Colab
 
 **DiRe-JAX** is a high-performance dimensionality reduction package built with JAX for efficient computation on CPUs, GPUs, and TPUs.
@@ -69,7 +69,9 @@ Key Features
 
 * **JAX-powered**: Leverages JAX for JIT compilation and automatic differentiation
 * **Hardware acceleration**: Supports CPU, GPU (via CUDA), and TPU
-* **Efficient**: Optimized for datasets up to 50K points
+* **Scalable**: Optimized for datasets up to 50K points, with large dataset mode for >65K points
+* **Memory-efficient**: Advanced chunking and memory management for large datasets
+* **High-performance**: Mixed precision arithmetic (MPA) and optimized kernel caching
 * **Research-friendly**: Clean, modular design for experimentation
 * **Benchmarking tools**: Built-in utilities for performance evaluation
 
