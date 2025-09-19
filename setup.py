@@ -39,7 +39,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",  
     url="https://github.com/sashakolpakov/dire-jax",
-    packages=find_packages(include=["dire_jax", "dire_jax.*", "tests", "tests.*"]),
+    packages=find_packages(include=["dire_jax", "dire_jax.*", "tests", "tests.*"], exclude=["benchmarking*"]),
     include_package_data=True,  
     package_data={"tests": ["*.py", "*.ipynb"]},
     classifiers=[
