@@ -53,6 +53,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#performance-characteristics">Performance Characteristics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#example-with-custom-parameters">Example with Custom Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#large-dataset-example">Large Dataset Example</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#benchmarking">Benchmarking</a></li>
@@ -124,10 +125,14 @@
 <p>DiRe-JAX is optimized for:</p>
 <ul class="simple">
 <li><p>Small to medium datasets (&lt;50K points)</p></li>
+<li><p><strong>Large dataset support</strong> (&gt;65K points) with automatic memory management</p></li>
 <li><p>Fully vectorized computation with JIT compilation</p></li>
 <li><p>Excellent CPU performance</p></li>
 <li><p>GPU acceleration when JAX is installed with CUDA support</p></li>
 <li><p>TPU support for cloud-based computation</p></li>
+<li><p><strong>Mixed precision arithmetic (MPA)</strong> for enhanced performance on modern hardware</p></li>
+<li><p><strong>Memory-efficient chunking</strong> to handle large datasets without memory issues</p></li>
+<li><p><strong>Optimized kernel caching</strong> to minimize recompilation and improve runtime</p></li>
 </ul>
 </section>
 <section id="advanced-configuration">
@@ -144,6 +149,9 @@
 <li><p><cite>n_sample_dirs</cite>: Number of sample directions for the layout algorithm</p></li>
 <li><p><cite>sample_size</cite>: Sample size for the layout algorithm</p></li>
 <li><p><cite>neg_ratio</cite>: Ratio of negative to positive samples</p></li>
+<li><p><cite>batch_size</cite>: Number of samples to process at once (None for automatic sizing)</p></li>
+<li><p><cite>mpa</cite>: Enable Mixed Precision Arithmetic for improved performance (default: True)</p></li>
+<li><p><cite>memm</cite>: Memory manager dictionary for different hardware architectures</p></li>
 </ul>
 <section id="example-with-custom-parameters">
 <h3>Example with Custom Parameters<a class="headerlink" href="#example-with-custom-parameters" title="Link to this heading"></a></h3>
@@ -174,6 +182,33 @@
 
 <span class="c1"># Visualize with labels</span>
 <span class="n">reducer</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="large-dataset-example">
+<h3>Large Dataset Example<a class="headerlink" href="#large-dataset-example" title="Link to this heading"></a></h3>
+<p>For very large datasets, DiRe-JAX automatically switches to memory-efficient mode:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># Create a large dataset</span>
+<span class="n">large_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">100000</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>  <span class="c1"># 100K samples, 200 dimensions</span>
+
+<span class="c1"># DiRe will automatically use large dataset mode</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span>
+    <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span>        <span class="c1"># Custom batch size for memory control</span>
+    <span class="n">mpa</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>               <span class="c1"># Enable mixed precision arithmetic</span>
+    <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>     <span class="c1"># Fewer iterations for faster processing</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>            <span class="c1"># Monitor progress</span>
+<span class="p">)</span>
+
+<span class="c1"># Memory-efficient processing with automatic chunking</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">large_data</span><span class="p">)</span>
+
+<span class="c1"># Visualize the result</span>
+<span class="n">reducer</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">point_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
