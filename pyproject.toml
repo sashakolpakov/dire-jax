@@ -54,7 +54,6 @@ Repository = "https://github.com/sashakolpakov/dire-jax"
 "Bug Tracker" = "https://github.com/sashakolpakov/dire-jax/issues"
 
 [tool.setuptools]
-packages = ["dire_jax", "tests"]
 include-package-data = true
 
 [tool.setuptools.packages.find]
