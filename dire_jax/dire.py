@@ -682,6 +682,17 @@ class DiRe(TransformerMixin):
         # This enables a single kernel to handle 8, 16, 32, 64, 128 iterations efficiently
         max_iterations = max(128, num_iterations)
 
+        # Calculate chunk size for large dataset mode
+        chunk_size = None
+        if large_dataset_mode:
+            platform = jax.devices()[0].platform
+            base_chunk_size = self.memm.get(platform, self.memm.get("other", 8192))
+            # Reduce chunk size significantly for large dataset mode
+            chunk_size = max(base_chunk_size // 4, 1024)  # At least 1024, but 1/4 of normal batch size
+            self.logger.info(f"Using large dataset mode with chunk size: {chunk_size} (platform: {platform})")
+        else:
+            self.logger.info("Using standard dataset mode (no chunking)")
+
         layout_kernel = _get_layout_optimization_kernel(
             max_iterations=max_iterations,
             sample_size=sample_size,
@@ -690,7 +701,9 @@ class DiRe(TransformerMixin):
             cutoff=self.cutoff,
             a=self._a,
             b=self._b,
-            use_float32=self.mpa
+            use_float32=self.mpa,
+            large_dataset_mode=large_dataset_mode,
+            chunk_size=chunk_size
         )
 
         # Run the complete optimization in a single JIT-compiled call with dynamic iterations
@@ -1159,9 +1172,75 @@ def _get_sampling_kernel(n_components, n_samples, n_dirs, neg_ratio, dtype):
 
     return sampling_kernel
 
+
+def _get_chunked_sampling_kernel(n_components, n_samples, n_dirs, neg_ratio, dtype, chunk_size):
+    """Get or create a memory-efficient chunked sampling kernel for large datasets."""
+
+    @jax.jit
+    def chunked_sampling_kernel(key, arr):
+        arr_len = arr.shape[0]
+
+        # For large datasets, use a simpler approximation that reduces memory usage
+        # Instead of processing in dynamic chunks, we use subsampling to reduce the problem size
+
+        # Get random unit vectors for projections
+        key, subkey = random.split(key)
+        direction_vectors = _get_rand_directions_kernel(n_components, n_dirs, dtype)(subkey)
+
+        # Subsample the array to reduce memory footprint
+        subsample_size = min(chunk_size, arr_len)
+        key, subkey = random.split(key)
+        subsample_indices = random.choice(subkey, arr_len, (subsample_size,), replace=False)
+        subsample_arr = arr[subsample_indices]
+
+        sampled_indices_list = []
+
+        # For each direction, sample points based on projections from subsampled array
+        for i in range(n_dirs):
+            vec = direction_vectors[i]
+
+            # Project subsampled points onto the direction vector
+            subsample_proj = jnp.dot(vec, subsample_arr.T)
+
+            # Sort indices by projection values
+            indices_sort = jnp.argsort(subsample_proj)
+
+            # For each original point, find nearest points in the subsampled space
+            arr_proj_full = jnp.dot(vec, arr.T)
+
+            def find_neighbors_for_point(point_proj):
+                # Find position in sorted subsampled projections
+                pos = jnp.searchsorted(subsample_proj[indices_sort], point_proj)
+
+                # Sample around this position in the subsampled space
+                start = jnp.maximum(0, pos - n_samples // 2)
+                end = jnp.minimum(subsample_size, start + n_samples)
+                start = jnp.maximum(0, end - n_samples)
+
+                # Map back to original indices using dynamic_slice
+                subsampled_neighbors = jax.lax.dynamic_slice(indices_sort, (start,), (n_samples,))
+                return subsample_indices[subsampled_neighbors]
+
+            vmap_find_neighbors = vmap(find_neighbors_for_point)
+            indices = vmap_find_neighbors(arr_proj_full)
+            sampled_indices_list.append(indices)
+
+        # Generate random negative samples
+        n_neg_samples = int(neg_ratio * n_samples)
+        key, subkey = random.split(key)
+        neg_indices = random.randint(subkey, (arr_len, n_neg_samples), 0, arr_len)
+        sampled_indices_list.append(neg_indices)
+
+        # Combine all sampled indices
+        sampled_indices = jnp.concatenate(sampled_indices_list, axis=-1)
+
+        return sampled_indices
+
+    return chunked_sampling_kernel
+
 # Cache complete layout optimization kernels with max iterations
 @functools.lru_cache(maxsize=8)
-def _get_layout_optimization_kernel(max_iterations, sample_size, n_dirs, neg_ratio, cutoff, a, b, use_float32):
+def _get_layout_optimization_kernel(max_iterations, sample_size, n_dirs, neg_ratio, cutoff, a, b, use_float32, large_dataset_mode=False, chunk_size=None):
     """Get or create a cached layout optimization kernel for the given configuration."""
 
     @jax.jit
@@ -1179,8 +1258,14 @@ def _get_layout_optimization_kernel(max_iterations, sample_size, n_dirs, neg_rat
         a_typed = jnp.array(a, dtype=compute_dtype)
         b_typed = jnp.array(b, dtype=compute_dtype)
 
-        # Get cached kernels
-        sampling_kernel = _get_sampling_kernel(n_components, sample_size, n_dirs, neg_ratio, compute_dtype)
+        # Get cached kernels - use chunked sampling for large datasets to reduce memory usage
+        if large_dataset_mode and chunk_size is not None:
+            sampling_kernel = _get_chunked_sampling_kernel(
+                n_components, sample_size, n_dirs, neg_ratio, compute_dtype, chunk_size
+            )
+        else:
+            sampling_kernel = _get_sampling_kernel(n_components, sample_size, n_dirs, neg_ratio, compute_dtype)
+
         force_kernel = _get_force_computation_kernel(a, b, use_float32)
 
         def optimization_step(carry, iter_id):
