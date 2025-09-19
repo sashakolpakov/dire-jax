@@ -32,7 +32,7 @@ utils_deps = [
 
 setup(
     name="dire-jax",
-    version="0.2.0",
+    version="0.2.1",
     author="Alexander Kolpakov (UATX), Igor Rivin (Temple University)",
     author_email="akolpakov@uaustin.org, rivin@temple.edu",
     description="A JAX-based Dimension Reducer",

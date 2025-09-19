@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dire-jax"
+version = "0.2.1"
+authors = [
+    {name = "Alexander Kolpakov", email = "akolpakov@uaustin.org"},
+    {name = "Igor Rivin", email = "rivin@temple.edu"},
+]
+description = "A JAX-based Dimension Reducer"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+keywords = ["dimensionality reduction", "jax", "machine learning", "visualization"]
+dependencies = [
+    "jax",
+    "jaxlib",
+    "numpy",
+    "scipy",
+    "tqdm",
+    "pandas",
+    "plotly",
+    "loguru",
+    "scikit-learn",
+]
+
+[project.optional-dependencies]
+utils = [
+    "ripser",
+    "persim",
+    "fastdtw",
+    "fast-twed",
+    "pot",
+]
+all = [
+    "ripser",
+    "persim",
+    "fastdtw",
+    "fast-twed",
+    "pot",
+]
+
+[project.urls]
+Homepage = "https://github.com/sashakolpakov/dire-jax"
+Documentation = "https://sashakolpakov.github.io/dire-jax/"
+Repository = "https://github.com/sashakolpakov/dire-jax"
+"Bug Tracker" = "https://github.com/sashakolpakov/dire-jax/issues"
+
+[tool.setuptools]
+packages = ["dire_jax", "tests"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+tests = ["*.py", "*.ipynb"]
