@@ -136,10 +136,6 @@ Please follow the [contibuting guide](https://sashakolpakov.github.io/dire-jax/c
 
 If you use this work, please cite it as:
 
-```
-Kolpakov, A., & Rivin, I. (2025). Dimensionality reduction for homological stability and global structure preservation. arXiv preprint arXiv:2503.03156.
-```
-
 **BibTeX:**
 ```bibtex
 @misc{kolpakov2025dimensionality,
@@ -151,6 +147,11 @@ Kolpakov, A., & Rivin, I. (2025). Dimensionality reduction for homological stabi
   primaryClass={cs.LG},
   url={https://arxiv.org/abs/2503.03156}
 }
+```
+
+**APA Style:**
+```
+Kolpakov, A., & Rivin, I. (2025). Dimensionality reduction for homological stability and global structure preservation. arXiv preprint arXiv:2503.03156. https://arxiv.org/abs/2503.03156
 ```
 
 ### Acknowledgement
