@@ -132,6 +132,27 @@ This provides access to dimensionality reduction quality metrics and benchmarkin
 
 Please follow the [contibuting guide](https://sashakolpakov.github.io/dire-jax/contributing.html). Thanks!
 
-### Acknowledgement 
+### Citation
+
+If you use this work, please cite it as:
+
+```
+Kolpakov, A., & Rivin, I. (2025). Dimensionality reduction for homological stability and global structure preservation. arXiv preprint arXiv:2503.03156.
+```
+
+**BibTeX:**
+```bibtex
+@misc{kolpakov2025dimensionality,
+  title={Dimensionality reduction for homological stability and global structure preservation},
+  author={Kolpakov, Alexander and Rivin, Igor},
+  year={2025},
+  eprint={2503.03156},
+  archivePrefix={arXiv},
+  primaryClass={cs.LG},
+  url={https://arxiv.org/abs/2503.03156}
+}
+```
+
+### Acknowledgement
 
 This work is supported by the Google Cloud Research Award number GCP19980904.

@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "Dimensionality reduction for homological stability and global structure preservation"
+authors:
+  - family-names: Kolpakov
+    given-names: Alexander
+  - family-names: Rivin
+    given-names: Igor
+doi: 10.48550/arXiv.2503.03156
+date-released: 2025-03-17
+url: https://arxiv.org/abs/2503.03156
+abstract: |
+  We propose a new dimensionality reduction toolkit designed to address some of the challenges faced by traditional methods like UMAP and tSNE such as loss of global structure and computational efficiency. Built on the JAX framework, DiRe leverages modern hardware acceleration to provide an efficient, scalable, and interpretable solution for visualizing complex data structures, and for quantitative analysis of lower-dimensional embeddings. The toolkit shows considerable promise in preserving both local and global structures within the data as compared to state-of-the-art UMAP and tSNE implementations. This makes it suitable for a wide range of applications in machine learning, bio-informatics, and data science.
+keywords:
+  - dimensionality reduction
+  - JAX
+  - homological stability
+  - global structure preservation
+  - machine learning
+  - data visualization
+  - bioinformatics
+  - mathematical software

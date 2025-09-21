@@ -5,8 +5,10 @@ from setuptools import setup, find_packages
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
-# Comment on utils extra
-print("For benchmarking, metrics and utilities, use the [utils] extra.")
+# Comment on utils extra (only when running setup.py directly)
+import sys
+if 'setup.py' in sys.argv[0]:
+    print("For benchmarking, metrics and utilities, use the [utils] extra.")
 
 # Core dependencies (dire.py and hpindex.py)
 core_deps = [
@@ -33,7 +35,7 @@ utils_deps = [
 setup(
     name="dire-jax",
     version="0.2.1",
-    author="Alexander Kolpakov (UATX), Igor Rivin (Temple University)",
+    author="Alexander Kolpakov, Igor Rivin",
     author_email="akolpakov@uaustin.org, rivin@temple.edu",
     description="A JAX-based Dimension Reducer",
     long_description=long_description,
