@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+include pyproject.toml
+recursive-include docs *.md *.txt
+recursive-include tests *.py *.ipynb
+global-exclude *.pyc
+global-exclude __pycache__
+prune benchmarking
