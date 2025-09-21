@@ -138,7 +138,7 @@ If you use this work, please cite it as:
 
 **BibTeX:**
 ```bibtex
-@misc{kolpakov2025dimensionality,
+@misc{kolpakov-rivin-2025dimensionality,
   title={Dimensionality reduction for homological stability and global structure preservation},
   author={Kolpakov, Alexander and Rivin, Igor},
   year={2025},
