@@ -57,7 +57,9 @@ Repository = "https://github.com/sashakolpakov/dire-jax"
 include-package-data = true
 
 [tool.setuptools.packages.find]
+include = ["dire_jax*", "tests*"]
 exclude = ["benchmarking*"]
 
 [tool.setuptools.package-data]
+"*" = ["*.py", "*.ipynb"]
 tests = ["*.py", "*.ipynb"]
