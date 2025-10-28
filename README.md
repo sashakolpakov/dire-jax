@@ -19,7 +19,8 @@
 </p>
 <p align="center">
   <a href="https://pepy.tech/projects/dire-jax">
-    <img src="https://static.pepy.tech/personalized-badge/dire-jax?period=total&units=ABBREVIATION&left_color=GREY&right_color=BLUE&left_text=downloads" alt="PyPI Downloads">
+    <img alt="Pepy Total Downloads" src="https://img.shields.io/pepy/dt/dire-jax">
+
   </a>
   <a href="https://github.com/sashakolpakov/dire-jax/actions/workflows/pylint.yml">
     <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/sashakolpakov/dire-jax/pylint.yml?branch=main&label=CI&logo=github">
