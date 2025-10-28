@@ -102,9 +102,9 @@ for manifold learning.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>n_components</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Embedding dimension</em><em>, </em><em>default 2.</em>)</p></li>
-<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors to consider for each point</em><em>, </em><em>default 16.</em>)</p></li>
-<li><p><strong>init</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>)</em>) – <dl>
+<li><p><strong>n_components</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Embedding dimension</em><em>, </em><em>default 2.</em>)</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors to consider for each point</em><em>, </em><em>default 16.</em>)</p></li>
+<li><p><strong>init</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em>) – <dl>
 <dt>Method to initialize the embedding; choices are:</dt><dd><ul>
 <li><p>’random’ for random projection based on the Johnson-Lindenstrauss lemma;</p></li>
 <li><p>’spectral’ for spectral embedding (with sim_kernel as similarity kernel);</p></li>
@@ -116,16 +116,16 @@ for manifold learning.</p>
 </p></li>
 <li><p><strong>sim_kernel</strong> (<em>(</em><em>callable</em><em>)</em>) – A similarity kernel function that transforms a distance metric to a similarity score.
 The function should have the form <cite>lambda distance: float -&gt; similarity: float</cite>; default <cite>None</cite>.</p></li>
-<li><p><strong>max_iter_layout</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Maximum number of iterations to run the layout optimization, default 128.</p></li>
-<li><p><strong>min_dist</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em>) – Minimum distance scale for distribution kernel, default 0.01.</p></li>
-<li><p><strong>spread</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em>) – Spread of the distribution kernel, default 1.0.</p></li>
-<li><p><strong>cutoff</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em>) – Cutoff for clipping forces during layout optimization, default 42.0.</p></li>
-<li><p><strong>n_sample_dirs</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Number of directions to sample in random sampling, default 8.</p></li>
-<li><p><strong>sample_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Number of samples per direction in random sampling, default 16.</p></li>
-<li><p><strong>neg_ratio</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Ratio of negative to positive samples in random sampling, default 8.</p></li>
+<li><p><strong>max_iter_layout</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Maximum number of iterations to run the layout optimization, default 128.</p></li>
+<li><p><strong>min_dist</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – Minimum distance scale for distribution kernel, default 0.01.</p></li>
+<li><p><strong>spread</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – Spread of the distribution kernel, default 1.0.</p></li>
+<li><p><strong>cutoff</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – Cutoff for clipping forces during layout optimization, default 42.0.</p></li>
+<li><p><strong>n_sample_dirs</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Number of directions to sample in random sampling, default 8.</p></li>
+<li><p><strong>sample_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Number of samples per direction in random sampling, default 16.</p></li>
+<li><p><strong>neg_ratio</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Ratio of negative to positive samples in random sampling, default 8.</p></li>
 <li><p><strong>my_logger</strong> ((logger.Logger or <cite>None</cite>)) – Custom logger for logging events; if None, a default logger is created, default <cite>None</cite>.</p></li>
-<li><p><strong>verbose</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>)</em>) – Flag to enable verbose output, default <cite>True</cite>.</p></li>
-<li><p><strong>random_state</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Random seed to make stochastic computations reproducible.</p></li>
+<li><p><strong>verbose</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>)</em>) – Flag to enable verbose output, default <cite>True</cite>.</p></li>
+<li><p><strong>random_state</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Random seed to make stochastic computations reproducible.</p></li>
 </ul>
 </dd>
 </dl>
@@ -135,7 +135,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Target dimensionality of the output space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -146,7 +146,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Number of neighbors to consider in the k-nearest neighbors graph.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -157,7 +157,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Chosen method for initial embedding.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -190,7 +190,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Maximum iterations for optimizing the layout.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -201,7 +201,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Minimum distance for repulsion used in the distribution kernel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -212,7 +212,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Spread between the data points used in the distribution kernel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -223,7 +223,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Maximum cutoff for forces during optimization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -234,7 +234,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Number of random directions sampled.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -245,7 +245,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Number of samples per random direction, unless chosen automatically with ‘auto’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> or ‘auto’</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a> or ‘auto’</p>
 </dd>
 </dl>
 </dd></dl>
@@ -257,7 +257,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 will be automatically determined based on dataset size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> or None, optional</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a> or None, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -268,7 +268,7 @@ will be automatically determined based on dataset size.</p>
 <dd><p>Ratio of negative to positive samples in the sampling process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -290,7 +290,7 @@ will be automatically determined based on dataset size.</p>
 <dd><p>Logger output flag (True = output logger messages, False = flush to null)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -314,7 +314,7 @@ be positive integers.</p>
 <dd><p>Mixed Precision Arithmetic flag (True = use MPA, False = always use float64)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -363,9 +363,9 @@ representation of the high-dimensional data. The algorithm applies:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>large_dataset_mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – If True, use memory-efficient techniques for large datasets.
+<li><p><strong>large_dataset_mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – If True, use memory-efficient techniques for large datasets.
 If None, automatically determine based on dataset size.</p></li>
-<li><p><strong>force_cpu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, force computations on CPU instead of GPU, which can
+<li><p><strong>force_cpu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, force computations on CPU instead of GPU, which can
 be helpful for large datasets that exceed GPU memory.</p></li>
 </ul>
 </dd>
@@ -482,7 +482,7 @@ It attempts to use GPU acceleration if available, with a fallback to CPU.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Number of samples to process at once. If None, a suitable value
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Number of samples to process at once. If None, a suitable value
 will be automatically determined based on dataset size.</p></li>
 <li><p><strong>attributes</strong> (<em>The method sets the following instance</em>)</p></li>
 <li><p><strong>distances</strong> (<em>-</em>)</p></li>
@@ -508,13 +508,13 @@ colored by provided labels for clearer visualization of clusters or categories.<
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>labels</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Labels for each data point to color the points in the visualization.
 If None, all points will have the same color. Default is None.</p></li>
-<li><p><strong>point_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Size of points in the scatter plot. Default is 2.</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Title for the visualization. If None, a default title will be used. Default is None.</p></li>
-<li><p><strong>colormap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Name of the colormap to use for labels (e.g., ‘viridis’, ‘plasma’).
+<li><p><strong>point_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Size of points in the scatter plot. Default is 2.</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Title for the visualization. If None, a default title will be used. Default is None.</p></li>
+<li><p><strong>colormap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Name of the colormap to use for labels (e.g., ‘viridis’, ‘plasma’).
 If None, the default Plotly colormap will be used. Default is None.</p></li>
-<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Width of the figure in pixels. Default is 800.</p></li>
-<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Height of the figure in pixels. Default is 600.</p></li>
-<li><p><strong>opacity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Opacity of the points (0.0 to 1.0). Default is 0.7.</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Width of the figure in pixels. Default is 800.</p></li>
+<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Height of the figure in pixels. Default is 600.</p></li>
+<li><p><strong>opacity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Opacity of the points (0.0 to 1.0). Default is 0.7.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -637,9 +637,9 @@ for manifold learning.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>n_components</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Embedding dimension</em><em>, </em><em>default 2.</em>)</p></li>
-<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors to consider for each point</em><em>, </em><em>default 16.</em>)</p></li>
-<li><p><strong>init</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>)</em>) – <dl>
+<li><p><strong>n_components</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Embedding dimension</em><em>, </em><em>default 2.</em>)</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors to consider for each point</em><em>, </em><em>default 16.</em>)</p></li>
+<li><p><strong>init</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>)</em>) – <dl>
 <dt>Method to initialize the embedding; choices are:</dt><dd><ul>
 <li><p>’random’ for random projection based on the Johnson-Lindenstrauss lemma;</p></li>
 <li><p>’spectral’ for spectral embedding (with sim_kernel as similarity kernel);</p></li>
@@ -651,16 +651,16 @@ for manifold learning.</p>
 </p></li>
 <li><p><strong>sim_kernel</strong> (<em>(</em><em>callable</em><em>)</em>) – A similarity kernel function that transforms a distance metric to a similarity score.
 The function should have the form <cite>lambda distance: float -&gt; similarity: float</cite>; default <cite>None</cite>.</p></li>
-<li><p><strong>max_iter_layout</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Maximum number of iterations to run the layout optimization, default 128.</p></li>
-<li><p><strong>min_dist</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em>) – Minimum distance scale for distribution kernel, default 0.01.</p></li>
-<li><p><strong>spread</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em>) – Spread of the distribution kernel, default 1.0.</p></li>
-<li><p><strong>cutoff</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em>) – Cutoff for clipping forces during layout optimization, default 42.0.</p></li>
-<li><p><strong>n_sample_dirs</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Number of directions to sample in random sampling, default 8.</p></li>
-<li><p><strong>sample_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Number of samples per direction in random sampling, default 16.</p></li>
-<li><p><strong>neg_ratio</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Ratio of negative to positive samples in random sampling, default 8.</p></li>
+<li><p><strong>max_iter_layout</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Maximum number of iterations to run the layout optimization, default 128.</p></li>
+<li><p><strong>min_dist</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – Minimum distance scale for distribution kernel, default 0.01.</p></li>
+<li><p><strong>spread</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – Spread of the distribution kernel, default 1.0.</p></li>
+<li><p><strong>cutoff</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – Cutoff for clipping forces during layout optimization, default 42.0.</p></li>
+<li><p><strong>n_sample_dirs</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Number of directions to sample in random sampling, default 8.</p></li>
+<li><p><strong>sample_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Number of samples per direction in random sampling, default 16.</p></li>
+<li><p><strong>neg_ratio</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Ratio of negative to positive samples in random sampling, default 8.</p></li>
 <li><p><strong>my_logger</strong> ((logger.Logger or <cite>None</cite>)) – Custom logger for logging events; if None, a default logger is created, default <cite>None</cite>.</p></li>
-<li><p><strong>verbose</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>)</em>) – Flag to enable verbose output, default <cite>True</cite>.</p></li>
-<li><p><strong>random_state</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Random seed to make stochastic computations reproducible.</p></li>
+<li><p><strong>verbose</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>)</em>) – Flag to enable verbose output, default <cite>True</cite>.</p></li>
+<li><p><strong>random_state</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>)</em>) – Random seed to make stochastic computations reproducible.</p></li>
 </ul>
 </dd>
 </dl>
@@ -670,7 +670,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Target dimensionality of the output space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -681,7 +681,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Number of neighbors to consider in the k-nearest neighbors graph.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -692,7 +692,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Chosen method for initial embedding.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -725,7 +725,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Maximum iterations for optimizing the layout.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -736,7 +736,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Minimum distance for repulsion used in the distribution kernel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -747,7 +747,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Spread between the data points used in the distribution kernel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -758,7 +758,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Maximum cutoff for forces during optimization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -769,7 +769,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Number of random directions sampled.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -780,7 +780,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 <dd><p>Number of samples per random direction, unless chosen automatically with ‘auto’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> or ‘auto’</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a> or ‘auto’</p>
 </dd>
 </dl>
 </dd></dl>
@@ -792,7 +792,7 @@ The function should have the form <cite>lambda distance: float -&gt; similarity:
 will be automatically determined based on dataset size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a> or None, optional</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a> or None, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -803,7 +803,7 @@ will be automatically determined based on dataset size.</p>
 <dd><p>Ratio of negative to positive samples in the sampling process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -825,7 +825,7 @@ will be automatically determined based on dataset size.</p>
 <dd><p>Logger output flag (True = output logger messages, False = flush to null)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -849,7 +849,7 @@ be positive integers.</p>
 <dd><p>Mixed Precision Arithmetic flag (True = use MPA, False = always use float64)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1025,7 +1025,7 @@ It attempts to use GPU acceleration if available, with a fallback to CPU.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Number of samples to process at once. If None, a suitable value
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Number of samples to process at once. If None, a suitable value
 will be automatically determined based on dataset size.</p></li>
 <li><p><strong>attributes</strong> (<em>The method sets the following instance</em>)</p></li>
 <li><p><strong>distances</strong> (<em>-</em>)</p></li>
@@ -1100,9 +1100,9 @@ representation of the high-dimensional data. The algorithm applies:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>large_dataset_mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – If True, use memory-efficient techniques for large datasets.
+<li><p><strong>large_dataset_mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – If True, use memory-efficient techniques for large datasets.
 If None, automatically determine based on dataset size.</p></li>
-<li><p><strong>force_cpu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, force computations on CPU instead of GPU, which can
+<li><p><strong>force_cpu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, force computations on CPU instead of GPU, which can
 be helpful for large datasets that exceed GPU memory.</p></li>
 </ul>
 </dd>
@@ -1121,13 +1121,13 @@ colored by provided labels for clearer visualization of clusters or categories.<
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>labels</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Labels for each data point to color the points in the visualization.
 If None, all points will have the same color. Default is None.</p></li>
-<li><p><strong>point_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Size of points in the scatter plot. Default is 2.</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Title for the visualization. If None, a default title will be used. Default is None.</p></li>
-<li><p><strong>colormap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Name of the colormap to use for labels (e.g., ‘viridis’, ‘plasma’).
+<li><p><strong>point_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Size of points in the scatter plot. Default is 2.</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Title for the visualization. If None, a default title will be used. Default is None.</p></li>
+<li><p><strong>colormap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Name of the colormap to use for labels (e.g., ‘viridis’, ‘plasma’).
 If None, the default Plotly colormap will be used. Default is None.</p></li>
-<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Width of the figure in pixels. Default is 800.</p></li>
-<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Height of the figure in pixels. Default is 600.</p></li>
-<li><p><strong>opacity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Opacity of the points (0.0 to 1.0). Default is 0.7.</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Width of the figure in pixels. Default is 800.</p></li>
+<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Height of the figure in pixels. Default is 600.</p></li>
+<li><p><strong>opacity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Opacity of the points (0.0 to 1.0). Default is 0.7.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1161,15 +1161,15 @@ Gets or creates a cached kernel for the given a, b, use_float32 configuration.</
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dist</strong> (<em>jax.numpy.ndarray</em>) – Distance values</p></li>
-<li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Scale parameter that controls the steepness of the distribution</p></li>
-<li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Shape parameter that controls the tail behavior</p></li>
+<li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Scale parameter that controls the steepness of the distribution</p></li>
+<li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Shape parameter that controls the tail behavior</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Similarity score(s) between 0 and 1</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a> or jax.numpy.ndarray</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a> or jax.numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1194,8 +1194,8 @@ Gets or creates a cached kernel for the given a, b, use_float32 configuration.</
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>key</strong> (<em>jax.random.PRNGKey</em>) – Random number generator key</p></li>
-<li><p><strong>dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Dimensionality of the vectors</p></li>
-<li><p><strong>num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of random directions to sample</p></li>
+<li><p><strong>dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Dimensionality of the vectors</p></li>
+<li><p><strong>num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Number of random directions to sample</p></li>
 <li><p><strong>dtype</strong> (<em>jnp.dtype</em>) – Data type for computation</p></li>
 </ul>
 </dd>
@@ -1216,8 +1216,8 @@ Gets or creates a cached kernel for the given a, b, use_float32 configuration.</
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>arr</strong> (<em>jax.numpy.ndarray</em>) – Input array</p></li>
-<li><p><strong>k</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Size of the slice</p></li>
-<li><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Center index position</p></li>
+<li><p><strong>k</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Size of the slice</p></li>
+<li><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Center index position</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1241,7 +1241,7 @@ Gets or creates a cached kernel for the given a, b, use_float32 configuration.</
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Layout to display</em><em>, </em><em>must have dimension 2</em><em> or </em><em>3.</em>)</p></li>
 <li><p><strong>labels</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Labels to generate color and legend.</em>)</p></li>
-<li><p><strong>point_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Point size for plotting.</em>)</p></li>
+<li><p><strong>point_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Point size for plotting.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1249,7 +1249,7 @@ Gets or creates a cached kernel for the given a, b, use_float32 configuration.</
 For higher-dimensional data no plot is provided, and the function returns <cite>None</cite>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)">object</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)">object</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1262,7 +1262,7 @@ For higher-dimensional data no plot is provided, and the function returns <cite>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>High-dimensional data.</em>)</p></li>
 <li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Low-dimensional embedding.</em>)</p></li>
-<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>neighbors in the kNN graph.</em>)</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>neighbors in the kNN graph.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1281,9 +1281,9 @@ For higher-dimensional data no plot is provided, and the function returns <cite>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>diagram</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>tuples</em>) – Persistence diagram represented as a list of (birth, death) tuples</p></li>
-<li><p><strong>dimension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Homology dimension of the diagram</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Title for the visualization</p></li>
+<li><p><strong>diagram</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>tuples</em>) – Persistence diagram represented as a list of (birth, death) tuples</p></li>
+<li><p><strong>dimension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Homology dimension of the diagram</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Title for the visualization</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1307,10 +1307,10 @@ Earth Mover Distance.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – High-dimensional data.</p></li>
 <li><p><strong>layout</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – Low-dimensional embedding.</p></li>
-<li><p><strong>dimension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The dimension up to which persistence diagrams are computed.</p></li>
-<li><p><strong>subsample_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The threshold used for subsampling the data points.</p></li>
+<li><p><strong>dimension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – The dimension up to which persistence diagrams are computed.</p></li>
+<li><p><strong>subsample_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The threshold used for subsampling the data points.</p></li>
 <li><p><strong>rng_key</strong> (<em>jax.random.PRNGKey</em>) – Random key used for generating random numbers for subsampling, ensuring reproducibility.</p></li>
-<li><p><strong>n_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – The number of steps or points in the filtration range for computing Betti curves, default 100.</p></li>
+<li><p><strong>n_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – The number of steps or points in the filtration range for computing Betti curves, default 100.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1331,8 +1331,8 @@ Earth Mover Distance.</p>
 <li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>High-dimensional data.</em>)</p></li>
 <li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Low-dimensional embedding.</em>)</p></li>
 <li><p><strong>labels</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Data labels</em><em>, </em><em>required for context preservation analysis.</em>)</p></li>
-<li><p><strong>subsample_threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Subsample thresholds.</em>)</p></li>
-<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors for the kNN graph</em><em> of </em><em>data.</em>)</p></li>
+<li><p><strong>subsample_threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Subsample thresholds.</em>)</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors for the kNN graph</em><em> of </em><em>data.</em>)</p></li>
 <li><p><strong>rng_key</strong> (<em>Random key used for generating random numbers for subsampling</em><em>, </em><em>ensuring reproducibility.</em>)</p></li>
 <li><p><strong>kwargs</strong> (<em>Keyword arguments for kNN and SVM score procedure</em><em>, </em><em>and similar.</em>)</p></li>
 </ul>
@@ -1411,8 +1411,8 @@ and times the embedding process.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>reducer</strong> ((object) The dimensionality reduction model with a <cite>fit_transform</cite> method.) – It should also have an <cite>n_neighbors</cite> attribute for computing neighborhood scores.</p></li>
 <li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>The high-dimensional data to be reduced as a benchmark.</em>)</p></li>
-<li><p><strong>num_trials</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>The number</em><em> of </em><em>runs to collect stats.</em>)</p></li>
-<li><p><strong>only_stats</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>) </em><em>If True</em><em>, </em><em>only the tuple</em><em> (</em><em>mean</em><em>, </em><em>std</em><em>) </em><em>for each metrics is returned.</em>) – If False, both stats and values for all runs are returned.</p></li>
+<li><p><strong>num_trials</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>The number</em><em> of </em><em>runs to collect stats.</em>)</p></li>
+<li><p><strong>only_stats</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>) </em><em>If True</em><em>, </em><em>only the tuple</em><em> (</em><em>mean</em><em>, </em><em>std</em><em>) </em><em>for each metrics is returned.</em>) – If False, both stats and values for all runs are returned.</p></li>
 <li><p><strong>kwargs</strong> (<em>Keyword arguments to be passed to do_metrics.</em>)</p></li>
 </ul>
 </dd>
@@ -1433,7 +1433,7 @@ and times the embedding process.</p>
 <dl class="py class">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HPIndex</span></span><a class="reference internal" href="../_modules/dire_jax/hpindex.html#HPIndex"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A kernelized kNN index that uses batching / tiling to efficiently handle
 large datasets with limited memory usage.</p>
 <dl class="py method">
@@ -1472,9 +1472,9 @@ ignoring values beyond the given finite_threshold.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>carry</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em>) – (count, mean, M2) — intermediate stats.</p></li>
-<li><p><strong>new_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Incoming value to incorporate.</p></li>
-<li><p><strong>finite_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Max magnitude allowed for inclusion.</p></li>
+<li><p><strong>carry</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – (count, mean, M2) — intermediate stats.</p></li>
+<li><p><strong>new_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Incoming value to incorporate.</p></li>
+<li><p><strong>finite_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Max magnitude allowed for inclusion.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1492,7 +1492,7 @@ ignoring values beyond the given finite_threshold.</p>
 <dd><p>Finalize the computation of mean and variance from the aggregate statistics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>agg</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>) </em><em>A tuple containing the aggregated statistics:</em>) – <ul class="simple">
+<dd class="field-odd"><p><strong>agg</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>) </em><em>A tuple containing the aggregated statistics:</em>) – <ul class="simple">
 <li><p>count: (int) The total count of valid (non-NaN) entries.</p></li>
 <li><p>mean: (float) The computed mean of the dataset.</p></li>
 <li><p>M2: (float) The computed sum of squares of differences from the mean.</p></li>
@@ -1533,8 +1533,8 @@ ignoring values beyond the given finite_threshold.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – High-dimensional data points.</p></li>
-<li><p><strong>n_neighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of nearest neighbors to find for each point.</p></li>
-<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Number of samples to process at once. If None, a suitable value
+<li><p><strong>n_neighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Number of nearest neighbors to find for each point.</p></li>
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Number of samples to process at once. If None, a suitable value
 will be automatically determined based on dataset size.</p></li>
 </ul>
 </dd>
@@ -1562,8 +1562,8 @@ space and the embedded space, using a ratio of distances.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>High-dimensional data points.</em>)</p></li>
 <li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Embedded data points.</em>)</p></li>
-<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors to consider for each point.</em>)</p></li>
-<li><p><strong>eps</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Parameter to prevent zero division if mean distortion is near zero</em><em>, </em><em>default 1e-6.</em>)</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors to consider for each point.</em>)</p></li>
+<li><p><strong>eps</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Parameter to prevent zero division if mean distortion is near zero</em><em>, </em><em>default 1e-6.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1588,7 +1588,7 @@ comparing the nearest neighbors in the original space with those in the reduced 
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>A NumPy array</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>data_dim</em><em>) </em><em>containing</em>) – the original high-dimensional data.</p></li>
 <li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>A NumPy array</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>embed_dim</em><em>) </em><em>containing</em>) – the lower-dimensional embedding of the data.</p></li>
-<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>The number</em><em> of </em><em>nearest neighbors to consider for each data point.</em>)</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>The number</em><em> of </em><em>nearest neighbors to consider for each data point.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1614,8 +1614,8 @@ comparing the nearest neighbors in the original space with those in the reduced 
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>High-dimensional data points.</em>)</p></li>
 <li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Low-dimensional data points corresponding to the high-dimensional data.</em>)</p></li>
-<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>closest neighbors for the kNN graph.</em>)</p></li>
-<li><p><strong>memory_efficient</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em> or </em><em>None</em><em>) </em><em>If True</em><em>, </em><em>use memory-efficient algorithms for large datasets.</em>) – If None, automatically determine based on dataset size.</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>closest neighbors for the kNN graph.</em>)</p></li>
+<li><p><strong>memory_efficient</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> or </em><em>None</em><em>) </em><em>If True</em><em>, </em><em>use memory-efficient algorithms for large datasets.</em>) – If None, automatically determine based on dataset size.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1635,8 +1635,8 @@ The function generates random numbers and selects the samples where the random n
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*arrays</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em> of </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>)</em>) – The input data arrays to be subsampled. Each array should have the same number of samples (rows).</p></li>
-<li><p><strong>threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em>) – Probability threshold for subsampling; only samples with generated random numbers below this value are kept.</p></li>
+<li><p><strong>*arrays</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em> of </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>)</em>) – The input data arrays to be subsampled. Each array should have the same number of samples (rows).</p></li>
+<li><p><strong>threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>)</em>) – Probability threshold for subsampling; only samples with generated random numbers below this value are kept.</p></li>
 <li><p><strong>rng_key</strong> (<em>Random key</em><em> or </em><em>random generator used for generating random numbers</em><em>, </em><em>ensuring reproducibility.</em>)</p></li>
 </ul>
 </dd>
@@ -1660,8 +1660,8 @@ and potentially highlight more relevant features when computing topological summ
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>High-dimensional data points.</em>)</p></li>
 <li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Low-dimensional data points corresponding to the high-dimensional data.</em>)</p></li>
-<li><p><strong>max_dim</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Maximum dimension</em><em> of </em><em>homology groups to compute.</em>)</p></li>
-<li><p><strong>subsample_threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Threshold used for subsampling the data points.</em>)</p></li>
+<li><p><strong>max_dim</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Maximum dimension</em><em> of </em><em>homology groups to compute.</em>)</p></li>
+<li><p><strong>subsample_threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Threshold used for subsampling the data points.</em>)</p></li>
 <li><p><strong>rng_key</strong> (<em>Random key used for generating random numbers for subsampling</em><em>, </em><em>ensuring reproducibility.</em>)</p></li>
 </ul>
 </dd>
@@ -1683,8 +1683,8 @@ across scales.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>diagram</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>tuples</em><em>) </em><em>A persistence diagram represented as a list</em><em> of </em><em>tuples</em><em> (</em><em>birth</em><em>, </em><em>death</em><em>) </em><em>indicating</em>) – the range over which each topological feature persists.</p></li>
-<li><p><strong>n_steps</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em><em>) </em><em>The number</em><em> of </em><em>steps</em><em> or </em><em>points in the filtration range at which to evaluate the Betti number.</em>)</p></li>
+<li><p><strong>diagram</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>tuples</em><em>) </em><em>A persistence diagram represented as a list</em><em> of </em><em>tuples</em><em> (</em><em>birth</em><em>, </em><em>death</em><em>) </em><em>indicating</em>) – the range over which each topological feature persists.</p></li>
+<li><p><strong>n_steps</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em><em>) </em><em>The number</em><em> of </em><em>steps</em><em> or </em><em>points in the filtration range at which to evaluate the Betti number.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1713,7 +1713,7 @@ between two Betti curves represented as time series with time dimension x and va
 <li><p><strong>axis_y_hd</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Values</em><em> of </em><em>the high-dimensional Betti curve.</em>)</p></li>
 <li><p><strong>axis_x_ld</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Time axis</em><em> of </em><em>the low-dimensional Betti curve.</em>)</p></li>
 <li><p><strong>axis_y_ld</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Values</em><em> of </em><em>the low-dimensional Betti curve.</em>)</p></li>
-<li><p><strong>norm_factor</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Normalization factor</em><em>, </em><em>default 1.0.</em>)</p></li>
+<li><p><strong>norm_factor</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Normalization factor</em><em>, </em><em>default 1.0.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1737,7 +1737,7 @@ between two Betti curves represented as time series with time dimension x and va
 <li><p><strong>axis_y_hd</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Values</em><em> of </em><em>the high-dimensional Betti curve.</em>)</p></li>
 <li><p><strong>axis_x_ld</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Time axis</em><em> of </em><em>the low-dimensional Betti curve.</em>)</p></li>
 <li><p><strong>axis_y_ld</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Values</em><em> of </em><em>the low-dimensional Betti curve.</em>)</p></li>
-<li><p><strong>norm_factor</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Normalization factor</em><em>, </em><em>default 1.0.</em>)</p></li>
+<li><p><strong>norm_factor</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Normalization factor</em><em>, </em><em>default 1.0.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1761,8 +1761,8 @@ between two Betti curves represented as time series with time dimension x and va
 <li><p><strong>axis_y_hd</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Values</em><em> of </em><em>the high-dimensional Betti curve.</em>)</p></li>
 <li><p><strong>axis_x_ld</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Time axis</em><em> of </em><em>the low-dimensional Betti curve.</em>)</p></li>
 <li><p><strong>axis_y_ld</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Values</em><em> of </em><em>the low-dimensional Betti curve.</em>)</p></li>
-<li><p><strong>adjust_mass</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>) </em><em>Use to adjust mass</em><em> (</em><em>by default</em><em>, </em><em>EMD is computed for unit mass curves</em><em>)</em><em>;</em>) – default <cite>False</cite>.</p></li>
-<li><p><strong>norm_factor</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Normalization factor</em><em>, </em><em>default 1.0.</em>)</p></li>
+<li><p><strong>adjust_mass</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>) </em><em>Use to adjust mass</em><em> (</em><em>by default</em><em>, </em><em>EMD is computed for unit mass curves</em><em>)</em><em>;</em>) – default <cite>False</cite>.</p></li>
+<li><p><strong>norm_factor</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Normalization factor</em><em>, </em><em>default 1.0.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1782,9 +1782,9 @@ between two Betti curves represented as time series with time dimension x and va
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>diag_hd</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>tuples</em><em>) </em><em>Persistence diagram for the high-dimensional data.</em>)</p></li>
-<li><p><strong>diag_ld</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>tuples</em><em>) </em><em>Persistence diagram for the low-dimensional data.</em>)</p></li>
-<li><p><strong>norm_factor</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Normalization factor</em><em>, </em><em>default 1.0.</em>)</p></li>
+<li><p><strong>diag_hd</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>tuples</em><em>) </em><em>Persistence diagram for the high-dimensional data.</em>)</p></li>
+<li><p><strong>diag_ld</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>tuples</em><em>) </em><em>Persistence diagram for the low-dimensional data.</em>)</p></li>
+<li><p><strong>norm_factor</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Normalization factor</em><em>, </em><em>default 1.0.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1804,9 +1804,9 @@ between two Betti curves represented as time series with time dimension x and va
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>diag_hd</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>tuples</em><em>) </em><em>Persistence diagram for the high-dimensional data.</em>)</p></li>
-<li><p><strong>diag_ld</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>tuples</em><em>) </em><em>Persistence diagram for the low-dimensional data.</em>)</p></li>
-<li><p><strong>norm_factor</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Normalization factor</em><em>, </em><em>default 1.0.</em>)</p></li>
+<li><p><strong>diag_hd</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>tuples</em><em>) </em><em>Persistence diagram for the high-dimensional data.</em>)</p></li>
+<li><p><strong>diag_ld</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>tuples</em><em>) </em><em>Persistence diagram for the low-dimensional data.</em>)</p></li>
+<li><p><strong>norm_factor</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Normalization factor</em><em>, </em><em>default 1.0.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1831,11 +1831,11 @@ fidelity of dimensionality reduction.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>High-dimensional data points.</em>)</p></li>
 <li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Low-dimensional data points corresponding to the high-dimensional data.</em>)</p></li>
-<li><p><strong>dimension</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>The maximum dimension for which to compute persistence diagrams.</em>)</p></li>
-<li><p><strong>subsample_threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Threshold used for subsampling the data.</em>)</p></li>
+<li><p><strong>dimension</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>The maximum dimension for which to compute persistence diagrams.</em>)</p></li>
+<li><p><strong>subsample_threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Threshold used for subsampling the data.</em>)</p></li>
 <li><p><strong>rng_key</strong> (<em>Random key used for generating random numbers for subsampling</em><em>, </em><em>ensuring reproducibility.</em>)</p></li>
-<li><p><strong>n_steps</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em><em>) </em><em>The number</em><em> of </em><em>steps</em><em> or </em><em>points in the filtration range for computing Betti curves.</em>)</p></li>
-<li><p><strong>metrics_only</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>) </em><em>If True</em><em>, </em><em>return metrics only; otherwise diagrams and Betti curves are also returned;</em>) – default <cite>True</cite>.</p></li>
+<li><p><strong>n_steps</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em><em>) </em><em>The number</em><em> of </em><em>steps</em><em> or </em><em>points in the filtration range for computing Betti curves.</em>)</p></li>
+<li><p><strong>metrics_only</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>) </em><em>If True</em><em>, </em><em>return metrics only; otherwise diagrams and Betti curves are also returned;</em>) – default <cite>True</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1864,10 +1864,10 @@ the distances, diagrams, or curves were computed.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Data.</em>)</p></li>
 <li><p><strong>y</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Data labels.</em>)</p></li>
-<li><p><strong>test_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Test size</em><em> (</em><em>between 0.0 and 1.0</em><em>) </em><em>for the train / test split</em><em>, </em><em>default 0.3.</em>)</p></li>
-<li><p><strong>reg_param</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Regularization parameter for SVM</em><em>, </em><em>default 1.0.</em>)</p></li>
-<li><p><strong>max_iter</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Maximal number</em><em> of </em><em>iterations for SVM training</em><em>, </em><em>default 100.</em>)</p></li>
-<li><p><strong>random_state</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Random state for reproducibility</em><em>, </em><em>default 42.</em>)</p></li>
+<li><p><strong>test_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Test size</em><em> (</em><em>between 0.0 and 1.0</em><em>) </em><em>for the train / test split</em><em>, </em><em>default 0.3.</em>)</p></li>
+<li><p><strong>reg_param</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Regularization parameter for SVM</em><em>, </em><em>default 1.0.</em>)</p></li>
+<li><p><strong>max_iter</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Maximal number</em><em> of </em><em>iterations for SVM training</em><em>, </em><em>default 100.</em>)</p></li>
+<li><p><strong>random_state</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Random state for reproducibility</em><em>, </em><em>default 42.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1890,7 +1890,7 @@ on the high-dimensional data and on the low-dimensional embedding.</p>
 <li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>)  </em><em>High-dimensional data.</em>)</p></li>
 <li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Low-dimensional embedding.</em>)</p></li>
 <li><p><strong>labels</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Data labels.</em>)</p></li>
-<li><p><strong>subsample_threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Threshold used for subsampling the data.</em>)</p></li>
+<li><p><strong>subsample_threshold</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Threshold used for subsampling the data.</em>)</p></li>
 <li><p><strong>rng_key</strong> (<em>Random key used for generating random numbers for subsampling</em><em>, </em><em>ensuring reproducibility.</em>)</p></li>
 <li><p><strong>kwargs</strong> (<em>Other keyword arguments used by the various scores above.</em>)</p></li>
 </ul>
@@ -1913,16 +1913,16 @@ on the high-dimensional data and on the low-dimensional embedding.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Data.</em>)</p></li>
 <li><p><strong>y</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Data labels.</em>)</p></li>
-<li><p><strong>test_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>) </em><em>Test size</em><em> (</em><em>between 0.0 and 1.0</em><em>) </em><em>for the train / test split</em><em>, </em><em>default 0.3.</em>)</p></li>
-<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>neighbors for kNN classification</em><em>, </em><em>default 16.</em>)</p></li>
-<li><p><strong>random_state</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Random state for reproducibility</em><em>, </em><em>default 42.</em>)</p></li>
+<li><p><strong>test_size</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>) </em><em>Test size</em><em> (</em><em>between 0.0 and 1.0</em><em>) </em><em>for the train / test split</em><em>, </em><em>default 0.3.</em>)</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>neighbors for kNN classification</em><em>, </em><em>default 16.</em>)</p></li>
+<li><p><strong>random_state</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Random state for reproducibility</em><em>, </em><em>default 42.</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>accuracy</strong></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>) Accuracy of the KNN model on the test set.</p>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a>) Accuracy of the KNN model on the test set.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1938,7 +1938,7 @@ on the high-dimensional data and on the low-dimensional embedding.</p>
 <li><p><strong>data</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>)  </em><em>High-dimensional data.</em>)</p></li>
 <li><p><strong>layout</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Low-dimensional embedding.</em>)</p></li>
 <li><p><strong>labels</strong> (<em>(</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a><em>) </em><em>Data labels.</em>)</p></li>
-<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors for kNN classifier</em><em>, </em><em>default 16.</em>)</p></li>
+<li><p><strong>n_neighbors</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>) </em><em>Number</em><em> of </em><em>nearest neighbors for kNN classifier</em><em>, </em><em>default 16.</em>)</p></li>
 <li><p><strong>kwargs</strong> (<em>Other keyword arguments used by the various scores above.</em>)</p></li>
 </ul>
 </dd>
@@ -1971,7 +1971,7 @@ representation preserves important properties of the high-dimensional data.</p>
 - shepard_correlation: Correlation between pairwise distances in original and embedded spaces</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1986,8 +1986,8 @@ representation preserves important properties of the high-dimensional data.</p>
 <li><p><strong>data</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – High-dimensional data points.</p></li>
 <li><p><strong>layout</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – Low-dimensional embedding of the data.</p></li>
 <li><p><strong>labels</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><em>numpy.ndarray</em></a>) – Data labels needed for context preservation analysis.</p></li>
-<li><p><strong>subsample_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Threshold used for subsampling the data.</p></li>
-<li><p><strong>n_neighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of neighbors for the kNN graph.</p></li>
+<li><p><strong>subsample_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Threshold used for subsampling the data.</p></li>
+<li><p><strong>n_neighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Number of neighbors for the kNN graph.</p></li>
 <li><p><strong>rng_key</strong> (<em>jax.random.PRNGKey</em>) – Random key for reproducible subsampling.</p></li>
 <li><p><strong>**kwargs</strong> – Additional keyword arguments for the scoring functions.</p></li>
 </ul>
@@ -1997,7 +1997,7 @@ representation preserves important properties of the high-dimensional data.</p>
 SVM and kNN classification performance comparisons.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
