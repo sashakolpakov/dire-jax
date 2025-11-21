@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e  # Exit on any error
 
 # Script to build the documentation for DiRe-JAX
 
