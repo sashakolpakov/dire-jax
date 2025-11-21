@@ -38,7 +38,7 @@
 
 DiRe offers fast dimensionality reduction preserving the global dataset structure, with benchmarks showing competitive performance against UMAP and t-SNE. Built with JAX for efficient computation on CPUs and GPUs.
 
-### Quick start
+### Quick start [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/benchmarking/dire_benchmarks.ipynb)
 
 **Basic installation (JAX backend only):**
 ```bash    
@@ -104,11 +104,6 @@ Please refer to the DiRe API [documentation](https://sashakolpakov.github.io/dir
 ### Working paper
 
 Our working paper is available on the arXiv. [![Paper](https://img.shields.io/badge/arXiv-read%20PDF-b31b1b.svg)](https://arxiv.org/abs/2503.03156)
-
- Also, check out the Jupyter notebook with comprehensive benchmarking results and performance analysis. [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](
-  https://colab.research.google.com/github/sashakolpakov/dire-jax/blob/main/benchmarking/dire_benchmarks.ipynb
-)
-
 
 ### Performance Characteristics
 
