@@ -1,0 +1,309 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dire_jax.hpindex &mdash; dire-jax 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            dire-jax
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../benchmarking.html">Benchmarking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">dire-jax</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">dire_jax.hpindex</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dire_jax.hpindex</h1><div class="highlight"><pre>
+<span></span><span class="c1"># hpindex.py</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A JAX-based implementation for efficient k-nearest neighbors.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span><span class="p">,</span> <span class="n">lru_cache</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+
+<span class="c1">#</span>
+<span class="c1"># Double precision support</span>
+<span class="c1">#</span>
+<span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HPIndex">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpindex.HPIndex">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HPIndex</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A kernelized kNN index that uses batching / tiling to efficiently handle</span>
+<span class="sd">    large datasets with limited memory usage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="HPIndex.knn_tiled">
+<a class="viewcode-back" href="../../api/modules.html#dire_jax.hpindex.HPIndex.knn_tiled">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">knn_tiled</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="o">=</span><span class="mi">8192</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Single-kernel kNN implementation that compiles once and reuses efficiently.</span>
+<span class="sd">        Uses a single JIT-compiled kernel with fixed tile/batch parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: (n, d) array of database points</span>
+<span class="sd">            y: (m, d) array of query points</span>
+<span class="sd">            k: number of nearest neighbors</span>
+<span class="sd">            x_tile_size: size of database tiles</span>
+<span class="sd">            y_batch_size: size of query batches</span>
+<span class="sd">            dtype: desired floating-point dtype (e.g., jnp.float32 or jnp.float64)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (m, k) array of indices and distances of nearest neighbors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get or compile the kernel for this configuration</span>
+        <span class="n">kernel</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">_get_knn_kernel</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+
+        <span class="c1"># Call the compiled kernel</span>
+        <span class="k">return</span> <span class="n">kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>  <span class="c1"># Cache compiled kernels for different configurations</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_knn_kernel</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get or create a cached JIT-compiled kNN kernel for the given configuration.</span>
+<span class="sd">        This ensures we reuse compiled kernels across different datasets with same params.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">knn_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="c1"># Ensure consistent dtypes</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+
+            <span class="n">n_x</span><span class="p">,</span> <span class="n">d_x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">n_y</span><span class="p">,</span> <span class="n">d_y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="c1"># Pad data to tile/batch boundaries</span>
+            <span class="n">padded_n_x</span> <span class="o">=</span> <span class="p">((</span><span class="n">n_x</span> <span class="o">+</span> <span class="n">x_tile_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">x_tile_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_tile_size</span>
+            <span class="n">padded_n_y</span> <span class="o">=</span> <span class="p">((</span><span class="n">n_y</span> <span class="o">+</span> <span class="n">y_batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">y_batch_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">y_batch_size</span>
+
+            <span class="c1"># Pad x if needed</span>
+            <span class="k">if</span> <span class="n">padded_n_x</span> <span class="o">&gt;</span> <span class="n">n_x</span><span class="p">:</span>
+                <span class="n">x_pad</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">padded_n_x</span> <span class="o">-</span> <span class="n">n_x</span><span class="p">,</span> <span class="n">d_x</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">x_padded</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">x_pad</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x_padded</span> <span class="o">=</span> <span class="n">x</span>
+
+            <span class="c1"># Pad y if needed</span>
+            <span class="k">if</span> <span class="n">padded_n_y</span> <span class="o">&gt;</span> <span class="n">n_y</span><span class="p">:</span>
+                <span class="n">y_pad</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">padded_n_y</span> <span class="o">-</span> <span class="n">n_y</span><span class="p">,</span> <span class="n">d_y</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">y_padded</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">y</span><span class="p">,</span> <span class="n">y_pad</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y_padded</span> <span class="o">=</span> <span class="n">y</span>
+
+            <span class="c1"># Calculate number of tiles/batches</span>
+            <span class="n">num_y_batches</span> <span class="o">=</span> <span class="n">padded_n_y</span> <span class="o">//</span> <span class="n">y_batch_size</span>
+            <span class="n">num_x_tiles</span> <span class="o">=</span> <span class="n">padded_n_x</span> <span class="o">//</span> <span class="n">x_tile_size</span>
+
+            <span class="c1"># Initialize results</span>
+            <span class="n">all_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">padded_n_y</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="n">all_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">padded_n_y</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+
+            <span class="c1"># Get distance kernel for this dtype</span>
+            <span class="n">distance_kernel</span> <span class="o">=</span> <span class="n">_get_distance_kernel</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+
+            <span class="c1"># Main processing loop using scan for efficiency</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">process_y_batch</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">y_batch_idx</span><span class="p">):</span>
+                <span class="n">curr_indices</span><span class="p">,</span> <span class="n">curr_distances</span> <span class="o">=</span> <span class="n">carry</span>
+                <span class="n">y_start</span> <span class="o">=</span> <span class="n">y_batch_idx</span> <span class="o">*</span> <span class="n">y_batch_size</span>
+                <span class="n">y_batch</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_slice</span><span class="p">(</span><span class="n">y_padded</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">d_y</span><span class="p">))</span>
+
+                <span class="n">batch_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                <span class="n">batch_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">y_batch_size</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+
+                <span class="k">def</span><span class="w"> </span><span class="nf">process_x_tile</span><span class="p">(</span><span class="n">tile_carry</span><span class="p">,</span> <span class="n">x_tile_idx</span><span class="p">):</span>
+                    <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch_dist</span> <span class="o">=</span> <span class="n">tile_carry</span>
+                    <span class="n">x_start</span> <span class="o">=</span> <span class="n">x_tile_idx</span> <span class="o">*</span> <span class="n">x_tile_size</span>
+                    <span class="n">x_tile</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_slice</span><span class="p">(</span><span class="n">x_padded</span><span class="p">,</span> <span class="p">(</span><span class="n">x_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">x_tile_size</span><span class="p">,</span> <span class="n">d_x</span><span class="p">))</span>
+
+                    <span class="c1"># Compute distances</span>
+                    <span class="n">tile_distances</span> <span class="o">=</span> <span class="n">distance_kernel</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x_tile</span><span class="p">)</span>
+
+                    <span class="c1"># Create tile indices</span>
+                    <span class="n">tile_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x_tile_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_start</span>
+                    <span class="n">tile_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">tile_indices</span><span class="p">,</span> <span class="n">tile_distances</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+                    <span class="c1"># Merge and get top k</span>
+                    <span class="n">combined_distances</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">batch_dist</span><span class="p">,</span> <span class="n">tile_distances</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">combined_indices</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">batch_idx</span><span class="p">,</span> <span class="n">tile_indices</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">top_k_idx</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">combined_distances</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">k</span><span class="p">]</span>
+
+                    <span class="n">new_batch_dist</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">combined_distances</span><span class="p">,</span> <span class="n">top_k_idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">new_batch_idx</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">combined_indices</span><span class="p">,</span> <span class="n">top_k_idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="p">(</span><span class="n">new_batch_idx</span><span class="p">,</span> <span class="n">new_batch_dist</span><span class="p">),</span> <span class="kc">None</span>
+
+                <span class="c1"># Process all x tiles for this y batch</span>
+                <span class="p">(</span><span class="n">batch_indices</span><span class="p">,</span> <span class="n">batch_distances</span><span class="p">),</span> <span class="n">_</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span>
+                    <span class="n">process_x_tile</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">batch_indices</span><span class="p">,</span> <span class="n">batch_distances</span><span class="p">),</span>
+                    <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_x_tiles</span><span class="p">)</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Update results</span>
+                <span class="n">curr_indices</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_update_slice</span><span class="p">(</span><span class="n">curr_indices</span><span class="p">,</span> <span class="n">batch_indices</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="n">curr_distances</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">dynamic_update_slice</span><span class="p">(</span><span class="n">curr_distances</span><span class="p">,</span> <span class="n">batch_distances</span><span class="p">,</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+                <span class="k">return</span> <span class="p">(</span><span class="n">curr_indices</span><span class="p">,</span> <span class="n">curr_distances</span><span class="p">),</span> <span class="kc">None</span>
+
+            <span class="c1"># Process all y batches</span>
+            <span class="p">(</span><span class="n">all_indices</span><span class="p">,</span> <span class="n">all_distances</span><span class="p">),</span> <span class="n">_</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span>
+                <span class="n">process_y_batch</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">all_indices</span><span class="p">,</span> <span class="n">all_distances</span><span class="p">),</span>
+                <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_y_batches</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Return only valid portion</span>
+            <span class="k">return</span> <span class="n">all_indices</span><span class="p">[:</span><span class="n">n_y</span><span class="p">],</span> <span class="n">all_distances</span><span class="p">[:</span><span class="n">n_y</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">knn_kernel</span></div>
+
+
+
+<span class="c1"># Globally define the _compute_batch_distances_l2 function for reuse</span>
+<span class="c1"># Using lru_cache to avoid recompilation for different dtype combinations</span>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>  <span class="c1"># Cache different dtype combinations</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_distance_kernel</span><span class="p">(</span><span class="n">dtype</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get or create a JIT-compiled distance kernel for the given dtype.&quot;&quot;&quot;</span>
+    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_distances</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># Ensure consistent dtype</span>
+        <span class="n">y_batch</span> <span class="o">=</span> <span class="n">y_batch</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="c1"># Compute squared norms using more numerically stable method</span>
+        <span class="n">x_norm</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">y_norm</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_batch</span> <span class="o">*</span> <span class="n">y_batch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Compute xy term with explicit dtype</span>
+        <span class="n">xy</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">Precision</span><span class="o">.</span><span class="n">DEFAULT</span><span class="p">)</span>
+
+        <span class="c1"># Complete squared distance: ||y||² + ||x||² - 2*&lt;y,x&gt;</span>
+        <span class="c1"># Use broadcasting with consistent dtype</span>
+        <span class="n">two</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">dists2</span> <span class="o">=</span> <span class="n">y_norm</span><span class="p">[:,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_norm</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">two</span> <span class="o">*</span> <span class="n">xy</span>
+
+        <span class="c1"># Clip to valid range for the dtype</span>
+        <span class="n">zero</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">dists2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">dists2</span><span class="p">,</span> <span class="n">zero</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dists2</span>
+
+    <span class="k">return</span> <span class="n">compute_distances</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_compute_batch_distances_l2</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the squared L2 distances between a batch of query points</span>
+<span class="sd">    and all database points. Uses cached kernels to avoid recompilation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y_batch: (batch_size, d) array of query points</span>
+<span class="sd">        x: (n, d) array of database points</span>
+<span class="sd">        dtype: data type for computation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (batch_size, n) array of squared distances</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the cached kernel for this dtype</span>
+    <span class="n">distance_kernel</span> <span class="o">=</span> <span class="n">_get_distance_kernel</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">distance_kernel</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alexander Kolpakov, Igor Rivin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

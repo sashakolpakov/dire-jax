@@ -1,0 +1,316 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usage Guide &mdash; dire-jax 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api/modules.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            dire-jax
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick Start</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-characteristics">Performance Characteristics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-with-custom-parameters">Example with Custom Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#large-dataset-example">Large Dataset Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#benchmarking">Benchmarking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-different-data-types">Working with Different Data Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">dire-jax</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Usage Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="usage-guide">
+<h1>Usage Guide<a class="headerlink" href="#usage-guide" title="Link to this heading"></a></h1>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h2>
+<p>DiRe-JAX offers fast dimensionality reduction with JAX-based computation.</p>
+<section id="quick-start">
+<h3>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># Create some sample data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>  <span class="c1"># 1000 samples in 50 dimensions</span>
+
+<span class="c1"># Initialize DiRe with desired parameters</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span>
+    <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>         <span class="c1"># Target dimension</span>
+    <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>         <span class="c1"># Number of neighbors to consider</span>
+    <span class="n">init</span><span class="o">=</span><span class="s1">&#39;pca&#39;</span><span class="p">,</span>             <span class="c1"># Initialization method</span>
+    <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>    <span class="c1"># Maximum number of layout iterations</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>            <span class="c1"># Show progress</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit and transform the data</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Visualize the results</span>
+<span class="n">reducer</span><span class="o">.</span><span class="n">visualize</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-characteristics">
+<h2>Performance Characteristics<a class="headerlink" href="#performance-characteristics" title="Link to this heading"></a></h2>
+<p>DiRe-JAX is optimized for:</p>
+<ul class="simple">
+<li><p>Small to medium datasets (&lt;50K points)</p></li>
+<li><p><strong>Large dataset support</strong> (&gt;65K points) with automatic memory management</p></li>
+<li><p>Fully vectorized computation with JIT compilation</p></li>
+<li><p>Excellent CPU performance</p></li>
+<li><p>GPU acceleration when JAX is installed with CUDA support</p></li>
+<li><p>TPU support for cloud-based computation</p></li>
+<li><p><strong>Mixed precision arithmetic (MPA)</strong> for enhanced performance on modern hardware</p></li>
+<li><p><strong>Memory-efficient chunking</strong> to handle large datasets without memory issues</p></li>
+<li><p><strong>Optimized kernel caching</strong> to minimize recompilation and improve runtime</p></li>
+</ul>
+</section>
+<section id="advanced-configuration">
+<h2>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading"></a></h2>
+<p>DiRe offers several parameters that can be tuned to optimize the dimensionality reduction process:</p>
+<ul class="simple">
+<li><p><cite>n_components</cite>: Target dimension for the embedding (typically 2 or 3)</p></li>
+<li><p><cite>n_neighbors</cite>: Number of neighbors to consider when constructing the graph</p></li>
+<li><p><cite>init</cite>: Method to initialize the embedding (‘pca’, ‘random’, ‘spectral’)</p></li>
+<li><p><cite>max_iter_layout</cite>: Maximum number of iterations for the layout algorithm</p></li>
+<li><p><cite>min_dist</cite>: Minimum distance between points in the embedding</p></li>
+<li><p><cite>spread</cite>: Controls how spread out the embedding is</p></li>
+<li><p><cite>cutoff</cite>: Maximum distance for neighbor connections</p></li>
+<li><p><cite>n_sample_dirs</cite>: Number of sample directions for the layout algorithm</p></li>
+<li><p><cite>sample_size</cite>: Sample size for the layout algorithm</p></li>
+<li><p><cite>neg_ratio</cite>: Ratio of negative to positive samples</p></li>
+<li><p><cite>batch_size</cite>: Number of samples to process at once (None for automatic sizing)</p></li>
+<li><p><cite>mpa</cite>: Enable Mixed Precision Arithmetic for improved performance (default: True)</p></li>
+<li><p><cite>memm</cite>: Memory manager dictionary for different hardware architectures</p></li>
+</ul>
+<section id="example-with-custom-parameters">
+<h3>Example with Custom Parameters<a class="headerlink" href="#example-with-custom-parameters" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_blobs</span>
+
+<span class="c1"># Create dataset with clusters</span>
+<span class="n">features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">make_blobs</span><span class="p">(</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">n_features</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">centers</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Initialize with custom parameters</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span>
+    <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>          <span class="c1"># More neighbors for global structure</span>
+    <span class="n">init</span><span class="o">=</span><span class="s1">&#39;spectral&#39;</span><span class="p">,</span>         <span class="c1"># Spectral initialization</span>
+    <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>     <span class="c1"># More iterations for convergence</span>
+    <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>           <span class="c1"># Tighter packing</span>
+    <span class="n">spread</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>              <span class="c1"># More spread out embedding</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit and transform</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+<span class="c1"># Visualize with labels</span>
+<span class="n">reducer</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="large-dataset-example">
+<h3>Large Dataset Example<a class="headerlink" href="#large-dataset-example" title="Link to this heading"></a></h3>
+<p>For very large datasets, DiRe-JAX automatically switches to memory-efficient mode:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># Create a large dataset</span>
+<span class="n">large_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">100000</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>  <span class="c1"># 100K samples, 200 dimensions</span>
+
+<span class="c1"># DiRe will automatically use large dataset mode</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span>
+    <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span>        <span class="c1"># Custom batch size for memory control</span>
+    <span class="n">mpa</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>               <span class="c1"># Enable mixed precision arithmetic</span>
+    <span class="n">max_iter_layout</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>     <span class="c1"># Fewer iterations for faster processing</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>            <span class="c1"># Monitor progress</span>
+<span class="p">)</span>
+
+<span class="c1"># Memory-efficient processing with automatic chunking</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">large_data</span><span class="p">)</span>
+
+<span class="c1"># Visualize the result</span>
+<span class="n">reducer</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">point_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="benchmarking">
+<h2>Benchmarking<a class="headerlink" href="#benchmarking" title="Link to this heading"></a></h2>
+<p>If you’ve installed DiRe-JAX with the <cite>[utils]</cite> extra, you can use the benchmarking utilities:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax.dire_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_benchmark</span><span class="p">,</span> <span class="n">viz_benchmark</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_blobs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">random</span>
+
+<span class="c1"># Create data</span>
+<span class="n">features</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">make_blobs</span><span class="p">(</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">n_features</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">centers</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Initialize reducer</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+
+<span class="c1"># Run the benchmark</span>
+<span class="n">benchmark_results</span> <span class="o">=</span> <span class="n">run_benchmark</span><span class="p">(</span>
+    <span class="n">reducer</span><span class="p">,</span>
+    <span class="n">features</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+    <span class="n">dimension</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># for persistence homology</span>
+    <span class="n">subsample_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># subsample for speed</span>
+    <span class="n">rng_key</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">),</span>
+    <span class="n">num_trials</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># choose sample size</span>
+    <span class="n">only_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Print the results</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">benchmark_results</span><span class="p">)</span>
+
+<span class="c1"># Or visualize the benchmark</span>
+<span class="n">viz_benchmark</span><span class="p">(</span>
+    <span class="n">reducer</span><span class="p">,</span>
+    <span class="n">features</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+    <span class="n">dimension</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># for persistence homology</span>
+    <span class="n">subsample_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># subsample for speed</span>
+    <span class="n">rng_key</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">),</span>
+    <span class="n">point_size</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="working-with-different-data-types">
+<h2>Working with Different Data Types<a class="headerlink" href="#working-with-different-data-types" title="Link to this heading"></a></h2>
+<p>DiRe-JAX works with various data formats:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dire_jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiRe</span>
+
+<span class="c1"># NumPy arrays</span>
+<span class="n">data_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
+
+<span class="c1"># Pandas DataFrames</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data_numpy</span><span class="p">)</span>
+
+<span class="c1"># Both work seamlessly</span>
+<span class="n">reducer</span> <span class="o">=</span> <span class="n">DiRe</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">embedding_numpy</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data_numpy</span><span class="p">)</span>
+<span class="n">embedding_df</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data_df</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/modules.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alexander Kolpakov, Igor Rivin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
