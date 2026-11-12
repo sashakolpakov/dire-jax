@@ -7,14 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>dire_jax.hpmetrics &mdash; dire-jax 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -75,9 +75,9 @@
   <h1>Source code for dire_jax.hpmetrics</h1><div class="highlight"><pre>
 <span></span><span class="c1"># hpmetrics.py</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">Auxiliary functions for high-performance benchmarking metrics</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="c1">#</span>
 <span class="c1"># Imports</span>
@@ -110,8 +110,8 @@
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.welford_update">[docs]</a>
 <span class="nd">@jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">welford_update</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">new_value</span><span class="p">,</span> <span class="n">finite_threshold</span><span class="o">=</span><span class="mf">1e12</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Update running mean and variance using Welford&#39;s algorithm,</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Update running mean and variance using Welford's algorithm,</span>
 <span class="sd">    ignoring values beyond the given finite_threshold.</span>
 
 <span class="sd">    Parameters</span>
@@ -126,7 +126,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    (carry, None): Updated carry and dummy output for lax.scan.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">M2</span><span class="p">)</span> <span class="o">=</span> <span class="n">carry</span>
     <span class="n">is_finite</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">finite_threshold</span><span class="p">)</span>
@@ -143,7 +143,7 @@
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.welford_finalize">[docs]</a>
 <span class="nd">@jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">welford_finalize</span><span class="p">(</span><span class="n">agg</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Finalize the computation of mean and variance from the aggregate statistics.</span>
 
 <span class="sd">    Parameters</span>
@@ -156,7 +156,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tuple: A tuple containing the final mean and standard deviation of the dataset.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">count</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">M2</span> <span class="o">=</span> <span class="n">agg</span>
     <span class="n">variance</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">M2</span> <span class="o">/</span> <span class="p">(</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
@@ -168,8 +168,8 @@
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.welford">[docs]</a>
 <span class="nd">@jit</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">welford</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute the mean and standard deviation of a dataset using Welford&#39;s algorithm.</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Compute the mean and standard deviation of a dataset using Welford's algorithm.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -178,7 +178,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tuple: A tuple containing the mean and standard deviation of the valid entries in the dataset.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">init_agg</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>  <span class="c1"># initial aggregate: count, mean, M2</span>
     <span class="n">agg</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="n">welford_update</span><span class="p">,</span> <span class="n">init_agg</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -197,7 +197,7 @@
 <div class="viewcode-block" id="make_knn_graph">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.make_knn_graph">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_knn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the distances to nearest neighbors and their indices in the kNN graph of data.</span>
 
 <span class="sd">    Parameters</span>
@@ -217,19 +217,19 @@
 <span class="sd">        - distances: Array of shape (n_samples, n_neighbors+1) with distances to nearest neighbors</span>
 <span class="sd">        - indices: Array of shape (n_samples, n_neighbors+1) with indices of nearest neighbors</span>
 <span class="sd">        </span>
-<span class="sd">        The first column contains each point&#39;s self-reference (distance 0.0 and own index).</span>
+<span class="sd">        The first column contains each point's self-reference (distance 0.0 and own index).</span>
 <span class="sd">        The remaining columns contain the n_neighbors nearest neighbors in ascending order of distance.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Get data size</span>
     <span class="n">n_samples</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Determine appropriate batch size for memory efficiency</span>
     <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Process in chunks to reduce peak memory usage</span>
-        <span class="k">if</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;tpu&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">'tpu'</span><span class="p">:</span>
             <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">8192</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;gpu&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">jax</span><span class="o">.</span><span class="n">devices</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">'gpu'</span><span class="p">:</span>
             <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">16384</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">8192</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
@@ -260,7 +260,7 @@
 <div class="viewcode-block" id="compute_stress">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_stress">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_stress</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the stress of an embedding based on the distances in the original high-dimensional</span>
 <span class="sd">    space and the embedded space, using a ratio of distances.</span>
 
@@ -274,7 +274,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float: The normalized stress value indicating the quality of the embedding.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Computing kNN distances and indices for higher-dimensional data</span>
     <span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
@@ -307,7 +307,7 @@
 <div class="viewcode-block" id="compute_neighbor_score">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_neighbor_score">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_neighbor_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Computes the neighborhood preservation score between high-dimensional data and its corresponding low-dimensional</span>
 <span class="sd">    layout.</span>
 <span class="sd">    </span>
@@ -328,7 +328,7 @@
 <span class="sd">    list: A list containing two floats:</span>
 <span class="sd">          - neighbor_mean: (float) The mean of the neighborhood preservation scores.</span>
 <span class="sd">          - neighbor_std: (float) The standard deviation of the neighborhood preservation scores.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Computing kNN indices for higher-dimensional data</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">indices_data</span> <span class="o">=</span> <span class="n">make_knn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
@@ -363,7 +363,7 @@
 <div class="viewcode-block" id="compute_local_metrics">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_local_metrics">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_local_metrics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">memory_efficient</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute local metrics of the (data, layout) pair.</span>
 
 <span class="sd">    Parameters</span>
@@ -377,7 +377,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    dict: A dictionary containing computed scores of each type (stress, neighborhood preservation).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Determine if we should use memory-efficient mode for large datasets</span>
     <span class="k">if</span> <span class="n">memory_efficient</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">memory_efficient</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">32768</span>
@@ -390,16 +390,16 @@
         <span class="n">data_sample</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
         <span class="n">layout_sample</span> <span class="o">=</span> <span class="n">layout</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
 
-        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stress&#39;</span><span class="p">:</span> <span class="n">compute_stress</span><span class="p">(</span><span class="n">data_sample</span><span class="p">,</span> <span class="n">layout_sample</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">),</span>
-                   <span class="s1">&#39;neighbor&#39;</span><span class="p">:</span> <span class="n">compute_neighbor_score</span><span class="p">(</span><span class="n">data_sample</span><span class="p">,</span> <span class="n">layout_sample</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">),</span>
-                   <span class="s1">&#39;note&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Metrics computed on </span><span class="si">{</span><span class="n">sample_size</span><span class="si">}</span><span class="s2"> randomly sampled points due to large dataset size&quot;</span><span class="p">}</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'stress'</span><span class="p">:</span> <span class="n">compute_stress</span><span class="p">(</span><span class="n">data_sample</span><span class="p">,</span> <span class="n">layout_sample</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">),</span>
+                   <span class="s1">'neighbor'</span><span class="p">:</span> <span class="n">compute_neighbor_score</span><span class="p">(</span><span class="n">data_sample</span><span class="p">,</span> <span class="n">layout_sample</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">),</span>
+                   <span class="s1">'note'</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Metrics computed on </span><span class="si">{</span><span class="n">sample_size</span><span class="si">}</span><span class="s2"> randomly sampled points due to large dataset size"</span><span class="p">}</span>
 
         <span class="c1"># Add note about subsampling</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;stress&#39;</span><span class="p">:</span> <span class="n">compute_stress</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">),</span>
-            <span class="s1">&#39;neighbor&#39;</span><span class="p">:</span> <span class="n">compute_neighbor_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
+            <span class="s1">'stress'</span><span class="p">:</span> <span class="n">compute_stress</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">),</span>
+            <span class="s1">'neighbor'</span><span class="p">:</span> <span class="n">compute_neighbor_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span>
         <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">metrics</span></div>
@@ -422,7 +422,7 @@
 <div class="viewcode-block" id="threshold_subsample">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.threshold_subsample">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">threshold_subsample</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Subsample multiple arrays based on a specified threshold.</span>
 <span class="sd">    The function generates random numbers and selects the samples where the random number is less than the threshold.</span>
 
@@ -437,12 +437,12 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    tuple: A tuple containing the subsampled arrays in the same order as the input arrays.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Check that all arrays have the same number of samples</span>
     <span class="n">n_samples</span> <span class="o">=</span> <span class="n">arrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">n_samples</span><span class="p">,</span> <span class="s2">&quot;All input arrays must have the same number of rows.&quot;</span>
+        <span class="k">assert</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">n_samples</span><span class="p">,</span> <span class="s2">"All input arrays must have the same number of rows."</span>
 
     <span class="n">random_numbers</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">rng_key</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,))</span>
     <span class="n">selected_indices</span> <span class="o">=</span> <span class="n">random_numbers</span> <span class="o">&lt;</span> <span class="n">threshold</span>
@@ -457,7 +457,7 @@
 <div class="viewcode-block" id="diagrams">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.diagrams">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">diagrams</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">max_dim</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generate persistence diagrams for high-dimensional and low-dimensional data up to a specified dimension,</span>
 <span class="sd">    after subsampling both datasets based on a threshold. The subsampling is performed to reduce the dataset size</span>
 <span class="sd">    and potentially highlight more relevant features when computing topological summaries.</span>
@@ -472,18 +472,18 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    dict: A dictionary containing two keys, &#39;data&#39; and &#39;layout&#39;, each associated with arrays of persistence diagrams</span>
+<span class="sd">    dict: A dictionary containing two keys, 'data' and 'layout', each associated with arrays of persistence diagrams</span>
 <span class="sd">          for the respective high-dimensional and low-dimensional datasets.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">data_hd</span><span class="p">,</span> <span class="n">data_ld</span> <span class="o">=</span> <span class="n">threshold_subsample</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span>
                                            <span class="n">threshold</span><span class="o">=</span><span class="n">subsample_threshold</span><span class="p">,</span>
                                            <span class="n">rng_key</span><span class="o">=</span><span class="n">rng_key</span><span class="p">)</span>
 
-    <span class="n">diags_hd</span> <span class="o">=</span> <span class="n">ripser</span><span class="p">(</span><span class="n">data_hd</span><span class="p">,</span> <span class="n">maxdim</span><span class="o">=</span><span class="n">max_dim</span><span class="p">)[</span><span class="s1">&#39;dgms&#39;</span><span class="p">]</span>
-    <span class="n">diags_ld</span> <span class="o">=</span> <span class="n">ripser</span><span class="p">(</span><span class="n">data_ld</span><span class="p">,</span> <span class="n">maxdim</span><span class="o">=</span><span class="n">max_dim</span><span class="p">)[</span><span class="s1">&#39;dgms&#39;</span><span class="p">]</span>
+    <span class="n">diags_hd</span> <span class="o">=</span> <span class="n">ripser</span><span class="p">(</span><span class="n">data_hd</span><span class="p">,</span> <span class="n">maxdim</span><span class="o">=</span><span class="n">max_dim</span><span class="p">)[</span><span class="s1">'dgms'</span><span class="p">]</span>
+    <span class="n">diags_ld</span> <span class="o">=</span> <span class="n">ripser</span><span class="p">(</span><span class="n">data_ld</span><span class="p">,</span> <span class="n">maxdim</span><span class="o">=</span><span class="n">max_dim</span><span class="p">)[</span><span class="s1">'dgms'</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">diags_hd</span><span class="p">,</span> <span class="s1">&#39;layout&#39;</span><span class="p">:</span> <span class="n">diags_ld</span><span class="p">}</span></div>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">'data'</span><span class="p">:</span> <span class="n">diags_hd</span><span class="p">,</span> <span class="s1">'layout'</span><span class="p">:</span> <span class="n">diags_ld</span><span class="p">}</span></div>
 
 
 
@@ -493,7 +493,7 @@
 <div class="viewcode-block" id="betti_curve">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.betti_curve">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">betti_curve</span><span class="p">(</span><span class="n">diagram</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the Betti curve from a persistence diagram, which is a function of the number of features</span>
 <span class="sd">    that persist at different filtration levels. This curve provides a summary of topological features</span>
 <span class="sd">    across scales.</span>
@@ -509,7 +509,7 @@
 <span class="sd">    tuple: A tuple of two numpy arrays:</span>
 <span class="sd">        - The first array represents the evenly spaced filtration values.</span>
 <span class="sd">        - The second array represents the Betti numbers at each filtration value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">diagram</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)</span>
@@ -534,7 +534,7 @@
 <div class="viewcode-block" id="compute_dtw">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_dtw">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_dtw</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute normalized Dynamic Time Warp (DTW) distance (using Euclidean metric)</span>
 <span class="sd">    between two Betti curves represented as time series with time dimension x and values y.</span>
 
@@ -549,7 +549,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float: Normalized DTW distance between two Betti curves.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">seq0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">)))</span>
     <span class="n">seq1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">)))</span>
@@ -566,7 +566,7 @@
 <div class="viewcode-block" id="compute_twed">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_twed">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_twed</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute normalized Time Warp Edit Distance (TWED) distance using Euclidean metric</span>
 <span class="sd">    between two Betti curves represented as time series with time dimension x and values y.</span>
 
@@ -581,7 +581,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float: Normalized TWED distance between two Betti curves.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">dist_twed</span> <span class="o">=</span> <span class="n">twed</span><span class="p">(</span><span class="n">axis_y_hd</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                      <span class="n">axis_y_ld</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
@@ -601,7 +601,7 @@
 <div class="viewcode-block" id="compute_emd">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_emd">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_emd</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">adjust_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute normalized Earth Mover Distance (EMD) distance (using Euclidean metric)</span>
 <span class="sd">    between two Betti curves represented as time series with time dimension x and values y.</span>
 
@@ -618,13 +618,13 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float: Normalized EMD distance between two Betti curves.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">sum_hd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis_y_hd</span><span class="p">)</span>
     <span class="n">sum_ld</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis_y_ld</span><span class="p">)</span>
     <span class="n">axis_y_hd_</span> <span class="o">=</span> <span class="n">axis_y_hd</span> <span class="o">/</span> <span class="n">sum_hd</span>
     <span class="n">axis_y_ld_</span> <span class="o">=</span> <span class="n">axis_y_ld</span> <span class="o">/</span> <span class="n">sum_ld</span>
-    <span class="n">dist_emd</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">emd2_1d</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_hd_</span><span class="p">,</span> <span class="n">axis_y_ld_</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">)</span>
+    <span class="n">dist_emd</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">emd2_1d</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_hd_</span><span class="p">,</span> <span class="n">axis_y_ld_</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">'euclidean'</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">adjust_mass</span><span class="p">:</span>
         <span class="n">dist_emd</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">sum_hd</span> <span class="o">/</span> <span class="n">sum_ld</span><span class="p">,</span> <span class="n">sum_ld</span> <span class="o">/</span> <span class="n">sum_hd</span><span class="p">])</span>
@@ -640,7 +640,7 @@
 <div class="viewcode-block" id="compute_wasserstein">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_wasserstein">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_wasserstein</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute normalized Wasserstein distance between two persistence diagrams</span>
 <span class="sd">    (usually one of high-dimensional data and one of low-dimensional data).</span>
 
@@ -653,7 +653,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float: Normalized Wasserstein distance between persistence diagrams.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">dist_wass</span> <span class="o">=</span> <span class="n">wasserstein</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">)</span>
     <span class="n">dist_wass</span> <span class="o">*=</span> <span class="n">norm_factor</span>
@@ -668,7 +668,7 @@
 <div class="viewcode-block" id="compute_bottleneck">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_bottleneck">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_bottleneck</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute normalized bottleneck distance between two persistence diagrams</span>
 <span class="sd">    (usually one of high-dimensional data and one of low-dimensional data).</span>
 
@@ -681,7 +681,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float: Normalized bottleneck distance between persistence diagrams.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">dist_bott</span> <span class="o">=</span> <span class="n">bottleneck</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">)</span>
     <span class="n">dist_bott</span> <span class="o">*=</span> <span class="n">norm_factor</span>
@@ -701,7 +701,7 @@
 <div class="viewcode-block" id="compute_global_metrics">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_global_metrics">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_global_metrics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">metrics_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute and compare persistence metrics between high-dimensional and low-dimensional data representations.</span>
 <span class="sd">    The function calculates the Dynamic Time Warp (DTW), Time Warp Edit Distance (TWED), and Earth Mover Distance</span>
 <span class="sd">    based on Betti curves derived from persistence diagrams. The function also calculate the Wasserstein distance</span>
@@ -722,25 +722,25 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    If metrics_only is True:</span>
-<span class="sd">        dict(dict): A dictionary containing one item &#39;metrics&#39; that is a dictionary of lists of computed distances for</span>
+<span class="sd">        dict(dict): A dictionary containing one item 'metrics' that is a dictionary of lists of computed distances for</span>
 <span class="sd">        each of the metrics (DTW, TWED, EMD, Wasserstein, and bottleneck). Each list is populated according to the</span>
 <span class="sd">        dimensions in which the distances were computed.</span>
 <span class="sd">    If metrics_only is False:</span>
 <span class="sd">        dict(dict, dict, dict): A dictionary containing three items:</span>
-<span class="sd">        - &#39;metrics&#39;: A dictionary of metrics, as described above;</span>
-<span class="sd">        - &#39;diags&#39;: A dictionary of diagrams for the initial data and for the layout;</span>
-<span class="sd">        - &#39;bettis&#39;: A dictionary of Betti curves for the initial data and for the layout.</span>
+<span class="sd">        - 'metrics': A dictionary of metrics, as described above;</span>
+<span class="sd">        - 'diags': A dictionary of diagrams for the initial data and for the layout;</span>
+<span class="sd">        - 'bettis': A dictionary of Betti curves for the initial data and for the layout.</span>
 <span class="sd">        Each dictionary is a dictionary of lists. Each list is populated according to the dimensions in which</span>
 <span class="sd">        the distances, diagrams, or curves were computed.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dtw&#39;</span><span class="p">:</span> <span class="p">[],</span>
-               <span class="s1">&#39;twed&#39;</span><span class="p">:</span> <span class="p">[],</span>
-               <span class="s1">&#39;emd&#39;</span><span class="p">:</span> <span class="p">[],</span>
-               <span class="s1">&#39;wass&#39;</span><span class="p">:</span> <span class="p">[],</span>
-               <span class="s1">&#39;bott&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+<span class="sd">    """</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'dtw'</span><span class="p">:</span> <span class="p">[],</span>
+               <span class="s1">'twed'</span><span class="p">:</span> <span class="p">[],</span>
+               <span class="s1">'emd'</span><span class="p">:</span> <span class="p">[],</span>
+               <span class="s1">'wass'</span><span class="p">:</span> <span class="p">[],</span>
+               <span class="s1">'bott'</span><span class="p">:</span> <span class="p">[]}</span>
 
-    <span class="n">betti_curves</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">[],</span>
-                    <span class="s1">&#39;layout&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+    <span class="n">betti_curves</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'data'</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s1">'layout'</span><span class="p">:</span> <span class="p">[]}</span>
 
     <span class="n">data_hd</span><span class="p">,</span> <span class="n">data_ld</span> <span class="o">=</span> <span class="n">threshold_subsample</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span>
                                            <span class="n">threshold</span><span class="o">=</span><span class="n">subsample_threshold</span><span class="p">,</span>
@@ -750,12 +750,12 @@
 
     <span class="n">diags</span> <span class="o">=</span> <span class="n">diagrams</span><span class="p">(</span><span class="n">data_hd</span><span class="p">,</span> <span class="n">data_ld</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">diags</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">diags</span><span class="p">[</span><span class="s1">&#39;layout&#39;</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">diags</span><span class="p">[</span><span class="s1">'data'</span><span class="p">],</span> <span class="n">diags</span><span class="p">[</span><span class="s1">'layout'</span><span class="p">]):</span>
         <span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span> <span class="o">=</span> <span class="n">betti_curve</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">)</span>
         <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span> <span class="o">=</span> <span class="n">betti_curve</span><span class="p">(</span><span class="n">diag_ld</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">)</span>
 
-        <span class="n">betti_curves</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">))</span>
-        <span class="n">betti_curves</span><span class="p">[</span><span class="s1">&#39;layout&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">))</span>
+        <span class="n">betti_curves</span><span class="p">[</span><span class="s1">'data'</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">))</span>
+        <span class="n">betti_curves</span><span class="p">[</span><span class="s1">'layout'</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">))</span>
 
         <span class="c1"># Computing DTW distance (normalized)</span>
         <span class="n">dist_dtw</span> <span class="o">=</span> <span class="n">compute_dtw</span><span class="p">(</span><span class="n">axis_x_hd</span><span class="p">,</span> <span class="n">axis_y_hd</span><span class="p">,</span> <span class="n">axis_x_ld</span><span class="p">,</span> <span class="n">axis_y_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n_points</span><span class="p">)</span>
@@ -773,15 +773,15 @@
         <span class="n">dist_bott</span> <span class="o">=</span> <span class="n">compute_bottleneck</span><span class="p">(</span><span class="n">diag_hd</span><span class="p">,</span> <span class="n">diag_ld</span><span class="p">,</span> <span class="n">norm_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 
         <span class="c1"># Adding metrics to dictionary </span>
-        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;dtw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_dtw</span><span class="p">)</span>
-        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;twed&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_twed</span><span class="p">)</span>
-        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;emd&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_emd</span><span class="p">)</span>
-        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;wass&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_wass</span><span class="p">)</span>
-        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;bott&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_bott</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">'dtw'</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_dtw</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">'twed'</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_twed</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">'emd'</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_emd</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">'wass'</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_wass</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">'bott'</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist_bott</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">metrics_only</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;metrics&#39;</span><span class="p">:</span> <span class="n">metrics</span><span class="p">}</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;metrics&#39;</span><span class="p">:</span> <span class="n">metrics</span><span class="p">,</span> <span class="s1">&#39;diags&#39;</span><span class="p">:</span> <span class="n">diags</span><span class="p">,</span> <span class="s1">&#39;bettis&#39;</span><span class="p">:</span> <span class="n">betti_curves</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">'metrics'</span><span class="p">:</span> <span class="n">metrics</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">'metrics'</span><span class="p">:</span> <span class="n">metrics</span><span class="p">,</span> <span class="s1">'diags'</span><span class="p">:</span> <span class="n">diags</span><span class="p">,</span> <span class="s1">'bettis'</span><span class="p">:</span> <span class="n">betti_curves</span><span class="p">}</span></div>
 
 
 
@@ -796,7 +796,7 @@
 <div class="viewcode-block" id="compute_svm_accuracy">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_svm_accuracy">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_svm_accuracy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">reg_param</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute linear SVM classifier accuracy for given labelled data X with labels y.</span>
 
 <span class="sd">    Parameters</span>
@@ -811,7 +811,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float: Accuracy of the linear SVM model on the test set.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Split the data into training and testing sets</span>
     <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
@@ -843,7 +843,7 @@
 <div class="viewcode-block" id="compute_svm_score">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_svm_score">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_svm_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute SVM score (context preservation measure) by comparing linear SVM classifier accuracies</span>
 <span class="sd">    on the high-dimensional data and on the low-dimensional embedding.</span>
 
@@ -859,16 +859,16 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float: SVM context preservation score.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">X_hd</span><span class="p">,</span> <span class="n">X_ld</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">threshold_subsample</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span>
                                         <span class="n">threshold</span><span class="o">=</span><span class="n">subsample_threshold</span><span class="p">,</span>
                                         <span class="n">rng_key</span><span class="o">=</span><span class="n">rng_key</span><span class="p">)</span>
 
-    <span class="n">svm_test_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;test_size&#39;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
-    <span class="n">svm_reg_param</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;reg_param&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-    <span class="n">svm_max_iter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;max_iter&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-    <span class="n">svm_random_state</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;random_state&#39;</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+    <span class="n">svm_test_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'test_size'</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">svm_reg_param</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'reg_param'</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">svm_max_iter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'max_iter'</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">svm_random_state</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'random_state'</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
 
     <span class="n">svm_acc_hd</span> <span class="o">=</span> <span class="n">compute_svm_accuracy</span><span class="p">(</span><span class="n">X_hd</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
                                       <span class="n">test_size</span><span class="o">=</span><span class="n">svm_test_size</span><span class="p">,</span>
@@ -897,7 +897,7 @@
 <div class="viewcode-block" id="compute_knn_accuracy">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_knn_accuracy">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_knn_accuracy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute kNN classifier accuracy for given labelled data X with labels y.</span>
 
 <span class="sd">    Parameters</span>
@@ -911,7 +911,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    accuracy: (float) Accuracy of the KNN model on the test set.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Split the data into training and testing sets</span>
     <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
@@ -941,7 +941,7 @@
 <div class="viewcode-block" id="compute_knn_score">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_knn_score">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_knn_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute kNN score (context preservation measure) by comparing kNN classifier accuracies</span>
 <span class="sd">    on the high-dimensional data and on the low-dimensional embedding.</span>
 
@@ -956,10 +956,10 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float: kNN context preservation score.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">test_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;test_size&#39;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
-    <span class="n">random_state</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;random_state&#39;</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+    <span class="n">test_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'test_size'</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">random_state</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'random_state'</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
 
     <span class="n">knn_acc_hd</span> <span class="o">=</span> <span class="n">compute_knn_accuracy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span>
                                       <span class="n">n_neighbors</span><span class="o">=</span><span class="n">n_neighbors</span><span class="p">,</span>
@@ -984,7 +984,7 @@
 <div class="viewcode-block" id="compute_quality_measures">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_quality_measures">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_quality_measures</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute quality measures for assessing the quality of dimensionality reduction.</span>
 <span class="sd">    </span>
 <span class="sd">    This function calculates quality measures that evaluate how well the low-dimensional</span>
@@ -1004,7 +1004,7 @@
 <span class="sd">        - trustworthiness: Measures if points that are close in the embedding are also close in original space</span>
 <span class="sd">        - continuity: Measures if points that are close in original space are also close in the embedding</span>
 <span class="sd">        - shepard_correlation: Correlation between pairwise distances in original and embedded spaces</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Calculate pairwise distances in original space</span>
     <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">16384</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># Limit computation for very large datasets</span>
 
@@ -1141,9 +1141,9 @@
     <span class="n">shepard_correlation</span> <span class="o">=</span> <span class="n">calculate_shepard_correlation</span><span class="p">()</span>
     
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s1">&#39;trustworthiness&#39;</span><span class="p">:</span> <span class="n">trustworthiness</span><span class="p">,</span>
-        <span class="s1">&#39;continuity&#39;</span><span class="p">:</span> <span class="n">continuity</span><span class="p">,</span>
-        <span class="s1">&#39;shepard_correlation&#39;</span><span class="p">:</span> <span class="n">shepard_correlation</span>
+        <span class="s1">'trustworthiness'</span><span class="p">:</span> <span class="n">trustworthiness</span><span class="p">,</span>
+        <span class="s1">'continuity'</span><span class="p">:</span> <span class="n">continuity</span><span class="p">,</span>
+        <span class="s1">'shepard_correlation'</span><span class="p">:</span> <span class="n">shepard_correlation</span>
     <span class="p">}</span></div>
 
 
@@ -1154,7 +1154,7 @@
 <div class="viewcode-block" id="compute_context_measures">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpmetrics.compute_context_measures">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_context_measures</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute measures of how well the embedding preserves the context of the data.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters</span>
@@ -1179,10 +1179,10 @@
 <span class="sd">    dict</span>
 <span class="sd">        Dictionary of context preservation measures, including</span>
 <span class="sd">        SVM and kNN classification performance comparisons.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">measures</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;svm&#39;</span><span class="p">:</span> <span class="n">compute_svm_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
-        <span class="s1">&#39;knn&#39;</span><span class="p">:</span> <span class="n">compute_knn_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="s1">'svm'</span><span class="p">:</span> <span class="n">compute_svm_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">subsample_threshold</span><span class="p">,</span> <span class="n">rng_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+        <span class="s1">'knn'</span><span class="p">:</span> <span class="n">compute_knn_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">measures</span></div>

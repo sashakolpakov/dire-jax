@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Installation &mdash; dire-jax 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=d45e8c67"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -156,10 +156,10 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <h3>JAX GPU Support<a class="headerlink" href="#jax-gpu-support" title="Link to this heading"></a></h3>
 <p>For GPU acceleration, JAX needs to be installed with CUDA support:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For CUDA 12</span>
-pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span><span class="s2">&quot;jax[cuda12]&quot;</span>
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span><span class="s2">"jax[cuda12]"</span>
 
 <span class="c1"># For CUDA 11</span>
-pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span><span class="s2">&quot;jax[cuda11]&quot;</span>
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span><span class="s2">"jax[cuda11]"</span>
 </pre></div>
 </div>
 <p>See the <a class="reference external" href="https://github.com/google/jax#installation">JAX GPU installation guide</a> for detailed instructions.</p>
@@ -167,7 +167,7 @@ pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="
 <section id="jax-tpu-support">
 <h3>JAX TPU Support<a class="headerlink" href="#jax-tpu-support" title="Link to this heading"></a></h3>
 <p>For TPU support on Google Cloud:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span><span class="s2">&quot;jax[tpu]&quot;</span><span class="w"> </span>-f<span class="w"> </span>https://storage.googleapis.com/jax-releases/libtpu_releases.html
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span><span class="s2">"jax[tpu]"</span><span class="w"> </span>-f<span class="w"> </span>https://storage.googleapis.com/jax-releases/libtpu_releases.html
 </pre></div>
 </div>
 <p>See the <a class="reference external" href="https://github.com/google/jax#tpu-tpu-vm">JAX TPU documentation</a> for more information.</p>

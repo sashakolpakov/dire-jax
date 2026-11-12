@@ -7,14 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>dire_jax.hpindex &mdash; dire-jax 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -75,9 +75,9 @@
   <h1>Source code for dire_jax.hpindex</h1><div class="highlight"><pre>
 <span></span><span class="c1"># hpindex.py</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="sd">A JAX-based implementation for efficient k-nearest neighbors.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span><span class="p">,</span> <span class="n">lru_cache</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
@@ -86,16 +86,16 @@
 <span class="c1">#</span>
 <span class="c1"># Double precision support</span>
 <span class="c1">#</span>
-<span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">"jax_enable_x64"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="HPIndex">
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpindex.HPIndex">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HPIndex</span><span class="p">:</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A kernelized kNN index that uses batching / tiling to efficiently handle</span>
 <span class="sd">    large datasets with limited memory usage.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
@@ -104,7 +104,7 @@
 <a class="viewcode-back" href="../../api/modules.html#dire_jax.hpindex.HPIndex.knn_tiled">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">knn_tiled</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="o">=</span><span class="mi">8192</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Single-kernel kNN implementation that compiles once and reuses efficiently.</span>
 <span class="sd">        Uses a single JIT-compiled kernel with fixed tile/batch parameters.</span>
 
@@ -118,7 +118,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (m, k) array of indices and distances of nearest neighbors</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Get or compile the kernel for this configuration</span>
         <span class="n">kernel</span> <span class="o">=</span> <span class="n">HPIndex</span><span class="o">.</span><span class="n">_get_knn_kernel</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
@@ -129,10 +129,10 @@
     <span class="nd">@staticmethod</span>
     <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>  <span class="c1"># Cache compiled kernels for different configurations</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_knn_kernel</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">x_tile_size</span><span class="p">,</span> <span class="n">y_batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Get or create a cached JIT-compiled kNN kernel for the given configuration.</span>
 <span class="sd">        This ensures we reuse compiled kernels across different datasets with same params.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">knn_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
@@ -234,7 +234,7 @@
 <span class="c1"># Using lru_cache to avoid recompilation for different dtype combinations</span>
 <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>  <span class="c1"># Cache different dtype combinations</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_distance_kernel</span><span class="p">(</span><span class="n">dtype</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get or create a JIT-compiled distance kernel for the given dtype.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Get or create a JIT-compiled distance kernel for the given dtype."""</span>
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_distances</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="c1"># Ensure consistent dtype</span>
@@ -262,7 +262,7 @@
     <span class="k">return</span> <span class="n">compute_distances</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_compute_batch_distances_l2</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the squared L2 distances between a batch of query points</span>
 <span class="sd">    and all database points. Uses cached kernels to avoid recompilation.</span>
 
@@ -273,7 +273,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        (batch_size, n) array of squared distances</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Get the cached kernel for this dtype</span>
     <span class="n">distance_kernel</span> <span class="o">=</span> <span class="n">_get_distance_kernel</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">distance_kernel</span><span class="p">(</span><span class="n">y_batch</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
